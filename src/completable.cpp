@@ -197,7 +197,7 @@ int main()
                 }
             }
         }
-        else if (ch == '$' || ch == '~')
+        else if (ch == '$' || ch == '~' || ch == '`')
         {
             def_prog_mode();
             endwin();
@@ -319,7 +319,12 @@ void shell()
         while (std::getline(ss, token, ' '))
             words.push_back(token);
 
-        if (words.size() == 1)
+        if (words.size() == 0)
+        {
+            std::cout << std::endl;
+            break;
+        }
+        else if (words.size() == 1)
         {
             if (words[0] == ":abc")
             {
@@ -352,11 +357,6 @@ void shell()
                             << " microseconds" << std::endl;
                 continue;
             }
-        }
-        else
-        {
-            std::cout << std::endl;
-            break;
         }
 
         for (auto const & word : words)
