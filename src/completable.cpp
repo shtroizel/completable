@@ -52,11 +52,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 static int const MAX_COMPLETIONS{107};
 
 
+struct completion
+{
+    std::string prefix;
+    int start{-1};
+    int length{0};
+};
+
+
 void grow(
     int ch,
-    int max_results,
     int & completion_count,
-    std::pair<std::string, std::vector<int>> * completions
+    completion * completions
 );
 
 
@@ -64,7 +71,7 @@ void draw_complete_win(
     int height,
     int width,
     int completion_count,
-    std::pair<std::string, std::vector<int>> * completions,
+    completion * completions,
     WINDOW * win
 );
 
@@ -98,11 +105,8 @@ int main()
     WINDOW * complete_win = newwin(complete_height, complete_width, 0, 0);
     keypad(complete_win, true);
 
-    //             prefix, matchmaker indexes forming the completion list
-    std::pair<std::string, std::vector<int>> completions[MAX_COMPLETIONS];
+    completion completions[MAX_COMPLETIONS];
     int completion_count{0};
-
-    int max_results{complete_height - 4};
 
     draw_complete_win(complete_height, complete_width, completion_count, completions, complete_win);
 
@@ -121,16 +125,15 @@ int main()
             wrefresh(complete_win);
 
             complete_height = root_y;
-            max_results = complete_height - 4;
             wresize(complete_win, complete_height, complete_width);
 
             // recalculate all completions using new max_results
             for (int i = 0; i < completion_count; ++i)
             {
                 matchmaker::complete(
-                    completions[i].first,
-                    max_results,
-                    completions[i].second
+                    completions[i].prefix,
+                    completions[i].start,
+                    completions[i].length
                 );
             }
         }
@@ -141,25 +144,26 @@ int main()
 
         if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z'))
         {
-            grow(ch, max_results, completion_count, completions);
+            grow(ch, completion_count, completions);
         }
         else if (ch == KEY_BACKSPACE && completion_count > 0)
         {
             --completion_count;
-            completions[completion_count].first.clear();
-            completions[completion_count].second.clear();
+            completions[completion_count].prefix.clear();
+            completions[completion_count].start = -1;
+            completions[completion_count].length = 0;
         }
         else if (ch == 9) // TAB
         {
             if (completion_count > 0)
             {
-                std::string const & prefix = completions[completion_count - 1].first;
-                if (completions[completion_count - 1].second.size() > 0)
+                std::string const & prefix = completions[completion_count - 1].prefix;
+                if (completions[completion_count - 1].length > 0)
                 {
                     std::string const & first_entry =
-                            matchmaker::at(completions[completion_count - 1].second.at(0));
+                            matchmaker::at(completions[completion_count - 1].start);
 
-                    auto const & cur_completion = completions[completion_count - 1].second;
+                    auto const & cur_completion = completions[completion_count - 1];
 
                     // find out the "target_completion_count" or the completion count after skipping
                     // by common characters
@@ -167,10 +171,13 @@ int main()
                     bool ok = first_entry.size() > prefix.size();
                     while (ok)
                     {
-                        for (int i = 0; ok && i < (int) cur_completion.size(); ++i)
+                        for (
+                            int i = cur_completion.start;
+                            ok && i < cur_completion.start + cur_completion.length;
+                            ++i
+                        )
                         {
-                            std::string const & entry =
-                                    matchmaker::at(completions[completion_count - 1].second.at(i));
+                            std::string const & entry = matchmaker::at(i);
 
                             if ((int) entry.size() < target_completion_count)
                                 ok = false;
@@ -186,7 +193,7 @@ int main()
 
                     // grow up to the target completion count
                     for (int i = (int) prefix.size(); i < target_completion_count; ++i)
-                        grow(first_entry[i], max_results, completion_count, completions);
+                        grow(first_entry[i], completion_count, completions);
                 }
             }
         }
@@ -211,29 +218,28 @@ int main()
 
 void grow(
     int ch,
-    int max_results,
     int & completion_count,
-    std::pair<std::string, std::vector<int>> * completions
+    completion * completions
 )
 {
     // start with previous prefix
     if (completion_count > 0)
-        completions[completion_count].first = completions[completion_count - 1].first;
+        completions[completion_count].prefix = completions[completion_count - 1].prefix;
     else
-        completions[completion_count].first.clear();
+        completions[completion_count].prefix.clear();
 
     // add new character to prefix
-    completions[completion_count].first += ch;
+    completions[completion_count].prefix += ch;
 
     // get new completion
     matchmaker::complete(
-        completions[completion_count].first,
-        max_results,
-        completions[completion_count].second
+        completions[completion_count].prefix,
+        completions[completion_count].start,
+        completions[completion_count].length
     );
 
     // update completion_count
-    if (completions[completion_count].second.size() > 0 && completion_count < MAX_COMPLETIONS)
+    if (completions[completion_count].length > 0 && completion_count < MAX_COMPLETIONS)
         ++completion_count;
 }
 
@@ -242,7 +248,7 @@ void draw_complete_win(
     int height,
     int width,
     int completion_count,
-    std::pair<std::string, std::vector<int>> * completions,
+    completion * completions,
     WINDOW * win
 )
 {
@@ -253,7 +259,7 @@ void draw_complete_win(
     // draw prefix
     if (completion_count > 0)
     {
-        std::string const & prefix = completions[completion_count - 1].first;
+        std::string const & prefix = completions[completion_count - 1].prefix;
         for (int x = 0; x < width - 2 && x < (int) prefix.size(); ++x)
             mvwaddch(win, 1, x + 1, prefix[x]);
     }
@@ -268,10 +274,10 @@ void draw_complete_win(
     if (completion_count > 0)
     {
         // for each completion entry in our newest completion
-        for (int i = 0; i < (int) completions[completion_count - 1].second.size() && i < height - 4; ++i)
+        for (int i = 0; i < completions[completion_count - 1].length && i < height - 4; ++i)
         {
             std::string const & complete_entry =
-                    matchmaker::at(completions[completion_count - 1].second.at(i));
+                    matchmaker::at(completions[completion_count - 1].start + i);
 
             // draw complete_entry letter by letter
             for (int j = 0; j < (int) complete_entry.size(); ++j)
@@ -333,15 +339,15 @@ void shell()
             }
             else if (words[0].size() && words[0][0] == ':')
             {
-                std::string word{words[0].substr(1)};
-                std::vector<int> completion;
+                completion c;
+                c.prefix = words[0].substr(1);
                 auto start = std::chrono::high_resolution_clock::now();
-                matchmaker::complete(word, 9999999, completion);
+                matchmaker::complete(c.prefix, c.start, c.length);
                 auto stop = std::chrono::high_resolution_clock::now();
                 auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-                std::cout << "completion (" << completion.size() << ") : ";
-                for (auto const & c : completion)
-                    std::cout << " " << matchmaker::at(c);
+                std::cout << "completion (" << c.length << ") : ";
+                for (int i = c.start; i < c.start + c.length; ++i)
+                    std::cout << " " << matchmaker::at(i);
                 std::cout << "\ncompletion done in " << duration.count()
                             << " microseconds" << std::endl;
                 continue;
