@@ -69,6 +69,7 @@ void draw_complete_win(
 );
 
 
+void shell();
 
 
 int main()
@@ -189,6 +190,16 @@ int main()
                 }
             }
         }
+        else if (ch == '$' || ch == '~')
+        {
+            def_prog_mode();
+            endwin();
+
+            shell();
+
+            reset_prog_mode();
+            refresh();
+        }
     }
 
     delwin(complete_win);
@@ -276,4 +287,82 @@ void draw_complete_win(
     }
 
     wrefresh(win);
+}
+
+
+void shell()
+{
+    int index{-1};
+    bool found{false};
+
+    while (true)
+    {
+        std::cout << "matchmaker (" << matchmaker::size()
+                    << ")  { prefix with ':' for completion } { use :abc for all } $  ";
+
+        std::string line;
+        std::getline(std::cin, line);
+        if (std::cin.eof() == 1)
+        {
+            std::cout << std::endl;
+            break;
+        }
+        std::vector<std::string> words;
+        std::stringstream ss(line);
+        std::string token;
+        while (std::getline(ss, token, ' '))
+            words.push_back(token);
+
+        if (words.size() == 1)
+        {
+            if (words[0] == ":abc")
+            {
+                for (int i = 0; i < matchmaker::size(); ++i)
+                {
+                    auto start = std::chrono::high_resolution_clock::now();
+                    std::string const & str = matchmaker::at(i);
+                    auto stop = std::chrono::high_resolution_clock::now();
+                    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
+                        stop - start
+                    );
+                    std::cout << "       [" << i << "] :  '" << str << "' accessed in "
+                                << duration.count() << " microseconds\n";
+                }
+                std::cout << std::flush;
+                continue;
+            }
+            else if (words[0].size() && words[0][0] == ':')
+            {
+                std::string word{words[0].substr(1)};
+                std::vector<int> completion;
+                auto start = std::chrono::high_resolution_clock::now();
+                matchmaker::complete(word, 9999999, completion);
+                auto stop = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+                std::cout << "completion (" << completion.size() << ") : ";
+                for (auto const & c : completion)
+                    std::cout << " " << matchmaker::at(c);
+                std::cout << "\ncompletion done in " << duration.count()
+                            << " microseconds" << std::endl;
+                continue;
+            }
+        }
+        else
+        {
+            std::cout << std::endl;
+            break;
+        }
+
+        for (auto const & word : words)
+        {
+            std::cout << "       [";
+            auto start = std::chrono::high_resolution_clock::now();
+            index = matchmaker::lookup(word, &found);
+            auto stop = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+            std::cout << index << "] :  '" << matchmaker::at(index) << "'     lookup time: "
+                    << duration.count() << " microseconds" << std::endl;
+        }
+        std::cout << std::endl;
+    }
 }
