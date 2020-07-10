@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-project(completable VERSION 1.1.0)
+project(completable VERSION 1)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -11,7 +11,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra")
 get_filename_component(rpath_dir "${matchmaker_DIR}/.." REALPATH)
 set(CMAKE_INSTALL_RPATH "${rpath_dir}")
 
-find_package(matchmaker 1 REQUIRED)
+find_package(matchmaker 1.1 REQUIRED)
 
 find_package(Curses REQUIRED)
 include_directories(${CURSES_INCLUDE_DIRS})
