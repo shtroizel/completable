@@ -30,6 +30,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
+#include <chrono>
+#include <iomanip>
+#include <iostream>
+#include <random>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -52,28 +57,7 @@ void grow(
     int max_results,
     int & completion_count,
     std::pair<std::string, std::vector<int>> * completions
-)
-{
-    // start with previous prefix
-    if (completion_count > 0)
-        completions[completion_count].first = completions[completion_count - 1].first;
-    else
-        completions[completion_count].first.clear();
-
-    // add new character to prefix
-    completions[completion_count].first += ch;
-
-    // get new completion
-    matchmaker::complete(
-        completions[completion_count].first,
-        max_results,
-        completions[completion_count].second
-    );
-
-    // update completion_count
-    if (completions[completion_count].second.size() > 0 && completion_count < MAX_COMPLETIONS)
-        ++completion_count;
-}
+);
 
 
 void draw_complete_win(
@@ -82,50 +66,9 @@ void draw_complete_win(
     int completion_count,
     std::pair<std::string, std::vector<int>> * completions,
     WINDOW * win
-)
-{
-    wclear(win);
+);
 
-    box(win, 0, 0);
 
-    // draw prefix
-    if (completion_count > 0)
-    {
-        std::string const & prefix = completions[completion_count - 1].first;
-        for (int x = 0; x < width - 2 && x < (int) prefix.size(); ++x)
-            mvwaddch(win, 1, x + 1, prefix[x]);
-    }
-
-    // separator
-    mvwaddch(win, 2, 0, ACS_LTEE);
-    for (int i = 1; i < width - 1; ++i)
-        mvwaddch(win, 2, i, ACS_HLINE);
-    mvwaddch(win, 2, width - 1, ACS_RTEE);
-
-    // completion
-    if (completion_count > 0)
-    {
-        // for each completion entry in our newest completion
-        for (int i = 0; i < (int) completions[completion_count - 1].second.size() && i < height - 4; ++i)
-        {
-            std::string const & complete_entry =
-                    matchmaker::at(completions[completion_count - 1].second.at(i));
-
-            // draw complete_entry letter by letter
-            for (int j = 0; j < (int) complete_entry.size(); ++j)
-            {
-                mvwaddch(
-                    win,
-                    i + 3,
-                    j + 1,
-                    complete_entry[j]
-                );
-            }
-        }
-    }
-
-    wrefresh(win);
-}
 
 
 int main()
@@ -252,4 +195,85 @@ int main()
     endwin();
 
     return 0;
+}
+
+
+void grow(
+    int ch,
+    int max_results,
+    int & completion_count,
+    std::pair<std::string, std::vector<int>> * completions
+)
+{
+    // start with previous prefix
+    if (completion_count > 0)
+        completions[completion_count].first = completions[completion_count - 1].first;
+    else
+        completions[completion_count].first.clear();
+
+    // add new character to prefix
+    completions[completion_count].first += ch;
+
+    // get new completion
+    matchmaker::complete(
+        completions[completion_count].first,
+        max_results,
+        completions[completion_count].second
+    );
+
+    // update completion_count
+    if (completions[completion_count].second.size() > 0 && completion_count < MAX_COMPLETIONS)
+        ++completion_count;
+}
+
+
+void draw_complete_win(
+    int height,
+    int width,
+    int completion_count,
+    std::pair<std::string, std::vector<int>> * completions,
+    WINDOW * win
+)
+{
+    wclear(win);
+
+    box(win, 0, 0);
+
+    // draw prefix
+    if (completion_count > 0)
+    {
+        std::string const & prefix = completions[completion_count - 1].first;
+        for (int x = 0; x < width - 2 && x < (int) prefix.size(); ++x)
+            mvwaddch(win, 1, x + 1, prefix[x]);
+    }
+
+    // separator
+    mvwaddch(win, 2, 0, ACS_LTEE);
+    for (int i = 1; i < width - 1; ++i)
+        mvwaddch(win, 2, i, ACS_HLINE);
+    mvwaddch(win, 2, width - 1, ACS_RTEE);
+
+    // completion
+    if (completion_count > 0)
+    {
+        // for each completion entry in our newest completion
+        for (int i = 0; i < (int) completions[completion_count - 1].second.size() && i < height - 4; ++i)
+        {
+            std::string const & complete_entry =
+                    matchmaker::at(completions[completion_count - 1].second.at(i));
+
+            // draw complete_entry letter by letter
+            for (int j = 0; j < (int) complete_entry.size(); ++j)
+            {
+                mvwaddch(
+                    win,
+                    i + 3,
+                    j + 1,
+                    complete_entry[j]
+                );
+            }
+        }
+    }
+
+    wrefresh(win);
 }
