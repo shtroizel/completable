@@ -164,46 +164,43 @@ int main()
         }
         else if (ch == TAB)
         {
-            if (completion_count > 0)
+            std::string const & prefix = completions[completion_count - 1].prefix;
+            if (completions[completion_count - 1].length > 0)
             {
-                std::string const & prefix = completions[completion_count - 1].prefix;
-                if (completions[completion_count - 1].length > 0)
+                std::string const & first_entry =
+                        matchmaker::at(completions[completion_count - 1].start);
+
+                auto const & cur_completion = completions[completion_count - 1];
+
+                // find out the "target_completion_count" or the completion count after skipping
+                // by common characters
+                int target_completion_count = completion_count;
+                bool ok = first_entry.size() > prefix.size();
+                while (ok)
                 {
-                    std::string const & first_entry =
-                            matchmaker::at(completions[completion_count - 1].start);
-
-                    auto const & cur_completion = completions[completion_count - 1];
-
-                    // find out the "target_completion_count" or the completion count after skipping
-                    // by common characters
-                    int target_completion_count = completion_count;
-                    bool ok = first_entry.size() > prefix.size();
-                    while (ok)
+                    for (
+                        int i = cur_completion.start;
+                        ok && i < cur_completion.start + cur_completion.length;
+                        ++i
+                    )
                     {
-                        for (
-                            int i = cur_completion.start;
-                            ok && i < cur_completion.start + cur_completion.length;
-                            ++i
-                        )
-                        {
-                            std::string const & entry = matchmaker::at(i);
+                        std::string const & entry = matchmaker::at(i);
 
-                            if ((int) entry.size() < target_completion_count)
-                                ok = false;
-                            else if ((int) first_entry.size() < target_completion_count)
-                                ok = false;
-                            else if (entry[target_completion_count] != first_entry[target_completion_count])
-                                ok = false;
-                        }
-
-                        if (ok)
-                            ++target_completion_count;
+                        if ((int) entry.size() < target_completion_count)
+                            ok = false;
+                        else if ((int) first_entry.size() < target_completion_count)
+                            ok = false;
+                        else if (entry[target_completion_count] != first_entry[target_completion_count])
+                            ok = false;
                     }
 
-                    // grow up to the target completion count
-                    for (int i = (int) prefix.size(); i < target_completion_count; ++i)
-                        grow(first_entry[i], completion_count, completions);
+                    if (ok)
+                        ++target_completion_count;
                 }
+
+                // grow up to the target completion count
+                for (int i = (int) prefix.size(); i < target_completion_count; ++i)
+                    grow(first_entry[i], completion_count, completions);
             }
         }
         else if (ch == '$' || ch == '~' || ch == '`')
@@ -218,41 +215,29 @@ int main()
         }
         else if (ch == KEY_UP)
         {
-            if (completion_count > 0)
-            {
-                completion & c = completions[completion_count - 1];
-                if (c.display_start > c.start)
-                    --c.display_start;
-            }
+            completion & c = completions[completion_count - 1];
+            if (c.display_start > c.start)
+                --c.display_start;
         }
         else if (ch == KEY_DOWN)
         {
-            if (completion_count > 0)
-            {
-                completion & c = completions[completion_count - 1];
-                if (c.display_start < c.start + c.length)
-                    ++c.display_start;
-            }
+            completion & c = completions[completion_count - 1];
+            if (c.display_start < c.start + c.length - 1)
+                ++c.display_start;
         }
         else if (ch == PAGE_UP)
         {
-            if (completion_count > 0)
-            {
-                completion & c = completions[completion_count - 1];
-                c.display_start -= complete_height - 4;
-                if (c.display_start < c.start)
-                    c.display_start = c.start;
-            }
+            completion & c = completions[completion_count - 1];
+            c.display_start -= complete_height - 4;
+            if (c.display_start < c.start)
+                c.display_start = c.start;
         }
         else if (ch == PAGE_DOWN)
         {
-            if (completion_count > 0)
-            {
-                completion & c = completions[completion_count - 1];
-                c.display_start += complete_height - 4;
-                if (c.display_start >= c.start + c.length)
-                    c.display_start = c.start + c.length - 1;
-            }
+            completion & c = completions[completion_count - 1];
+            c.display_start += complete_height - 4;
+            if (c.display_start >= c.start + c.length)
+                c.display_start = c.start + c.length - 1;
         }
     }
 
@@ -270,12 +255,9 @@ void grow(
 )
 {
     // start with previous prefix
-    if (completion_count > 0)
-        completions[completion_count].prefix = completions[completion_count - 1].prefix;
-    else
-        completions[completion_count].prefix.clear();
+    completions[completion_count].prefix = completions[completion_count - 1].prefix;
 
-    // add new character to prefix
+    // add new character
     completions[completion_count].prefix += ch;
 
     // get new completion
@@ -321,27 +303,21 @@ void draw_complete_win(
     mvwaddch(win, 2, width - 1, ACS_RTEE);
 
     // completion
-    if (completion_count > 0)
+    completion & cur_completion = completions[completion_count - 1];
+    int length = cur_completion.length - (cur_completion.display_start - cur_completion.start);
+    for (int i = 0; i < length && i < height - 4; ++i)
     {
-        completion & cur_completion = completions[completion_count - 1];
+        std::string const & complete_entry = matchmaker::at(cur_completion.display_start + i);
 
-        int length = cur_completion.length - (cur_completion.display_start - cur_completion.start);
-
-        // for each completion entry in our newest completion
-        for (int i = 0; i < length && i < height - 4; ++i)
+        // draw complete_entry letter by letter
+        for (int j = 0; j < (int) complete_entry.size(); ++j)
         {
-            std::string const & complete_entry = matchmaker::at(cur_completion.display_start + i);
-
-            // draw complete_entry letter by letter
-            for (int j = 0; j < (int) complete_entry.size(); ++j)
-            {
-                mvwaddch(
-                    win,
-                    i + 3,
-                    j + 1,
-                    complete_entry[j]
-                );
-            }
+            mvwaddch(
+                win,
+                i + 3,
+                j + 1,
+                complete_entry[j]
+            );
         }
     }
 
