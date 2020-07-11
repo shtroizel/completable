@@ -11,7 +11,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra")
 get_filename_component(rpath_dir "${matchmaker_DIR}/.." REALPATH)
 set(CMAKE_INSTALL_RPATH "${rpath_dir}")
 
-find_package(matchmaker 1.1 REQUIRED)
+find_package(matchmaker 1.1.2 REQUIRED)
 
 find_package(Curses REQUIRED)
 include_directories(${CURSES_INCLUDE_DIRS})
