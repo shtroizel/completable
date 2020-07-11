@@ -20,7 +20,7 @@ def usage():
     print('                                * defaults to <completable root>/install')
     print('                                * relative paths are relative to build_dir\n')
     print('    -m  --matchmaker_dir      matchmaker install directory')
-    print('                                * defaults to <completable root>/../install')
+    print('                                * defaults to <completable root>/matchmaker/install')
     print('                                * relative paths are relative to <completable root>\n')
     print('    -q  --q                   adds \'_q\' suffix to:')
     print('                                * build_dir')
@@ -46,7 +46,7 @@ def build_and_install(build_dir, install_dir, matchmaker_dir, use_clang, q):
         install_dir = install_dir[:-1]
 
     if matchmaker_dir == '':
-        matchmaker_dir = completable_root + '/../install'
+        matchmaker_dir = completable_root + '/matchmaker/install'
     while matchmaker_dir[-1] == '/':
         matchmaker_dir = matchmaker_dir[:-1]
 
