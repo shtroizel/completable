@@ -54,6 +54,8 @@ static int const MAX_COMPLETIONS{107};
 static int const PAGE_UP{339};
 static int const PAGE_DOWN{338};
 static int const TAB{9};
+static int const HOME{262};
+static int const END{360};
 
 
 struct completion
@@ -238,6 +240,16 @@ int main()
             c.display_start += complete_height - 4;
             if (c.display_start >= c.start + c.length)
                 c.display_start = c.start + c.length - 1;
+        }
+        else if (ch == HOME)
+        {
+            completion & c = completions[completion_count - 1];
+            c.display_start = c.start;
+        }
+        else if (ch == END)
+        {
+            completion & c = completions[completion_count - 1];
+            c.display_start = c.start + c.length - 1;
         }
     }
 
