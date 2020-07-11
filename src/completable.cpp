@@ -51,6 +51,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // longest word so far is 45 letters so 107 should be ok
 static int const MAX_COMPLETIONS{107};
 
+static int const TAB{9};
+
 
 struct completion
 {
@@ -158,7 +160,7 @@ int main()
             completions[completion_count].display_start = -1;
             completions[completion_count].length = 0;
         }
-        else if (ch == 9) // TAB
+        else if (ch == TAB)
         {
             if (completion_count > 0)
             {
