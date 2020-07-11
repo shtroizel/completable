@@ -107,7 +107,10 @@ int main()
     keypad(complete_win, true);
 
     completion completions[MAX_COMPLETIONS];
-    int completion_count{0};
+    completions[0].start = 0;
+    completions[0].display_start = 0;
+    completions[0].length = matchmaker::size();
+    int completion_count{1};
 
     draw_complete_win(complete_height, complete_width, completion_count, completions, complete_win);
 
@@ -147,7 +150,7 @@ int main()
         {
             grow(ch, completion_count, completions);
         }
-        else if (ch == KEY_BACKSPACE && completion_count > 0)
+        else if (ch == KEY_BACKSPACE && completion_count > 1)
         {
             --completion_count;
             completions[completion_count].prefix.clear();
