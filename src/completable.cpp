@@ -54,9 +54,10 @@ static int const MAX_COMPLETIONS{107};
 
 struct completion
 {
-    std::string prefix;
-    int start{-1};
-    int length{0};
+    std::string prefix;      // string typed so far
+    int start{-1};           // index of first word in dictionary starting with prefix
+    int length{0};           // number of words in the dictionary starting with prefix
+    int display_start{-1};   // index of first word displayed starting with prefix
 };
 
 
@@ -151,6 +152,7 @@ int main()
             --completion_count;
             completions[completion_count].prefix.clear();
             completions[completion_count].start = -1;
+            completions[completion_count].display_start = -1;
             completions[completion_count].length = 0;
         }
         else if (ch == 9) // TAB
@@ -207,6 +209,24 @@ int main()
             reset_prog_mode();
             refresh();
         }
+        else if (ch == KEY_UP)
+        {
+            if (completion_count > 0)
+            {
+                completion & c = completions[completion_count - 1];
+                if (c.display_start > c.start)
+                    --c.display_start;
+            }
+        }
+        else if (ch == KEY_DOWN)
+        {
+            if (completion_count > 0)
+            {
+                completion & c = completions[completion_count - 1];
+                if (c.display_start < c.start + c.length)
+                    ++c.display_start;
+            }
+        }
     }
 
     delwin(complete_win);
@@ -237,6 +257,9 @@ void grow(
         completions[completion_count].start,
         completions[completion_count].length
     );
+
+    // initialize display_start
+    completions[completion_count].display_start = completions[completion_count].start;
 
     // update completion_count
     if (completions[completion_count].length > 0 && completion_count < MAX_COMPLETIONS)
@@ -273,11 +296,14 @@ void draw_complete_win(
     // completion
     if (completion_count > 0)
     {
+        completion & cur_completion = completions[completion_count - 1];
+
+        int length = cur_completion.length - (cur_completion.display_start - cur_completion.start);
+
         // for each completion entry in our newest completion
-        for (int i = 0; i < completions[completion_count - 1].length && i < height - 4; ++i)
+        for (int i = 0; i < length && i < height - 4; ++i)
         {
-            std::string const & complete_entry =
-                    matchmaker::at(completions[completion_count - 1].start + i);
+            std::string const & complete_entry = matchmaker::at(cur_completion.display_start + i);
 
             // draw complete_entry letter by letter
             for (int j = 0; j < (int) complete_entry.size(); ++j)
