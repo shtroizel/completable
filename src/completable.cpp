@@ -51,6 +51,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // longest word so far is 45 letters so 107 should be ok
 static int const MAX_COMPLETIONS{107};
 
+static int const PAGE_UP{339};
+static int const PAGE_DOWN{338};
 static int const TAB{9};
 
 
@@ -230,6 +232,26 @@ int main()
                 completion & c = completions[completion_count - 1];
                 if (c.display_start < c.start + c.length)
                     ++c.display_start;
+            }
+        }
+        else if (ch == PAGE_UP)
+        {
+            if (completion_count > 0)
+            {
+                completion & c = completions[completion_count - 1];
+                c.display_start -= complete_height - 4;
+                if (c.display_start < c.start)
+                    c.display_start = c.start;
+            }
+        }
+        else if (ch == PAGE_DOWN)
+        {
+            if (completion_count > 0)
+            {
+                completion & c = completions[completion_count - 1];
+                c.display_start += complete_height - 4;
+                if (c.display_start >= c.start + c.length)
+                    c.display_start = c.start + c.length - 1;
             }
         }
     }
