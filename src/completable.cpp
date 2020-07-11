@@ -321,6 +321,9 @@ void draw_complete_win(
     {
         std::string const & complete_entry = matchmaker::at(cur_completion.display_start + i);
 
+        if (i == 0)
+            wattron(win, A_REVERSE);
+
         // draw complete_entry letter by letter
         for (int j = 0; j < (int) complete_entry.size(); ++j)
         {
@@ -331,6 +334,9 @@ void draw_complete_win(
                 complete_entry[j]
             );
         }
+
+        if (i == 0)
+            wattroff(win, A_REVERSE);
     }
 
     wrefresh(win);
