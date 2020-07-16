@@ -5,7 +5,7 @@ project(completable VERSION 1)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra -ltinfo")
 
 
 get_filename_component(rpath_dir "${matchmaker_DIR}/.." REALPATH)
