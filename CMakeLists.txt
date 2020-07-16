@@ -7,6 +7,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra -ltinfo")
 
+find_program(ld_gold ld.gold)
+if(NOT "${ld_gold}" STREQUAL "ld_gold-NOTFOUND")
+    message(STATUS "found gold linker!")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fuse-ld=gold")
+endif()
+
 
 get_filename_component(rpath_dir "${matchmaker_DIR}/.." REALPATH)
 set(CMAKE_INSTALL_RPATH "${rpath_dir}")
@@ -20,9 +26,3 @@ add_executable(completable src/completable.cpp)
 target_link_libraries(completable matchmaker ${CURSES_LIBRARIES})
 target_include_directories(completable PRIVATE include)
 install(TARGETS completable DESTINATION bin)
-
-find_program(ld_gold ld.gold)
-if(NOT "${ld_gold}" STREQUAL "ld_gold-NOTFOUND")
-    message(STATUS "found gold linker!")
-    target_link_options(completable PUBLIC -fuse-ld=gold)
-endif()
