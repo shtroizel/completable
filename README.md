@@ -23,9 +23,9 @@ matchmaker/scripts/build_and_install.py -q
 scripts/build_and_install.py -q
 install_q/bin/completable
 ```
-### EXAMPLE: entire dictionary limiting memory usage to 17 GB
+### EXAMPLE: entire dictionary
 ```
-matchmaker/scripts/build_and_install.py -l 17
+matchmaker/scripts/build_and_install.py
 scripts/build_and_install.py
 install/bin/completable
 ```
