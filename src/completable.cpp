@@ -505,9 +505,10 @@ void shell()
             index = matchmaker::lookup(word, &found);
             auto stop = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-            std::cout << index << "] :  '" << matchmaker::at(index) << "'     lookup time: "
-                    << duration.count() << " microseconds" << std::endl;
+            std::cout << index << "] :  '" << matchmaker::at(index) << "' ";
+            if (!found)
+                std::cout << "(index if existed) ";
+            std::cout << "       lookup time: " << duration.count() << " microseconds" << std::endl;
         }
-        std::cout << std::endl;
     }
 }
