@@ -17,7 +17,7 @@ endif()
 get_filename_component(rpath_dir "${matchmaker_DIR}/.." REALPATH)
 set(CMAKE_INSTALL_RPATH "${rpath_dir}")
 
-find_package(matchmaker 1.2.1 REQUIRED)
+find_package(matchmaker 1.3.0 REQUIRED)
 
 find_package(Curses REQUIRED)
 include_directories(${CURSES_INCLUDE_DIRS})
