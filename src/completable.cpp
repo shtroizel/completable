@@ -415,46 +415,19 @@ void draw_pos_win(
         mvwaddch(win, 2, i, ACS_HLINE);
     mvwaddch(win, 2, width - 1, ACS_RTEE);
 
-    // completion
+    // parts of speech
     int selected = completions[completion_count - 1].display_start;
-    std::vector<std::string const *> pos_vect;
-    matchmaker::parts_of_speech(selected, pos_vect);
+    auto const & flagged_pos = matchmaker::flagged_parts_of_speech(selected);
 
-    static std::array<std::pair<std::string, bool>, 15> pos = {
-        std::make_pair("Noun", false ),
-        std::make_pair("Plural", false),
-        std::make_pair("Noun Phrase", false),
-        std::make_pair("Verb (usu participle)", false),
-        std::make_pair("Verb (transitive)", false),
-        std::make_pair("Verb (intransitive)", false),
-        std::make_pair("Adjective", false),
-        std::make_pair("Adverb", false),
-        std::make_pair("Conjunction", false),
-        std::make_pair("Preposition", false),
-        std::make_pair("Interjection", false),
-        std::make_pair("Pronoun", false),
-        std::make_pair("Definite Article", false),
-        std::make_pair("Indefinite Article", false),
-        std::make_pair("Nominative", false)
-    };
-
-    for (auto & p : pos)
-        p.second = false;
-
-    for (auto pv : pos_vect)
-        for (auto & p : pos)
-            if (*pv == p.first)
-                p.second = true;
-
-    for (int i = 0; i < (int) pos.size() && i < height - 4; ++i)
+    for (int i = 0; i < (int) matchmaker::all_parts_of_speech().size() && i < height - 4; ++i)
     {
-        if (pos[i].second)
+        if (flagged_pos[i] != 0)
             wattron(win, A_REVERSE);
 
-        for (int j = 0; j < (int) pos[i].first.size() && j < width - 2; ++j)
-            mvwaddch(win, i + 3, j + 1, pos[i].first[j]);
+        for (int j = 0; j < (int) matchmaker::all_parts_of_speech()[i].size() && j < width - 2; ++j)
+            mvwaddch(win, i + 3, j + 1, matchmaker::all_parts_of_speech()[i][j]);
 
-        if (pos[i].second)
+        if (flagged_pos[i] != 0)
             wattroff(win, A_REVERSE);
     }
 
