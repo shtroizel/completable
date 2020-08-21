@@ -437,13 +437,20 @@ void draw_pos_win(
 
 void shell()
 {
+    std::string const DELIMITER{" "};
     int index{-1};
     bool found{false};
+    std::vector<std::string const *> pos;
 
     while (true)
     {
-        std::cout << "matchmaker (" << matchmaker::size()
-                    << ")  { prefix with ':' for completion } { use :abc for all } $  ";
+        std::cout << "\n\n{ enter words delimited by '" << DELIMITER << "' for lookup }\n"
+                  << "{ prefix single word with ':' for completion }\n"
+                  << "{ use :abc to iterate over entire dictionary }\n"
+                  << "{ use :pos <word>... for parts of speech }\n"
+                  << "{ use :syn <word>... for synonyms }\n"
+                  << "{ use :ant <word>... for antonyms }\n"
+                  << "matchmaker (" << matchmaker::size() << ") $  ";
 
         std::string line;
         std::getline(std::cin, line);
@@ -496,6 +503,83 @@ void shell()
                             << " microseconds" << std::endl;
                 continue;
             }
+        }
+        else if (words[0] == ":syn")
+        {
+            for (int i = 1; i < (int) words.size(); ++i)
+            {
+                std::cout << "       [";
+                auto start = std::chrono::high_resolution_clock::now();
+                index = matchmaker::lookup(words[i], &found);
+                auto synonyms = matchmaker::synonyms(index);
+                auto stop = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+                std::cout << index << "] :  '" << matchmaker::at(index) << "' ";
+                if (!found)
+                    std::cout << "(index if existed) ";
+                std::cout << " syn:  ";
+                for (int j = 0; j < (int) synonyms.size() - 1; ++j)
+                    std::cout << matchmaker::at(synonyms[j]) << ", ";
+                if (synonyms.size() > 0)
+                    std::cout << matchmaker::at(synonyms[synonyms.size() - 1]);
+                else
+                    std::cout << " NONE AVAILABLE";
+                std::cout << "\n       -------> lookup + synonym retrieval time: "
+                          << duration.count() << " microseconds" << std::endl;
+            }
+            continue;
+        }
+        else if (words[0] == ":ant")
+        {
+            for (int i = 1; i < (int) words.size(); ++i)
+            {
+                std::cout << "       [";
+                auto start = std::chrono::high_resolution_clock::now();
+                index = matchmaker::lookup(words[i], &found);
+                auto antonyms = matchmaker::antonyms(index);
+                auto stop = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+                std::cout << index << "] :  '" << matchmaker::at(index) << "' ";
+                if (!found)
+                    std::cout << "(index if existed) ";
+                std::cout << " ant:  ";
+                for (int j = 0; j < (int) antonyms.size() - 1; ++j)
+                    std::cout << matchmaker::at(antonyms[j]) << ", ";
+                if (antonyms.size() > 0)
+                    std::cout << matchmaker::at(antonyms[antonyms.size() - 1]);
+                else
+                    std::cout << " NONE AVAILABLE";
+                std::cout << "\n       -------> lookup + antonym retrieval time: "
+                          << duration.count() << " microseconds" << std::endl;
+            }
+            continue;
+        }
+        else if (words[0] == ":pos")
+        {
+            for (int i = 1; i < (int) words.size(); ++i)
+            {
+                std::cout << "       [";
+                index = matchmaker::lookup(words[i], &found);
+                auto start = std::chrono::high_resolution_clock::now();
+                matchmaker::parts_of_speech(index, pos);
+                auto stop = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+                std::cout << index << "] :  '" << matchmaker::at(index) << "' ";
+                if (!found)
+                    std::cout << "(index if existed) ";
+                std::cout << " pos:  ";
+                for (int j = 0; j < (int) pos.size() - 1; ++j)
+                    std::cout << *pos[j] << ", ";
+
+                if (pos.size() > 0)
+                    std::cout << *pos[pos.size() - 1];
+                else
+                    std::cout << "NONE AVAILABLE";
+
+                std::cout << "\n       -------> parts_of_speech() time: "
+                          << duration.count() << " microseconds" << std::endl;
+            }
+            continue;
         }
 
         for (auto const & word : words)
