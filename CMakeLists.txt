@@ -5,7 +5,12 @@ project(completable VERSION 1)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra -ltinfo")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra")
+
+# work around broken ncurses
+if(EXISTS /etc/gentoo-release)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ltinfo")
+endif()
 
 find_program(ld_gold ld.gold)
 if(NOT "${ld_gold}" STREQUAL "ld_gold-NOTFOUND")
