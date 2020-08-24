@@ -12,10 +12,12 @@ if(EXISTS /etc/gentoo-release)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ltinfo")
 endif()
 
-find_program(ld_gold ld.gold)
-if(NOT "${ld_gold}" STREQUAL "ld_gold-NOTFOUND")
-    message(STATUS "found gold linker!")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fuse-ld=gold")
+if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    find_program(ld_gold ld.gold)
+    if(NOT "${ld_gold}" STREQUAL "ld_gold-NOTFOUND")
+        message(STATUS "found gold linker!")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fuse-ld=gold")
+    endif()
 endif()
 
 
