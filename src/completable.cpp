@@ -109,14 +109,8 @@ int main()
     int new_root_y{root_y};
     int new_root_x{root_x};
 
-    // calculate width based on longest word in dictionary
-    int target_complete_width{0};
-    for (int i = 0; i < matchmaker::size(); ++i)
-        if ((int) matchmaker::at(i).size() > target_complete_width)
-            target_complete_width = matchmaker::at(i).size();
-    target_complete_width += 2;
-    if (target_complete_width < 33)
-        target_complete_width = 33;
+    // calculate width based on longest word in dictionary + 2 cols for borders
+    int const target_complete_width{(int) matchmaker::at(matchmaker::longest_word()).size() + 2};
     int complete_width{target_complete_width};
 
     int complete_height{root_y};
