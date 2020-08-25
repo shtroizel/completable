@@ -112,6 +112,8 @@ int main()
     // calculate width based on longest word in dictionary + 2 cols for borders
     int const target_complete_width{(int) matchmaker::at(matchmaker::longest_word()).size() + 2};
     int complete_width{target_complete_width};
+    if (complete_width > root_x)
+        complete_width = root_x;
 
     int complete_height{root_y};
 
