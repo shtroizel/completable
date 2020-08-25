@@ -45,10 +45,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 // Each time a letter is entered the new prefix and its completion is stored in the "completions" array,
-// which is used as a stack. This means we should set MAX_COMPLETIONS to be longer than the longest word
+// which is used as a stack. This means we should set MAX_COMPLETIONS to be larger than the longest word
 // in the dictionary.
 //
-// longest word so far is 45 letters so 107 should be ok
+// 107 should be ok
 static int const MAX_COMPLETIONS{107};
 
 static int const PAGE_UP{339};
