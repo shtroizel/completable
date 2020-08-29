@@ -438,6 +438,15 @@ void shell()
     int index{-1};
     bool found{false};
     std::vector<std::string const *> pos;
+    int const MAX_INDEX_DIGITS =
+        []()
+        {
+            int digit_count{0};
+            for (int i = 1; i < matchmaker::size(); i *= 10)
+                ++digit_count;
+
+            return digit_count;
+        }();
 
     while (true)
     {
@@ -576,9 +585,10 @@ void shell()
             if (words[0] == ":longest")
             {
                 for (int i = start; i < (int) matchmaker::by_longest().size() && i < start + count; ++i)
-                    std::cout << matchmaker::at(matchmaker::by_longest()[i]) << " has "
-                            << matchmaker::at(matchmaker::by_longest()[i]).size()
-                            << " characters" << std::endl;
+                    std::cout << "       [" << std::setw(MAX_INDEX_DIGITS) << i << "]  "
+                              << matchmaker::at(matchmaker::by_longest()[i]) << " has "
+                              << matchmaker::at(matchmaker::by_longest()[i]).size()
+                              << " characters" << std::endl;
             }
             else if (words[0] == ":at")
             {
@@ -589,7 +599,8 @@ void shell()
                     std::string const & str = matchmaker::at(i);
                     auto stop = std::chrono::high_resolution_clock::now();
                     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-                    std::cout << "       [" << i << "], longest[" << matchmaker::as_longest(i) << "] :  '"
+                    std::cout << "       [" << std::setw(MAX_INDEX_DIGITS) << i << "], longest["
+                              << std::setw(MAX_INDEX_DIGITS) << matchmaker::as_longest(i) << "] :  '"
                               << str << "' accessed in " << duration.count() << " microseconds\n";
                 }
                 std::cout << std::flush;
