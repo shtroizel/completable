@@ -457,6 +457,7 @@ void shell()
                   <<     "{ use   :syn <word>              for synonyms of <word>                       }\n"
                   <<     "{ use   :ant <word>              for antonyms of <word>                       }\n"
                   <<     "{ use   :longest <nth> <count>   to list <count> long words starting at <nth> }\n"
+                  <<     "{ use   :ranges                  to list length ranges                        }\n"
                   <<     "matchmaker (" << matchmaker::size() << ") $  ";
 
         std::string line;
@@ -479,7 +480,24 @@ void shell()
         }
         else if (words.size() == 1 && words[0].size() > 0)
         {
-            if (words[0][0] == ':')
+            if (words[0] == ":ranges")
+            {
+                std::cout << "The following index ranges are for :length (<nth> values)" << std::endl;
+                std::cout << "The later index is inclusive\n" << std::endl;
+
+                int index{0};
+                int count{0};
+                for (auto l : matchmaker::lengths())
+                {
+                    if (matchmaker::length_location(l, index, count))
+                        std::cout << "    " << std::setw(MAX_INDEX_DIGITS) << l
+                                  << " letter words begin at index [" << std::setw(MAX_INDEX_DIGITS)
+                                  << index << "] with a count of: " << std::to_string(count) << std::endl;
+                    else
+                        std::cout << "OOPS!" << std::endl; // should be impossible
+                }
+            }
+            else if (words[0][0] == ':')
             {
                 completion c;
                 c.prefix = words[0].substr(1);
