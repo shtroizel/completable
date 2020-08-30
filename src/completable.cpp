@@ -436,6 +436,7 @@ void shell()
     std::string const DELIMITER{" "};
     int index{-1};
     bool found{false};
+    bool help{false};
     std::vector<std::string const *> pos;
     int const MAX_INDEX_DIGITS =
         []()
@@ -449,14 +450,19 @@ void shell()
 
     while (true)
     {
-        std::cout << "\n\n{ just enter a word for lookup                                                }\n"
-                  <<     "{ prefix the word with ':' for completion                                     }\n"
-                  <<     "{ use  :it <index> <count>        to iterate <count> words from <index>       }\n"
-                  <<     "{ use  :pos <word>                for parts of speech of <word>               }\n"
-                  <<     "{ use  :s <word>                  for synonyms of <word>                      }\n"
-                  <<     "{ use  :a <word>                  for antonyms of <word>                      }\n"
-                  <<     "{ use  :lon <index> <count>       like ':it' but uses 'by_longest()'          }\n"
-                  <<     "{ use  :len                       to list ':lon' indexes by length            }\n"
+        std::cout << "\n\n";
+        if (help)
+            std::cout << "{ just enter a word for lookup                                                }\n"
+                      << "{ prefix the word with ':' for completion                                     }\n"
+                      << "{ use  :it <index> <count>        to iterate <count> words from <index>       }\n"
+                      << "{ use  :pos <word>                for parts of speech of <word>               }\n"
+                      << "{ use  :s <word>                  for synonyms of <word>                      }\n"
+                      << "{ use  :a <word>                  for antonyms of <word>                      }\n"
+                      << "{ use  :lon <index> <count>       like ':it' but uses 'by_longest()'          }\n"
+                      << "{ use  :len                       to list ':lon' indexes by length            }\n"
+                      ;
+
+        std::cout <<     "{ use  :help                      to toggle help                              }\n"
                   <<     "matchmaker (" << matchmaker::size() << ") $  ";
 
         std::string line;
@@ -495,6 +501,10 @@ void shell()
                     else
                         std::cout << "OOPS!" << std::endl; // should be impossible
                 }
+            }
+            else if (words[0] == ":help")
+            {
+                help = !help;
             }
             else if (words[0][0] == ':')
             {
