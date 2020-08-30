@@ -451,12 +451,12 @@ void shell()
     {
         std::cout << "\n\n{ just enter a word for lookup                                                }\n"
                   <<     "{ prefix the word with ':' for completion                                     }\n"
-                  <<     "{ use   :at <index> <count>      to iterate <count> words from <index>        }\n"
-                  <<     "{ use   :pos <word>              for parts of speech of <word>                }\n"
-                  <<     "{ use   :syn <word>              for synonyms of <word>                       }\n"
-                  <<     "{ use   :ant <word>              for antonyms of <word>                       }\n"
-                  <<     "{ use   :longest <nth> <count>   to list <count> long words starting at <nth> }\n"
-                  <<     "{ use   :ranges                  to list length ranges                        }\n"
+                  <<     "{ use  :it <index> <count>        to iterate <count> words from <index>       }\n"
+                  <<     "{ use  :pos <word>                for parts of speech of <word>               }\n"
+                  <<     "{ use  :s <word>                  for synonyms of <word>                      }\n"
+                  <<     "{ use  :a <word>                  for antonyms of <word>                      }\n"
+                  <<     "{ use  :lon <index> <count>       like ':it' but uses 'by_longest()'          }\n"
+                  <<     "{ use  :len                       to list ':lon' indexes by length            }\n"
                   <<     "matchmaker (" << matchmaker::size() << ") $  ";
 
         std::string line;
@@ -479,9 +479,9 @@ void shell()
         }
         else if (words.size() == 1 && words[0].size() > 0)
         {
-            if (words[0] == ":ranges")
+            if (words[0] == ":len")
             {
-                std::cout << "The following index ranges are for :length (<nth> values)" << std::endl;
+                std::cout << "The following index offsets are for :longest ('<nth>' values)" << std::endl;
                 std::cout << "The later index is inclusive\n" << std::endl;
 
                 int index{0};
@@ -525,7 +525,7 @@ void shell()
         }
         else if (words.size() == 2)
         {
-            if (words[0] == ":syn")
+            if (words[0] == ":s")
             {
                 std::cout << "       [";
                 auto start = std::chrono::high_resolution_clock::now();
@@ -546,7 +546,7 @@ void shell()
                 std::cout << "\n       -------> lookup + synonym retrieval time: "
                           << duration.count() << " microseconds" << std::endl;
             }
-            else if (words[0] == ":ant")
+            else if (words[0] == ":a")
             {
                 std::cout << "       [";
                 auto start = std::chrono::high_resolution_clock::now();
@@ -599,7 +599,7 @@ void shell()
             int start{0}; try { start = std::stoi(words[1]); } catch (...) { continue; }
             int count{0}; try { count = std::stoi(words[2]); } catch (...) { continue; }
 
-            if (words[0] == ":longest")
+            if (words[0] == ":lon")
             {
                 for (int i = start; i < (int) matchmaker::by_longest().size() && i < start + count; ++i)
                     std::cout << "       [" << std::setw(MAX_INDEX_DIGITS) << matchmaker::by_longest()[i]
@@ -608,7 +608,7 @@ void shell()
                               << matchmaker::at(matchmaker::by_longest()[i]).size()
                               << " characters" << std::endl;
             }
-            else if (words[0] == ":at")
+            else if (words[0] == ":it")
             {
 
                 for (int i = start; i < matchmaker::size() && i < start + count; ++i)
