@@ -101,7 +101,6 @@ int main()
     initscr();
     noecho();
     curs_set(FALSE);
-    halfdelay(5);
 
     // window dimensions
     int root_y{0};
