@@ -603,7 +603,8 @@ void shell()
             if (words[0] == ":longest")
             {
                 for (int i = start; i < (int) matchmaker::by_longest().size() && i < start + count; ++i)
-                    std::cout << "       [" << std::setw(MAX_INDEX_DIGITS) << i << "]  "
+                    std::cout << "       [" << std::setw(MAX_INDEX_DIGITS) << matchmaker::by_longest()[i]
+                              << "], longest[" << std::setw(MAX_INDEX_DIGITS) << i << "]  "
                               << matchmaker::at(matchmaker::by_longest()[i]) << " has "
                               << matchmaker::at(matchmaker::by_longest()[i]).size()
                               << " characters" << std::endl;
