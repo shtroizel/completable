@@ -61,10 +61,13 @@ static int const END{360};
 
 struct completion
 {
-    std::string prefix;      // string typed so far
-    int start{-1};           // index of first word in dictionary starting with prefix
-    int length{0};           // number of words in the dictionary starting with prefix
-    int display_start{-1};   // index of first word displayed starting with prefix
+    std::string prefix;                 // string typed so far
+    int start{-1};                      // index of first word in dictionary starting with prefix
+    int length{0};                      // number of words in the dictionary starting with prefix
+    int display_start{-1};              // index of first word displayed in "Completion"
+    int len_display_start{0};           // index of first word displayed in "Length Completion"
+    std::vector<int> length_completion; // each "long index" is stored for length completion instead
+                                        // of just start + length because they are noncontiguous
 };
 
 
@@ -75,7 +78,24 @@ void grow(
 );
 
 
+void draw_input_win(
+    int width,
+    int completion_count,
+    completion * completions,
+    WINDOW * win
+);
+
+
 void draw_complete_win(
+    int height,
+    int width,
+    int completion_count,
+    completion * completions,
+    WINDOW * win
+);
+
+
+void draw_len_complete_win(
     int height,
     int width,
     int completion_count,
@@ -96,6 +116,10 @@ void draw_pos_win(
 void shell();
 
 
+enum class Win{ Completion, LengthCompletion };
+Win active_win = Win::Completion; // TODO inject and remove
+
+
 int main()
 {
     initscr();
@@ -109,23 +133,39 @@ int main()
     int new_root_y{root_y};
     int new_root_x{root_x};
 
+
+    // TODO
+    // single piece of code to initialize windows, currently duplicated in resize logic... :(
+
+    int pos_height{5};
+    int pos_width{std::min(root_x, 80)};
+    WINDOW * pos_win = newwin(pos_height, pos_width, root_y - pos_height, 0);
+
     // calculate width based on longest word in dictionary + 2 cols for borders
     int const target_complete_width{(int) matchmaker::at(matchmaker::longest_word()).size() + 2};
+//     int const target_complete_width{34};
     int complete_width{target_complete_width};
     if (complete_width > root_x)
         complete_width = root_x;
 
-    int complete_height{root_y};
+    int const complete_top{0};
+//     int complete_bottom{root_y / 2 - 4};
+    int complete_bottom{root_y - pos_height - 4};
+    int complete_height{complete_bottom - complete_top + 1};
 
-    WINDOW * complete_win = newwin(complete_height, complete_width, 0, 0);
-    keypad(complete_win, true);
+    WINDOW * complete_win = newwin(complete_height, complete_width, complete_top, 0);
 
-    int const target_pos_height{19};
-    int pos_height{target_pos_height};
-    int const target_pos_width{23};
-    int pos_width{target_pos_width};
-    WINDOW * pos_win = newwin(pos_height, pos_width, 0, complete_width + 1);
-    keypad(pos_win, true);
+    WINDOW * len_complete_win = newwin(
+        complete_height,
+        complete_width,
+        complete_top,
+        std::max(std::min(root_x, 80) - complete_width, complete_width + 1)
+    );
+
+    WINDOW * input_win = newwin(3, complete_width, complete_bottom + 1,
+                                std::min(root_x, 80) / 2 - complete_width / 2);
+    keypad(input_win, true);
+
 
     completion completions[MAX_COMPLETIONS];
     completions[0].start = 0;
@@ -141,14 +181,25 @@ int main()
         getmaxyx(stdscr, new_root_y, new_root_x);
         if (new_root_y != root_y || new_root_x != root_x)
         {
+            wclear(input_win);
+            wclear(complete_win);
+            wclear(len_complete_win);
+            wclear(pos_win);
+
+            wrefresh(input_win);
+            wrefresh(complete_win);
+            wrefresh(len_complete_win);
+            wrefresh(pos_win);
+
             root_x = new_root_x;
             root_y = new_root_y;
 
-            wclear(complete_win);
+//             complete_bottom = root_y / 2 - 4;
+            complete_bottom = root_y - pos_height - 4;
             complete_width = target_complete_width;
             if (complete_width > root_x)
                 complete_width = root_x;
-            complete_height = root_y;
+            complete_height = complete_bottom - complete_top + 1;
             wresize(complete_win, complete_height, complete_width);
 
             // recalculate all completions using new max_results
@@ -161,28 +212,31 @@ int main()
                 );
             }
 
+            mvwin(
+                len_complete_win,
+                complete_top,
+                std::max(std::min(root_x, 80) - complete_width, complete_width + 1)
+            );
+            wresize(len_complete_win, complete_height, complete_width);
 
-            wclear(pos_win);
+            mvwin(input_win, complete_bottom + 1, std::min(root_x, 80) / 2 - complete_width / 2);
+            wresize(input_win, 3, complete_width);
 
-            pos_height = target_pos_height;
-            if (pos_height > root_y)
-                pos_height = root_y;
-
-            pos_width = target_pos_width;
-            int width_available = root_x - complete_width - 1;
-            if (pos_width > width_available)
-                pos_width = width_available;
-
+            mvwin(pos_win, root_y - pos_height, 0);
             wresize(pos_win, pos_height, pos_width);
 
+            wrefresh(input_win);
             wrefresh(complete_win);
+            wrefresh(len_complete_win);
             wrefresh(pos_win);
         }
 
+        draw_input_win(complete_width, completion_count, completions, input_win);
         draw_complete_win(complete_height, complete_width, completion_count, completions, complete_win);
+        draw_len_complete_win(complete_height, complete_width, completion_count, completions, len_complete_win);
         draw_pos_win(pos_height, pos_width, completion_count, completions, pos_win);
 
-        ch = wgetch(complete_win);
+        ch = wgetch(input_win);
 
         if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z'))
         {
@@ -195,6 +249,8 @@ int main()
             completions[completion_count].start = -1;
             completions[completion_count].display_start = -1;
             completions[completion_count].length = 0;
+            completions[completion_count].len_display_start = 0;
+            completions[completion_count].length_completion.clear();
         }
         else if (ch == TAB)
         {
@@ -247,45 +303,90 @@ int main()
             reset_prog_mode();
             refresh();
         }
+        else if (ch == KEY_LEFT)
+        {
+            active_win = Win::Completion;
+        }
+        else if (ch == KEY_RIGHT)
+        {
+            active_win = Win::LengthCompletion;
+        }
         else if (ch == KEY_UP)
         {
             completion & c = completions[completion_count - 1];
-            if (c.display_start > c.start)
+
+            if (active_win == Win::Completion && c.display_start > c.start)
                 --c.display_start;
+            else if (active_win == Win::LengthCompletion && c.len_display_start > 0)
+                --c.len_display_start;
         }
         else if (ch == KEY_DOWN)
         {
             completion & c = completions[completion_count - 1];
-            if (c.display_start < c.start + c.length - 1)
+
+            if (active_win == Win::Completion && c.display_start < c.start + c.length - 1)
                 ++c.display_start;
+            else if (active_win == Win::LengthCompletion &&
+                    c.len_display_start < (int) c.length_completion.size() - 1)
+                ++c.len_display_start;
         }
         else if (ch == PAGE_UP)
         {
             completion & c = completions[completion_count - 1];
-            c.display_start -= complete_height - 4;
-            if (c.display_start < c.start)
-                c.display_start = c.start;
+
+            if (active_win == Win::Completion)
+            {
+                c.display_start -= complete_height - 2;
+                if (c.display_start < c.start)
+                    c.display_start = c.start;
+            }
+            else if (active_win == Win::LengthCompletion)
+            {
+                c.len_display_start -= complete_height - 2;
+                if (c.len_display_start < 0)
+                    c.len_display_start = 0;
+            }
         }
         else if (ch == PAGE_DOWN)
         {
             completion & c = completions[completion_count - 1];
-            c.display_start += complete_height - 4;
-            if (c.display_start >= c.start + c.length)
-                c.display_start = c.start + c.length - 1;
+
+            if (active_win == Win::Completion)
+            {
+                c.display_start += complete_height - 2;
+                if (c.display_start >= c.start + c.length)
+                    c.display_start = c.start + c.length - 1;
+            }
+            else if (active_win == Win::LengthCompletion)
+            {
+                c.len_display_start += complete_height - 2;
+                if (c.len_display_start >= (int) c.length_completion.size())
+                    c.len_display_start = (int) c.length_completion.size() - 1;
+            }
         }
         else if (ch == HOME)
         {
             completion & c = completions[completion_count - 1];
-            c.display_start = c.start;
+            if (active_win == Win::Completion)
+                c.display_start = c.start;
+            else if (active_win == Win::LengthCompletion)
+                c.len_display_start = 0;
         }
         else if (ch == END)
         {
             completion & c = completions[completion_count - 1];
-            c.display_start = c.start + c.length - 1;
+            if (active_win == Win::Completion)
+                c.display_start = c.start + c.length - 1;
+            else if (active_win == Win::LengthCompletion)
+                c.len_display_start = c.length_completion.size() - 1;
         }
     }
 
     delwin(complete_win);
+    delwin(len_complete_win);
+    delwin(pos_win);
+    delwin(input_win);
+
     endwin();
 
     return 0;
@@ -298,6 +399,9 @@ void grow(
     completion * completions
 )
 {
+    if (completion_count >= MAX_COMPLETIONS) // should be impossible
+        return;
+
     // start with previous prefix
     completions[completion_count].prefix = completions[completion_count - 1].prefix;
 
@@ -311,12 +415,60 @@ void grow(
         completions[completion_count].length
     );
 
+    // calculate length completion
+    std::priority_queue<int, std::vector<int>, std::greater<std::vector<int>::value_type>> q;
+    for (
+        int i = completions[completion_count].start;
+        i < completions[completion_count].start + completions[completion_count].length;
+        ++i
+    )
+        q.push(matchmaker::as_longest(i));
+    while (!q.empty())
+    {
+        completions[completion_count].length_completion.push_back(q.top());
+        q.pop();
+    }
+
     // initialize display_start
     completions[completion_count].display_start = completions[completion_count].start;
 
+    // initialize len_display_start
+    completions[completion_count].len_display_start = 0;
+
     // update completion_count
-    if (completions[completion_count].length > 0 && completion_count < MAX_COMPLETIONS)
+    if (completions[completion_count].length > 0)
         ++completion_count;
+}
+
+
+void draw_input_win(
+    int width,
+    int completion_count,
+    completion * completions,
+    WINDOW * win
+)
+{
+    wclear(win);
+
+    box(win, 0, 0);
+
+    // title
+    std::string const title{"Input"};
+    int const indent{width / 3 - (int) title.size() / 2};
+    mvwaddch(win, 0, indent - 1, ' ');
+    for (int i = 0; i < (int) title.size(); ++i)
+        mvwaddch(win, 0, i + indent, title[i]);
+    mvwaddch(win, 0, title.size() + indent, ' ');
+
+    // draw prefix
+    if (completion_count > 0)
+    {
+        std::string const & prefix = completions[completion_count - 1].prefix;
+        for (int x = 0; x < width - 2 && x < (int) prefix.size(); ++x)
+            mvwaddch(win, 1, x + 1, prefix[x]);
+    }
+
+    wrefresh(win);
 }
 
 
@@ -330,7 +482,7 @@ void draw_complete_win(
 {
     wclear(win);
 
-    if (height < 5)
+    if (height < 3)
         return;
 
     if (width < 3)
@@ -338,28 +490,22 @@ void draw_complete_win(
 
     box(win, 0, 0);
 
-    // draw prefix
-    if (completion_count > 0)
-    {
-        std::string const & prefix = completions[completion_count - 1].prefix;
-        for (int x = 0; x < width - 2 && x < (int) prefix.size(); ++x)
-            mvwaddch(win, 1, x + 1, prefix[x]);
-    }
-
-    // separator
-    mvwaddch(win, 2, 0, ACS_LTEE);
-    for (int i = 1; i < width - 1; ++i)
-        mvwaddch(win, 2, i, ACS_HLINE);
-    mvwaddch(win, 2, width - 1, ACS_RTEE);
+    // title
+    std::string const title{"Completion"};
+    int const indent{width / 3 - (int) title.size() / 2};
+    mvwaddch(win, 0, indent - 1, ' ');
+    for (int i = 0; i < (int) title.size(); ++i)
+        mvwaddch(win, 0, i + indent, title[i]);
+    mvwaddch(win, 0, title.size() + indent, ' ');
 
     // completion
     completion & cur_completion = completions[completion_count - 1];
     int length = cur_completion.length - (cur_completion.display_start - cur_completion.start);
-    for (int i = 0; i < length && i < height - 4; ++i)
+    for (int i = 0; i < length && i < height - 2; ++i)
     {
         std::string const & complete_entry = matchmaker::at(cur_completion.display_start + i);
 
-        if (i == 0)
+        if (active_win == Win::Completion && i == 0)
             wattron(win, A_REVERSE);
 
         // draw complete_entry letter by letter
@@ -367,13 +513,85 @@ void draw_complete_win(
         {
             mvwaddch(
                 win,
-                i + 3,
+                i + 1,
                 j + 1,
                 complete_entry[j]
             );
         }
 
-        if (i == 0)
+        if (active_win == Win::Completion && i == 0)
+            wattroff(win, A_REVERSE);
+    }
+
+    wrefresh(win);
+}
+
+
+void draw_len_complete_win(
+    int height,
+    int width,
+    int completion_count,
+    completion * completions,
+    WINDOW * win
+)
+{
+    wclear(win);
+
+    if (height < 3)
+        return;
+
+    if (width < 3)
+        return;
+
+    box(win, 0, 0);
+
+    // title
+    std::string const title{"Length Completion"};
+    int const indent{width / 3 - (int) title.size() / 2};
+    mvwaddch(win, 0, indent - 1, ' ');
+    for (int i = 0; i < (int) title.size(); ++i)
+        mvwaddch(win, 0, i + indent, title[i]);
+    mvwaddch(win, 0, title.size() + indent, ' ');
+
+    // completion
+    completion & cur_completion = completions[completion_count - 1];
+//     int length = cur_completion.length - cur_completion.len_display_start;
+    int length = cur_completion.length_completion.size() - cur_completion.len_display_start;
+    if (length < 0)
+        return;
+
+    int long_index{0};
+
+    for (int i = 0; i < length && i < height - 2; ++i)
+    {
+        if (cur_completion.length_completion.size() > 0)
+        {
+            int length_completion_index = i + cur_completion.len_display_start;
+            if (length_completion_index >= (int) cur_completion.length_completion.size())
+                return;
+
+            long_index = cur_completion.length_completion[length_completion_index];
+        }
+        else
+            long_index = i;
+
+        std::string const & complete_entry = matchmaker::at(matchmaker::by_longest()[long_index]);
+
+        if (active_win == Win::LengthCompletion && i == 0)
+            wattron(win, A_REVERSE);
+
+        // draw complete_entry letter by letter
+        for (int j = 0; j < (int) complete_entry.size() && j < width - 2; ++j)
+        {
+            mvwaddch(
+                win,
+                i + 1,
+                j + 1,
+                complete_entry[j]
+            );
+        }
+
+        if (active_win == Win::LengthCompletion && i == 0)
             wattroff(win, A_REVERSE);
     }
 
@@ -389,42 +607,87 @@ void draw_pos_win(
     WINDOW * win
 )
 {
+    (void) completion_count;
+    (void) completions;
+
+
     wclear(win);
 
     if (height < 5)
         return;
 
-    if (width < 3)
+    if (width < 80)
         return;
 
     box(win, 0, 0);
 
+    int const cell_width{16};
+
     // title
-    static std::string const pos_title{"Parts of Speech"};
-
-    for (int i = 0; i < (int) pos_title.size() && i < width - 2; ++i)
-        mvwaddch(win, 1, i + 1, pos_title[i]);
-
-    // separator
-    mvwaddch(win, 2, 0, ACS_LTEE);
-    for (int i = 1; i < width - 1; ++i)
-        mvwaddch(win, 2, i, ACS_HLINE);
-    mvwaddch(win, 2, width - 1, ACS_RTEE);
+    std::string const title{"Parts of Speech"};
+    int const indent{width / 3 - (int) title.size() / 2};
+    mvwaddch(win, 0, indent - 1, ' ');
+    for (int i = 0; i < (int) title.size(); ++i)
+        mvwaddch(win, 0, i + indent, title[i]);
+    mvwaddch(win, 0, title.size() + indent, ' ');
 
     // parts of speech
-    int selected = completions[completion_count - 1].display_start;
+    int selected{0};
+    if (active_win == Win::Completion)
+    {
+        selected = completions[completion_count - 1].display_start;
+    }
+    else if (active_win == Win::LengthCompletion)
+    {
+        int length_completion_index = completions[completion_count - 1].len_display_start;
+        if (length_completion_index >= (int) completions[completion_count - 1].length_completion.size())
+            return;
+        if (length_completion_index < 0)
+            return;
+        int long_index = completions[completion_count - 1].length_completion[length_completion_index];
+        selected = matchmaker::by_longest()[long_index];
+    }
+    else
+    {
+        return;
+    }
+
     auto const & flagged_pos = matchmaker::flagged_parts_of_speech(selected);
 
-    for (int i = 0; i < (int) matchmaker::all_parts_of_speech().size() && i < height - 4; ++i)
+    int x = 1;
+    int i = 0;
+    int y = 1;
+    while (i < (int) matchmaker::all_parts_of_speech().size())
     {
         if (flagged_pos[i] != 0)
             wattron(win, A_REVERSE);
 
-        for (int j = 0; j < (int) matchmaker::all_parts_of_speech()[i].size() && j < width - 2; ++j)
-            mvwaddch(win, i + 3, j + 1, matchmaker::all_parts_of_speech()[i][j]);
+        for(
+            int j = 0;
+            j < (int) matchmaker::all_parts_of_speech()[i].size() && j < x + cell_width - 2;
+            ++j
+        )
+            mvwaddch(win, y, j + x, matchmaker::all_parts_of_speech()[i][j]);
 
         if (flagged_pos[i] != 0)
             wattroff(win, A_REVERSE);
+
+        ++i;
+
+        x += cell_width;
+
+        if (x > cell_width * 5)
+        {
+            if (y < 4)
+            {
+                y += 1;
+                x = 1;
+            }
+            else
+            {
+                break;
+            }
+        }
     }
 
     wrefresh(win);

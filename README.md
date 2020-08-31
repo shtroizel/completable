@@ -32,4 +32,5 @@ install/bin/completable
 ### using completable
 * start typing words to complete
 * use arrow up/down, page up/down and home/end for scrolling
+* use arrow left/right for window focus
 * use '$' or '`' for shell - enter empty line to get back
