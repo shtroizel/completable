@@ -27,9 +27,10 @@ def usage():
     print('                                * install_dir')
     print('                                * matchmaker_dir\n')
     print('    -c  --clang               force use of clang compiler (defaults to system compiler)\n')
+    print('    -d  --debug               debug build (default is release)\n')
 
 
-def build_and_install(build_dir, install_dir, matchmaker_dir, use_clang, q):
+def build_and_install(build_dir, install_dir, matchmaker_dir, use_clang, q, debug):
     start_dir = os.getcwd()
 
     completable_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
@@ -72,6 +73,11 @@ def build_and_install(build_dir, install_dir, matchmaker_dir, use_clang, q):
         cmake_cmd.append('-DCMAKE_C_COMPILER=/usr/bin/clang')
         cmake_cmd.append('-DCMAKE_CXX_COMPILER=/usr/bin/clang++')
 
+    if debug:
+        cmake_cmd.append('-DCMAKE_BUILD_TYPE=Debug')
+    else:
+        cmake_cmd.append('-DCMAKE_BUILD_TYPE=Release')
+
     cmake_cmd.append(completable_root)
 
     if subprocess.run(cmake_cmd).returncode != 0:
@@ -90,8 +96,8 @@ def build_and_install(build_dir, install_dir, matchmaker_dir, use_clang, q):
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hcb:i:m:q',
-                                   ['help', 'clang', 'build_dir', 'install_dir', 'matchmaker_dir', 'q'])
+        opts, args = getopt.getopt(sys.argv[1:], 'hcb:i:m:qd',
+                ['help', 'clang', 'build_dir', 'install_dir', 'matchmaker_dir', 'q', 'debug'])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -102,6 +108,7 @@ def main():
     install_dir = ''
     matchmaker_dir = ''
     q = False
+    debug = False
 
     for o, a in opts:
         if o in ('-h', '--help'):
@@ -117,11 +124,13 @@ def main():
             matchmaker_dir = a
         elif o in ('-q', '--q'):
             q = True
+        elif o in ('-d', '--debug'):
+            debug = True
         else:
             assert False, "unhandled option"
 
 
-    build_and_install(build_dir, install_dir, matchmaker_dir, use_clang, q)
+    build_and_install(build_dir, install_dir, matchmaker_dir, use_clang, q, debug)
 
     exit(0)
 
