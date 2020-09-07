@@ -58,6 +58,9 @@ static int const TAB{9};
 static int const HOME{262};
 static int const END{360};
 
+// support words of at least this many letters
+static int const MIN_SUPPORTED_WORD_LENGTH{34};
+
 
 struct completion
 {
@@ -142,8 +145,14 @@ int main()
     WINDOW * pos_win = newwin(pos_height, pos_width, root_y - pos_height, 0);
 
     // calculate width based on longest word in dictionary + 2 cols for borders
-    int const target_complete_width{(int) matchmaker::at(matchmaker::longest_word()).size() + 2};
-//     int const target_complete_width{34};
+    int const target_complete_width{
+        std::max(
+            (int) matchmaker::at(matchmaker::longest_word()).size(),
+            MIN_SUPPORTED_WORD_LENGTH
+        )
+        +
+        2 // left and right borders
+    };
     int complete_width{target_complete_width};
     if (complete_width > root_x)
         complete_width = root_x;
