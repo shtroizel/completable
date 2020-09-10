@@ -159,6 +159,37 @@ protected:
 };
 
 
+class PropertyWindow : public AbstractWindow
+{
+    void draw_hook(int completion_count, completion const * completions) override
+    {
+        int selected{0};
+        if (active_win == Win::Completion)
+        {
+            selected = completions[completion_count - 1].display_start;
+        }
+        else if (active_win == Win::LengthCompletion)
+        {
+            int length_completion_index = completions[completion_count - 1].len_display_start;
+            if (length_completion_index >= (int) completions[completion_count - 1].length_completion.size())
+                return;
+            if (length_completion_index < 0)
+                return;
+            int long_index = completions[completion_count - 1].length_completion[length_completion_index];
+            selected = matchmaker::from_longest(long_index);
+        }
+        else
+        {
+            return;
+        }
+
+        draw_hook(selected);
+    }
+
+    virtual void draw_hook(int selected) = 0;
+};
+
+
 class InputWindow : public AbstractWindow
 {
 public:
@@ -294,7 +325,7 @@ private:
 };
 
 
-class PartsOfSpeechWindow : public AbstractWindow
+class PartsOfSpeechWindow : public PropertyWindow
 {
     std::string const & title() const override
     {
@@ -310,29 +341,9 @@ class PartsOfSpeechWindow : public AbstractWindow
         x = 0;
     }
 
-    void draw_hook(int completion_count, completion const * completions) override
+    void draw_hook(int selected) override
     {
         int const cell_width{16};
-
-        int selected{0};
-        if (active_win == Win::Completion)
-        {
-            selected = completions[completion_count - 1].display_start;
-        }
-        else if (active_win == Win::LengthCompletion)
-        {
-            int length_completion_index = completions[completion_count - 1].len_display_start;
-            if (length_completion_index >= (int) completions[completion_count - 1].length_completion.size())
-                return;
-            if (length_completion_index < 0)
-                return;
-            int long_index = completions[completion_count - 1].length_completion[length_completion_index];
-            selected = matchmaker::from_longest(long_index);
-        }
-        else
-        {
-            return;
-        }
 
         auto const & flagged_pos = matchmaker::flagged_parts_of_speech(selected);
 
@@ -375,10 +386,10 @@ class PartsOfSpeechWindow : public AbstractWindow
 };
 
 
-class SynonymWindow : public AbstractWindow
+class SynonymWindow : public PropertyWindow
 {
 public:
-    SynonymWindow(CompletionWindow const & win) : AbstractWindow(), completion_win{win} {}
+    SynonymWindow(CompletionWindow const & win) : PropertyWindow(), completion_win{win} {}
 
 private:
     std::string const & title() const override
@@ -395,37 +406,12 @@ private:
         x = completion_win.get_width();
     }
 
-    void draw_hook(int completion_count, completion const * completions) override
+    void draw_hook(int selected) override
     {
-        // currently selected word
-        int selected{0};
-        if (active_win == Win::Completion)
-        {
-            selected = completions[completion_count - 1].display_start;
-        }
-        else if (active_win == Win::LengthCompletion)
-        {
-            int length_completion_index = completions[completion_count - 1].len_display_start;
-            if (length_completion_index >= (int) completions[completion_count - 1].length_completion.size())
-                return;
-            if (length_completion_index < 0)
-                return;
-            int long_index = completions[completion_count - 1].length_completion[length_completion_index];
-            selected = matchmaker::from_longest(long_index);
-        }
-        else
-        {
-            return;
-        }
-
-        // synonyms
         auto const & synonyms = matchmaker::synonyms(selected);
-
         for (int i = 0; i < (int) synonyms.size() && i < height - 2; ++i)
         {
             std::string const & syn = matchmaker::at(synonyms[i]);
-
-            // draw synonym
             for (int j = 0; j < (int) syn.length() && j < width - 2; ++j)
             {
                 mvwaddch(
@@ -443,10 +429,10 @@ private:
 };
 
 
-class AntonymWindow : public AbstractWindow
+class AntonymWindow : public PropertyWindow
 {
 public:
-    AntonymWindow(LengthCompletionWindow const & win) : AbstractWindow(), len_completion_win{win} {}
+    AntonymWindow(LengthCompletionWindow const & win) : PropertyWindow(), len_completion_win{win} {}
 
 private:
     std::string const & title() const override
@@ -463,37 +449,12 @@ private:
         x = len_completion_win.get_width();
     }
 
-    void draw_hook(int completion_count, completion const * completions) override
+    void draw_hook(int selected) override
     {
-        // currently selected word
-        int selected{0};
-        if (active_win == Win::Completion)
-        {
-            selected = completions[completion_count - 1].display_start;
-        }
-        else if (active_win == Win::LengthCompletion)
-        {
-            int length_completion_index = completions[completion_count - 1].len_display_start;
-            if (length_completion_index >= (int) completions[completion_count - 1].length_completion.size())
-                return;
-            if (length_completion_index < 0)
-                return;
-            int long_index = completions[completion_count - 1].length_completion[length_completion_index];
-            selected = matchmaker::from_longest(long_index);
-        }
-        else
-        {
-            return;
-        }
-
-        // antonyms
         auto const & antonyms = matchmaker::antonyms(selected);
-
         for (int i = 0; i < (int) antonyms.size() && i < height - 2; ++i)
         {
             std::string const & ant = matchmaker::at(antonyms[i]);
-
-            // draw synonym
             for (int j = 0; j < (int) ant.length() && j < width - 2; ++j)
             {
                 mvwaddch(
