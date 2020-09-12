@@ -45,13 +45,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-// Each time a letter is entered the new prefix and its completion is stored in the "completions" array,
-// which is used as a stack. This means we should set MAX_COMPLETIONS to be larger than the longest word
-// in the dictionary.
-//
-// 107 should be ok
-static int const MAX_COMPLETIONS{107};
-
 static int const PAGE_UP{339};
 static int const PAGE_DOWN{338};
 static int const TAB{9};
@@ -65,16 +58,120 @@ static int const MIN_ROOT_Y{30};
 static int const MIN_ROOT_X{80};
 
 
-struct completion
+template< int capacity = 107>
+class CompletionStack
 {
-    std::string prefix;                 // string typed so far
-    int start{-1};                      // index of first word in dictionary starting with prefix
-    int length{0};                      // number of words in the dictionary starting with prefix
-    int display_start{-1};              // index of first word displayed in "Completion"
-    int len_display_start{0};           // index of first word displayed in "Length Completion"
-    std::vector<int> length_completion; // each "long index" is stored for length completion instead
-                                        // of just start + length because they are noncontiguous
+public:
+    struct completion
+    {
+        std::string prefix;                 // user input state
+        int start{0};                       // index of first word in dictionary starting with prefix
+        int length{0};                      // number of words in the dictionary starting with prefix
+        int display_start{0};               // index of first word displayed in "Completion"
+        int len_display_start{0};           // index of first word displayed in "Length Completion"
+        std::vector<int> length_completion; // each "long index" is stored for length completion instead
+                                            // of just start + length because they are noncontiguous
+    };
+
+    CompletionStack()
+    {
+        clear_top();
+    }
+
+    void push(int ch)
+    {
+        if (completion_count >= capacity)
+            return;
+
+        {
+            // keep reference to previous top for prefix initialization
+            completion const & prev_top = top();
+
+            // grow
+            ++completion_count;
+            clear_top();
+
+            top().prefix = prev_top.prefix;
+        }
+        top().prefix += ch;
+
+        // get new completion
+        matchmaker::complete(
+            top().prefix,
+            top().start,
+            top().length
+        );
+
+        // adding 'ch' would make an unknown word, so ignore the push
+        if (top().length == 0)
+        {
+            pop();
+            return;
+        }
+
+        // calculate length completion
+        std::priority_queue<int, std::vector<int>, std::greater<std::vector<int>::value_type>> q;
+        for (
+            int i = top().start;
+            i < top().start + top().length;
+            ++i
+        )
+            q.push(matchmaker::as_longest(i));
+        while (!q.empty())
+        {
+            top().length_completion.push_back(q.top());
+            q.pop();
+        }
+
+        top().display_start = top().start;
+        top().len_display_start = 0;
+    }
+    void pop()
+    {
+        if (completion_count > 1)
+        {
+            clear_top();
+            --completion_count;
+        }
+    }
+    int count() const { return completion_count; }
+
+    completion const & top() const { return completions[completion_count - 1]; }
+    completion & top() { return completions[completion_count - 1]; }
+
+
+private:
+
+    void clear_top()
+    {
+        top().prefix.clear();
+        top().start = 0;
+        top().display_start = 0;
+        top().length = 0;
+        top().len_display_start = 0;
+        top().length_completion.clear();
+
+        if (completion_count == 1)
+        {
+            // use entired dictionary for completions
+
+            top().length = matchmaker::size();
+
+            std::priority_queue<int, std::vector<int>, std::greater<std::vector<int>::value_type>> q;
+            for (int i = 0; i < matchmaker::size(); ++i)
+                q.push(matchmaker::as_longest(i));
+            while (!q.empty())
+            {
+                top().length_completion.push_back(q.top());
+                q.pop();
+            }
+        }
+    }
+
+    completion completions[capacity];
+    int completion_count{1};
 };
+
 
 
 // TODO recode activation concept
@@ -110,7 +207,7 @@ public:
         keypad(w, true);
     }
 
-    void draw(int completion_count, completion const * completions)
+    void draw(CompletionStack<> const & cs)
     {
         wclear(w);
 
@@ -132,7 +229,7 @@ public:
         mvwaddch(w, 0, title().size() + indent, ' ');
 
         // window specific drawing
-        draw_hook(completion_count, completions);
+        draw_hook(cs);
 
         wrefresh(w);
     }
@@ -146,7 +243,7 @@ public:
 private:
     virtual std::string const & title() const = 0;
     virtual void resize_hook() = 0;
-    virtual void draw_hook(int completion_count, completion const * completions) = 0;
+    virtual void draw_hook(CompletionStack<> const & cs) = 0;
 
 protected:
     WINDOW * w{nullptr};
@@ -161,21 +258,21 @@ protected:
 
 class PropertyWindow : public AbstractWindow
 {
-    void draw_hook(int completion_count, completion const * completions) override
+    void draw_hook(CompletionStack<> const & cs) override
     {
         int selected{0};
         if (active_win == Win::Completion)
         {
-            selected = completions[completion_count - 1].display_start;
+            selected = cs.top().display_start;
         }
         else if (active_win == Win::LengthCompletion)
         {
-            int length_completion_index = completions[completion_count - 1].len_display_start;
-            if (length_completion_index >= (int) completions[completion_count - 1].length_completion.size())
+            int length_completion_index = cs.top().len_display_start;
+            if (length_completion_index >= (int) cs.top().length_completion.size())
                 return;
             if (length_completion_index < 0)
                 return;
-            int long_index = completions[completion_count - 1].length_completion[length_completion_index];
+            int long_index = cs.top().length_completion[length_completion_index];
             selected = matchmaker::from_longest(long_index);
         }
         else
@@ -206,9 +303,9 @@ private:
         x = root_x / 2 - width / 2;
     }
 
-    void draw_hook(int completion_count, completion const * completions) override
+    void draw_hook(CompletionStack<> const & cs) override
     {
-        std::string const & prefix = completions[completion_count - 1].prefix;
+        std::string const & prefix = cs.top().prefix;
         for (int x = 0; x < width - 2 && x < (int) prefix.size(); ++x)
             mvwaddch(w, 1, x + 1, prefix[x]);
     }
@@ -228,9 +325,9 @@ class CompletionWindow : public AbstractWindow
         x = 0;
     }
 
-    void draw_hook(int completion_count, completion const * completions) override
+    void draw_hook(CompletionStack<> const & cs) override
     {
-        completion const & cur_completion = completions[completion_count - 1];
+        auto const & cur_completion = cs.top();
         int length = cur_completion.length - (cur_completion.display_start - cur_completion.start);
         for (int i = 0; i < length && i < height - 2; ++i)
         {
@@ -277,9 +374,9 @@ private:
         width = completion_win.get_width();
     }
 
-    void draw_hook(int completion_count, completion const * completions) override
+    void draw_hook(CompletionStack<> const & cs) override
     {
-        completion const & cur_completion = completions[completion_count - 1];
+        auto const & cur_completion = cs.top();
         int length = cur_completion.length_completion.size() - cur_completion.len_display_start;
         if (length < 0)
             return;
@@ -473,14 +570,6 @@ private:
 
 
 
-
-void grow(
-    int ch,
-    int & completion_count,
-    completion * completions
-);
-
-
 void shell();
 
 
@@ -518,73 +607,33 @@ int main()
     AntonymWindow ant_win{len_completion_win};
     ant_win.resize();
 
+    CompletionStack cs;
 
-    // create the "completions" stack
-    // we always have at least one completion (initialized below)
-    // this is the completion used when user input is empty
-    completion completions[MAX_COMPLETIONS];
-    completions[0].start = 0;
-    completions[0].display_start = 0;
-    completions[0].length = matchmaker::size();
-    completions[0].len_display_start = 0;
-
-    // initialize completions[0].length_completion
-    {
-        std::priority_queue<int, std::vector<int>, std::greater<std::vector<int>::value_type>> q;
-        for (int i = 0; i < matchmaker::size(); ++i)
-            q.push(matchmaker::as_longest(i));
-        while (!q.empty())
-        {
-            completions[0].length_completion.push_back(q.top());
-            q.pop();
-        }
-    }
-
-    // may range from 1 to MAX_COMPLETIONS (will never be 0)
-    int completion_count{1};
-
-    // character read by getch() in main loop
     int ch{0};
 
     while (1)
     {
-        // terminal resized?
+        // *** terminal resized? *************
         prev_root_y = root_y;
         prev_root_x = root_x;
         getmaxyx(stdscr, root_y, root_x);
         if (root_y != prev_root_y || root_x != prev_root_x)
         {
-            input_win.clear();
-            completion_win.clear();
-            len_completion_win.clear();
-            pos_win.clear();
-            syn_win.clear();
-            ant_win.clear();
-
-            // recalculate all completions using new max_results
-            for (int i = 0; i < completion_count; ++i)
-            {
-                matchmaker::complete(
-                    completions[i].prefix,
-                    completions[i].start,
-                    completions[i].length
-                );
-            }
-
             input_win.resize();
             completion_win.resize();
             len_completion_win.resize();
             pos_win.resize();
             syn_win.resize();
             ant_win.resize();
-        } // of terminal window resized
+        }
+        // ***********************************
 
-        input_win.draw(completion_count, completions);
-        completion_win.draw(completion_count, completions);
-        len_completion_win.draw(completion_count, completions);
-        pos_win.draw(completion_count, completions);
-        syn_win.draw(completion_count, completions);
-        ant_win.draw(completion_count, completions);
+        input_win.draw(cs);
+        completion_win.draw(cs);
+        len_completion_win.draw(cs);
+        pos_win.draw(cs);
+        syn_win.draw(cs);
+        ant_win.draw(cs);
 
         ch = wgetch(input_win.get_WINDOW());
 
@@ -600,31 +649,27 @@ int main()
         }
         else if (ch > 31 && ch < 127) // printable ascii
         {
-            grow(ch, completion_count, completions);
+            cs.push(ch);
         }
-        else if (ch == KEY_BACKSPACE && completion_count > 1)
+        else if (ch == KEY_BACKSPACE)
         {
-            --completion_count;
-            completions[completion_count].prefix.clear();
-            completions[completion_count].start = -1;
-            completions[completion_count].display_start = -1;
-            completions[completion_count].length = 0;
-            completions[completion_count].len_display_start = 0;
-            completions[completion_count].length_completion.clear();
+            cs.pop();
         }
         else if (ch == TAB)
         {
-            std::string const & prefix = completions[completion_count - 1].prefix;
-            if (completions[completion_count - 1].length > 0)
+            decltype(cs) const & ccs = cs;
+
+            auto const & cur_completion = ccs.top();
+            std::string const & prefix = cur_completion.prefix;
+            if (cur_completion.length > 0)
             {
                 std::string const & first_entry =
-                        matchmaker::at(completions[completion_count - 1].start);
+                        matchmaker::at(cur_completion.start);
 
-                auto const & cur_completion = completions[completion_count - 1];
 
                 // find out the "target_completion_count" or the completion count after skipping
                 // by common characters
-                int target_completion_count = completion_count;
+                int target_completion_count = ccs.count();
                 bool ok = first_entry.size() > prefix.size();
                 while (ok)
                 {
@@ -650,7 +695,7 @@ int main()
 
                 // grow up to the target completion count
                 for (int i = (int) prefix.size(); i < target_completion_count; ++i)
-                    grow(first_entry[i], completion_count, completions);
+                    cs.push(first_entry[i]);
             }
         }
         else if (ch == KEY_LEFT)
@@ -663,7 +708,7 @@ int main()
         }
         else if (ch == KEY_UP)
         {
-            completion & c = completions[completion_count - 1];
+            auto & c = cs.top();
 
             if (active_win == Win::Completion && c.display_start > c.start)
                 --c.display_start;
@@ -672,7 +717,7 @@ int main()
         }
         else if (ch == KEY_DOWN)
         {
-            completion & c = completions[completion_count - 1];
+            auto & c = cs.top();
 
             if (active_win == Win::Completion && c.display_start < c.start + c.length - 1)
                 ++c.display_start;
@@ -682,7 +727,7 @@ int main()
         }
         else if (ch == PAGE_UP)
         {
-            completion & c = completions[completion_count - 1];
+            auto & c = cs.top();
 
             if (active_win == Win::Completion)
             {
@@ -699,7 +744,7 @@ int main()
         }
         else if (ch == PAGE_DOWN)
         {
-            completion & c = completions[completion_count - 1];
+            auto & c = cs.top();
 
             if (active_win == Win::Completion)
             {
@@ -716,7 +761,7 @@ int main()
         }
         else if (ch == HOME)
         {
-            completion & c = completions[completion_count - 1];
+            auto & c = cs.top();
             if (active_win == Win::Completion)
                 c.display_start = c.start;
             else if (active_win == Win::LengthCompletion)
@@ -724,7 +769,7 @@ int main()
         }
         else if (ch == END)
         {
-            completion & c = completions[completion_count - 1];
+            auto & c = cs.top();
             if (active_win == Win::Completion)
                 c.display_start = c.start + c.length - 1;
             else if (active_win == Win::LengthCompletion)
@@ -737,53 +782,6 @@ int main()
     return 0;
 }
 
-
-void grow(
-    int ch,
-    int & completion_count,
-    completion * completions
-)
-{
-    if (completion_count >= MAX_COMPLETIONS) // should be impossible
-        return;
-
-    // start with previous prefix
-    completions[completion_count].prefix = completions[completion_count - 1].prefix;
-
-    // add new character
-    completions[completion_count].prefix += ch;
-
-    // get new completion
-    matchmaker::complete(
-        completions[completion_count].prefix,
-        completions[completion_count].start,
-        completions[completion_count].length
-    );
-
-    // calculate length completion
-    std::priority_queue<int, std::vector<int>, std::greater<std::vector<int>::value_type>> q;
-    for (
-        int i = completions[completion_count].start;
-        i < completions[completion_count].start + completions[completion_count].length;
-        ++i
-    )
-        q.push(matchmaker::as_longest(i));
-    while (!q.empty())
-    {
-        completions[completion_count].length_completion.push_back(q.top());
-        q.pop();
-    }
-
-    // initialize display_start
-    completions[completion_count].display_start = completions[completion_count].start;
-
-    // initialize len_display_start
-    completions[completion_count].len_display_start = 0;
-
-    // update completion_count
-    if (completions[completion_count].length > 0)
-        ++completion_count;
-}
 
 
 void shell()
@@ -863,7 +861,7 @@ void shell()
             }
             else if (words[0][0] == ':')
             {
-                completion c;
+                CompletionStack<>::completion c;
                 c.prefix = words[0].substr(1);
                 auto start = std::chrono::high_resolution_clock::now();
                 matchmaker::complete(c.prefix, c.start, c.length);
