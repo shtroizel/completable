@@ -141,7 +141,6 @@ public:
 
 
 private:
-
     void clear_top()
     {
         top().prefix.clear();
@@ -697,7 +696,7 @@ int main()
 //                 // grow up to the target completion count
 //                 for (int i = (int) prefix.size(); i < target_completion_count; ++i)
 //                     cs.push(first_entry[i]);
-            }
+//             }
         }
         else if (ch == KEY_LEFT)
         {
