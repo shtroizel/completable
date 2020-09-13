@@ -786,7 +786,6 @@ int main()
 
 void shell()
 {
-    std::string const DELIMITER{" "};
     int index{-1};
     bool found{false};
     bool help{false};
