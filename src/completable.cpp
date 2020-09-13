@@ -810,12 +810,12 @@ void shell()
                       << "{ use  :pos <word>                for parts of speech of <word>               }\n"
                       << "{ use  :s <word>                  for synonyms of <word>                      }\n"
                       << "{ use  :a <word>                  for antonyms of <word>                      }\n"
-                      << "{ use  :lon <index> <count>       like ':it' but uses 'by_longest()'          }\n"
-                      << "{ use  :len                       to list ':lon' indexes by length            }\n"
-                      ;
-
-        std::cout <<     "{ use  :help                      to toggle help                              }\n"
-                  <<     "matchmaker (" << matchmaker::size() << ") $  ";
+                      << "{ use  :itl <index> <count>       like ':it' but uses length indexes          }\n"
+                      << "{ use  :len                       to list length index offsets                }\n"
+                      << "{ use  :help                      to toggle help                              }\n"
+                      << "matchmaker (" << matchmaker::size() << ") $  ";
+        else
+            std::cout << "matchmaker (" << matchmaker::size() << ") { enter :help for help } $  ";
 
         std::string line;
         std::getline(std::cin, line);
@@ -878,7 +878,7 @@ void shell()
                 index = matchmaker::lookup(words[0], &found);
                 auto stop = std::chrono::high_resolution_clock::now();
                 auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-                std::cout << index << "], longest[" << matchmaker::as_longest(index) << "] :  '"
+                std::cout << index << "], length[" << matchmaker::as_longest(index) << "] :  '"
                         << matchmaker::at(index) << "' ";
                 if (!found)
                     std::cout << "(index if existed) ";
@@ -961,11 +961,11 @@ void shell()
             int start{0}; try { start = std::stoi(words[1]); } catch (...) { continue; }
             int count{0}; try { count = std::stoi(words[2]); } catch (...) { continue; }
 
-            if (words[0] == ":lon")
+            if (words[0] == ":itl")
             {
                 for (int i = start; i < (int) matchmaker::by_longest().size() && i < start + count; ++i)
                     std::cout << "       [" << std::setw(MAX_INDEX_DIGITS) << matchmaker::by_longest()[i]
-                              << "], longest[" << std::setw(MAX_INDEX_DIGITS) << i << "]  "
+                              << "], length[" << std::setw(MAX_INDEX_DIGITS) << i << "]  "
                               << matchmaker::at(matchmaker::by_longest()[i]) << " has "
                               << matchmaker::at(matchmaker::by_longest()[i]).size()
                               << " characters" << std::endl;
@@ -979,7 +979,7 @@ void shell()
                     std::string const & str = matchmaker::at(i);
                     auto stop = std::chrono::high_resolution_clock::now();
                     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-                    std::cout << "       [" << std::setw(MAX_INDEX_DIGITS) << i << "], longest["
+                    std::cout << "       [" << std::setw(MAX_INDEX_DIGITS) << i << "], length["
                               << std::setw(MAX_INDEX_DIGITS) << matchmaker::as_longest(i) << "] :  '"
                               << str << "' accessed in " << duration.count() << " microseconds\n";
                 }
