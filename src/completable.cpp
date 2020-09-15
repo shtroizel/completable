@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CompletionWindow.h"
 #include "InputWindow.h"
 #include "LengthCompletionWindow.h"
+#include "PropertyWindow.h"
 
 
 
@@ -56,49 +57,6 @@ static int const PAGE_DOWN{338};
 static int const TAB{9};
 static int const HOME{262};
 static int const END{360};
-
-
-
-class PropertyWindow : public AbstractWindow
-{
-public:
-    PropertyWindow(CompletionWindow const & cw, LengthCompletionWindow const & lcw)
-        : completion_win(cw), len_completion_win(lcw)
-    {
-    }
-
-private:
-    void draw_hook(CompletionStack const & cs) override
-    {
-        int selected{0};
-        if (completion_win.is_active())
-        {
-            selected = cs.top().display_start;
-        }
-        else if (len_completion_win.is_active())
-        {
-            int length_completion_index = cs.top().len_display_start;
-            if (length_completion_index >= (int) cs.top().length_completion.size())
-                return;
-            if (length_completion_index < 0)
-                return;
-            int long_index = cs.top().length_completion[length_completion_index];
-            selected = matchmaker::from_longest(long_index);
-        }
-        else
-        {
-            return;
-        }
-
-        draw_hook(selected);
-    }
-
-    virtual void draw_hook(int selected) = 0;
-
-protected:
-    CompletionWindow const & completion_win;
-    LengthCompletionWindow const & len_completion_win;
-};
 
 
 
