@@ -77,7 +77,7 @@ void AbstractWindow::resize()
 }
 
 
-void AbstractWindow::draw(CompletionStack const & cs, bool draw_frame)
+void AbstractWindow::draw(CompletionStack const & cs, bool clear_first)
 {
     // check terminal for minimum size requirement
     if (root_y < MIN_ROOT_Y || root_x < MIN_ROOT_X)
@@ -87,20 +87,23 @@ void AbstractWindow::draw(CompletionStack const & cs, bool draw_frame)
         return;
     }
 
-    if (draw_frame)
-    {
+    if (clear_first)
         wclear(w);
 
-        // border
-        box(w, 0, 0);
+    // border
+    box(w, 0, 0);
 
-        // title
-        int const indent{width / 3 - (int) title().size() / 2};
-        mvwaddch(w, 0, indent - 1, ' ');
-        for (int i = 0; i < (int) title().size(); ++i)
-            mvwaddch(w, 0, i + indent, title()[i]);
-        mvwaddch(w, 0, title().size() + indent, ' ');
+    // title
+    int const indent{width / 3 - (int) title().size() / 2};
+    mvwaddch(w, 0, indent - 1, ' ');
+    if (is_active())
+    {
+        mvwaddch(w, 0, indent - 2, '>');
+        mvwaddch(w, 0, title().size() + indent + 1, '<');
     }
+    for (int i = 0; i < (int) title().size(); ++i)
+        mvwaddch(w, 0, i + indent, title()[i]);
+    mvwaddch(w, 0, title().size() + indent, ' ');
 
     // window specific drawing
     draw_hook(cs);
