@@ -57,7 +57,7 @@ public:
 
     void clear();
     void resize();
-    void draw(CompletionStack const & cs);
+    void draw(CompletionStack const & cs, bool draw_frame);
     int get_height() const { return height; }
     int get_width() const { return width; }
     int get_y() const { return y; }

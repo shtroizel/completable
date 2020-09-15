@@ -61,26 +61,31 @@ void CompletionWindow::draw_hook(CompletionStack const & cs)
 {
     auto const & cur_completion = cs.top();
     int length = cur_completion.length - (cur_completion.display_start - cur_completion.start);
-    for (int i = 0; i < length && i < height - 2; ++i)
+
+    int i = 0;
+    for (; i < length && i < height - 2; ++i)
     {
         std::string const & complete_entry = matchmaker::at(cur_completion.display_start + i);
 
         if (is_active() && i == 0)
             wattron(w, A_REVERSE);
 
-        for (int j = 0; j < (int) complete_entry.size() && j < width - 2; ++j)
-        {
-            mvwaddch(
-                w,
-                i + 1,
-                j + 1,
-                complete_entry[j]
-            );
-        }
+        int j = 0;
+        for (; j < (int) complete_entry.size() && j < width - 2; ++j)
+            mvwaddch(w, i + 1, j + 1, complete_entry[j]);
 
         if (is_active() && i == 0)
             wattroff(w, A_REVERSE);
+
+        // blank out rest of line
+        for (; j < width - 2; ++j)
+            mvwaddch(w, i + 1, j + 1, ' ');
     }
+
+    // blank out remaining lines
+    for (; i < height - 2; ++i)
+        for (int j = 0; j < width - 2; ++j)
+            mvwaddch(w, i + 1, j + 1, ' ');
 }
 
 

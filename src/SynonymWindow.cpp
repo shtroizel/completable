@@ -59,17 +59,23 @@ void SynonymWindow::resize_hook()
 void SynonymWindow::draw_hook(int selected)
 {
     auto const & synonyms = matchmaker::synonyms(selected);
-    for (int i = 0; i < (int) synonyms.size() && i < height - 2; ++i)
+
+    int i = 0;
+    for (; i < (int) synonyms.size() && i < height - 2; ++i)
     {
         std::string const & syn = matchmaker::at(synonyms[i]);
-        for (int j = 0; j < (int) syn.length() && j < width - 2; ++j)
-        {
-            mvwaddch(
-                w,
-                i + 1,
-                j + 1,
-                syn[j]
-            );
-        }
+
+        int j = 0;
+        for (; j < (int) syn.length() && j < width - 2; ++j)
+            mvwaddch(w, i + 1, j + 1, syn[j]);
+
+        // blank out rest of line
+        for (; j < width - 2; ++j)
+            mvwaddch(w, i + 1, j + 1, ' ');
     }
+
+    // blank out remaining lines
+    for (; i < height - 2; ++i)
+        for (int j = 0; j < width - 2; ++j)
+            mvwaddch(w, i + 1, j + 1, ' ');
 }

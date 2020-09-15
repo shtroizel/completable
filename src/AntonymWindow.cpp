@@ -59,17 +59,23 @@ void AntonymWindow::resize_hook()
 void AntonymWindow::draw_hook(int selected)
 {
     auto const & antonyms = matchmaker::antonyms(selected);
-    for (int i = 0; i < (int) antonyms.size() && i < height - 2; ++i)
+
+    int i = 0;
+    for (; i < (int) antonyms.size() && i < height - 2; ++i)
     {
         std::string const & ant = matchmaker::at(antonyms[i]);
-        for (int j = 0; j < (int) ant.length() && j < width - 2; ++j)
-        {
-            mvwaddch(
-                w,
-                i + 1,
-                j + 1,
-                ant[j]
-            );
-        }
+
+        int j = 0;
+        for (; j < (int) ant.length() && j < width - 2; ++j)
+            mvwaddch(w, i + 1, j + 1, ant[j]);
+
+        // blank out rest of line
+        for (; j < width - 2; ++j)
+            mvwaddch(w, i + 1, j + 1, ' ');
     }
+
+    // blank out remaining lines
+    for (; i < height - 2; ++i)
+        for (int j = 0; j < width - 2; ++j)
+            mvwaddch(w, i + 1, j + 1, ' ');
 }

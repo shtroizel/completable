@@ -96,9 +96,10 @@ int main()
 
     CompletionStack cs;
 
+    bool resized_draw{true};
     int ch{0};
 
-    while (1)
+    while (true)
     {
         // *** terminal resized? *************
         prev_root_y = root_y;
@@ -112,15 +113,19 @@ int main()
             pos_win.resize();
             syn_win.resize();
             ant_win.resize();
+
+            resized_draw = true;
         }
         // ***********************************
 
-        input_win.draw(cs);
-        completion_win.draw(cs);
-        len_completion_win.draw(cs);
-        pos_win.draw(cs);
-        syn_win.draw(cs);
-        ant_win.draw(cs);
+        input_win.draw(cs, resized_draw);
+        completion_win.draw(cs, resized_draw);
+        len_completion_win.draw(cs, resized_draw);
+        pos_win.draw(cs, resized_draw);
+        syn_win.draw(cs, resized_draw);
+        ant_win.draw(cs, resized_draw);
+
+        resized_draw = false;
 
         ch = wgetch(input_win.get_WINDOW());
 
@@ -132,7 +137,7 @@ int main()
             shell();
 
             reset_prog_mode();
-            refresh();
+            resized_draw = true;
         }
         else if (ch > 31 && ch < 127) // printable ascii
         {

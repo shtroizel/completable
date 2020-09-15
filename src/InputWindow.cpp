@@ -63,6 +63,12 @@ void InputWindow::post_resize_hook()
 void InputWindow::draw_hook(CompletionStack const & cs)
 {
     std::string const & prefix = cs.top().prefix;
-    for (int x = 0; x < width - 2 && x < (int) prefix.size(); ++x)
+
+    int x = 0;
+    for (; x < width - 2 && x < (int) prefix.size(); ++x)
         mvwaddch(w, 1, x + 1, prefix[x]);
+
+    // blank out rest of line
+    for (; x < width - 2; ++x)
+        mvwaddch(w, 1, x + 1, ' ');
 }
