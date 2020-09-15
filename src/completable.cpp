@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AbstractWindow.h"
 #include "CompletionStack.h"
+#include "InputWindow.h"
 
 
 
@@ -89,31 +90,6 @@ class PropertyWindow : public AbstractWindow
     }
 
     virtual void draw_hook(int selected) = 0;
-};
-
-
-class InputWindow : public AbstractWindow
-{
-public:
-    InputWindow() : AbstractWindow() { keypad(w, true); }
-
-private:
-    std::string const & title() const override { static std::string const t{"Input"}; return t; }
-
-    void resize_hook() override
-    {
-        height = 3;
-        width = root_x / 2;
-        y = 0;
-        x = root_x / 2 - width / 2;
-    }
-
-    void draw_hook(CompletionStack const & cs) override
-    {
-        std::string const & prefix = cs.top().prefix;
-        for (int x = 0; x < width - 2 && x < (int) prefix.size(); ++x)
-            mvwaddch(w, 1, x + 1, prefix[x]);
-    }
 };
 
 

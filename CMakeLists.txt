@@ -32,6 +32,7 @@ set(
     completable_srcs
     src/AbstractWindow.cpp
     src/CompletionStack.cpp
+    src/InputWindow.cpp
     src/completable.cpp
 )
 
