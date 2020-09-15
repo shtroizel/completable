@@ -43,6 +43,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <matchmaker/matchmaker.h>
 
+#include "CompletionStack.h"
+
 
 
 static int const PAGE_UP{339};
@@ -56,121 +58,6 @@ static int const MIN_ROOT_Y{30};
 
 // minimum required terminal width
 static int const MIN_ROOT_X{80};
-
-
-template< int capacity = 107>
-class CompletionStack
-{
-public:
-    struct completion
-    {
-        std::string prefix;                 // user input state
-        int start{0};                       // index of first word in dictionary starting with prefix
-        int length{0};                      // number of words in the dictionary starting with prefix
-        int display_start{0};               // index of first word displayed in "Completion"
-        int len_display_start{0};           // index of first word displayed in "Length Completion"
-        std::vector<int> length_completion; // each "long index" is stored for length completion instead
-                                            // of just start + length because they are noncontiguous
-    };
-
-    CompletionStack()
-    {
-        clear_top();
-    }
-
-    void push(int ch)
-    {
-        if (completion_count >= capacity)
-            return;
-
-        {
-            // keep reference to previous top for prefix initialization
-            completion const & prev_top = top();
-
-            // grow
-            ++completion_count;
-            clear_top();
-
-            top().prefix = prev_top.prefix;
-        }
-        top().prefix += ch;
-
-        // get new completion
-        matchmaker::complete(
-            top().prefix,
-            top().start,
-            top().length
-        );
-
-        // adding 'ch' would make an unknown word, so ignore the push
-        if (top().length == 0)
-        {
-            pop();
-            return;
-        }
-
-        // calculate length completion
-        std::priority_queue<int, std::vector<int>, std::greater<std::vector<int>::value_type>> q;
-        for (
-            int i = top().start;
-            i < top().start + top().length;
-            ++i
-        )
-            q.push(matchmaker::as_longest(i));
-        while (!q.empty())
-        {
-            top().length_completion.push_back(q.top());
-            q.pop();
-        }
-
-        top().display_start = top().start;
-        top().len_display_start = 0;
-    }
-    void pop()
-    {
-        if (completion_count > 1)
-        {
-            clear_top();
-            --completion_count;
-        }
-    }
-    int count() const { return completion_count; }
-
-    completion const & top() const { return completions[completion_count - 1]; }
-    completion & top() { return completions[completion_count - 1]; }
-
-
-private:
-    void clear_top()
-    {
-        top().prefix.clear();
-        top().start = 0;
-        top().display_start = 0;
-        top().length = 0;
-        top().len_display_start = 0;
-        top().length_completion.clear();
-
-        if (completion_count == 1)
-        {
-            // use entired dictionary for completions
-
-            top().length = matchmaker::size();
-
-            std::priority_queue<int, std::vector<int>, std::greater<std::vector<int>::value_type>> q;
-            for (int i = 0; i < matchmaker::size(); ++i)
-                q.push(matchmaker::as_longest(i));
-            while (!q.empty())
-            {
-                top().length_completion.push_back(q.top());
-                q.pop();
-            }
-        }
-    }
-
-    completion completions[capacity];
-    int completion_count{1};
-};
-
 
 
 // TODO recode activation concept
@@ -206,7 +93,7 @@ public:
         keypad(w, true);
     }
 
-    void draw(CompletionStack<> const & cs)
+    void draw(CompletionStack const & cs)
     {
         wclear(w);
 
@@ -242,7 +129,7 @@ public:
 private:
     virtual std::string const & title() const = 0;
     virtual void resize_hook() = 0;
-    virtual void draw_hook(CompletionStack<> const & cs) = 0;
+    virtual void draw_hook(CompletionStack const & cs) = 0;
 
 protected:
     WINDOW * w{nullptr};
@@ -257,7 +144,7 @@ protected:
 
 class PropertyWindow : public AbstractWindow
 {
-    void draw_hook(CompletionStack<> const & cs) override
+    void draw_hook(CompletionStack const & cs) override
     {
         int selected{0};
         if (active_win == Win::Completion)
@@ -302,7 +189,7 @@ private:
         x = root_x / 2 - width / 2;
     }
 
-    void draw_hook(CompletionStack<> const & cs) override
+    void draw_hook(CompletionStack const & cs) override
     {
         std::string const & prefix = cs.top().prefix;
         for (int x = 0; x < width - 2 && x < (int) prefix.size(); ++x)
@@ -324,7 +211,7 @@ class CompletionWindow : public AbstractWindow
         x = 0;
     }
 
-    void draw_hook(CompletionStack<> const & cs) override
+    void draw_hook(CompletionStack const & cs) override
     {
         auto const & cur_completion = cs.top();
         int length = cur_completion.length - (cur_completion.display_start - cur_completion.start);
@@ -373,7 +260,7 @@ private:
         width = completion_win.get_width();
     }
 
-    void draw_hook(CompletionStack<> const & cs) override
+    void draw_hook(CompletionStack const & cs) override
     {
         auto const & cur_completion = cs.top();
         int length = cur_completion.length_completion.size() - cur_completion.len_display_start;
@@ -860,7 +747,7 @@ void shell()
             }
             else if (words[0][0] == ':')
             {
-                CompletionStack<>::completion c;
+                CompletionStack::completion c;
                 c.prefix = words[0].substr(1);
                 auto start = std::chrono::high_resolution_clock::now();
                 matchmaker::complete(c.prefix, c.start, c.length);

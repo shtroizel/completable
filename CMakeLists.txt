@@ -28,7 +28,13 @@ find_package(matchmaker 1.4 REQUIRED)
 
 find_package(Curses REQUIRED)
 
-add_executable(completable src/completable.cpp)
+set(
+    completable_srcs
+    src/completable.cpp
+    src/CompletionStack.cpp
+)
+
+add_executable(completable ${completable_srcs})
 target_link_libraries(completable matchmaker ${CURSES_LIBRARIES})
 target_include_directories(completable PRIVATE include)
 install(TARGETS completable DESTINATION bin)
