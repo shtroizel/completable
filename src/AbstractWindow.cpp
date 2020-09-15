@@ -48,6 +48,9 @@ static int const MIN_ROOT_X{80};
 
 AbstractWindow::~AbstractWindow()
 {
+    if (is_active())
+        set_active_window(nullptr);
+
     delwin(w);
 }
 
@@ -101,4 +104,18 @@ void AbstractWindow::draw(CompletionStack const & cs)
     draw_hook(cs);
 
     wrefresh(w);
+}
+
+
+void AbstractWindow::on_KEY(int key, CompletionStack & cs)
+{
+    switch (key)
+    {
+        case KEY_UP    : on_KEY_UP(cs);    break;
+        case KEY_DOWN  : on_KEY_DOWN(cs);  break;
+        case PAGE_UP   : on_PAGE_UP(cs);   break;
+        case PAGE_DOWN : on_PAGE_DOWN(cs); break;
+        case HOME      : on_HOME(cs);      break;
+        case END       : on_END(cs);       break;
+    }
 }

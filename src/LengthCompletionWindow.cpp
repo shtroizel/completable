@@ -104,3 +104,50 @@ void LengthCompletionWindow::draw_hook(CompletionStack const & cs)
             wattroff(w, A_REVERSE);
     }
 }
+
+
+void LengthCompletionWindow::on_KEY_UP(CompletionStack & cs)
+{
+    auto & c = cs.top();
+    if (c.len_display_start > 0)
+        --c.len_display_start;
+}
+
+
+void LengthCompletionWindow::on_KEY_DOWN(CompletionStack & cs)
+{
+    auto & c = cs.top();
+    if (c.len_display_start < (int) c.length_completion.size() - 1)
+        ++c.len_display_start;
+}
+
+
+void LengthCompletionWindow::on_PAGE_UP(CompletionStack & cs)
+{
+    auto & c = cs.top();
+    c.len_display_start -= height - 2;
+    if (c.len_display_start < 0)
+        c.len_display_start = 0;
+}
+
+
+void LengthCompletionWindow::on_PAGE_DOWN(CompletionStack & cs)
+{
+    auto & c = cs.top();
+    c.len_display_start += height - 2;
+    if (c.len_display_start >= (int) c.length_completion.size())
+        c.len_display_start = (int) c.length_completion.size() - 1;
+}
+
+
+void LengthCompletionWindow::on_HOME(CompletionStack & cs)
+{
+    cs.top().len_display_start = 0;
+}
+
+
+void LengthCompletionWindow::on_END(CompletionStack & cs)
+{
+    auto & c = cs.top();
+    c.len_display_start = c.length_completion.size() - 1;
+}

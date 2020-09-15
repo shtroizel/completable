@@ -34,11 +34,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 
 
-
 // ncurses window
 typedef struct _win_st WINDOW;
 
 class CompletionStack;
+
+
+static int const PAGE_UP{339};
+static int const PAGE_DOWN{338};
+static int const HOME{262};
+static int const END{360};
+
 
 class AbstractWindow
 {
@@ -58,13 +64,23 @@ public:
     int get_x() const { return x; }
     WINDOW * get_WINDOW() const { return w; }
 
-    static void set_active_window(AbstractWindow const & act_win) { active() = act_win.title(); }
-    bool is_active() const { return active() == title(); }
+    static void set_active_window(AbstractWindow * act_win) { active() = act_win; }
+    static AbstractWindow * get_active_window() { return active(); }
+
+    bool is_active() const { return nullptr != active() && active()->title() == title(); }
+
+    void on_KEY(int key, CompletionStack & cs);
 
 private:
     virtual std::string const & title() const = 0;
     virtual void resize_hook() = 0;
     virtual void draw_hook(CompletionStack const & cs) = 0;
+    virtual void on_KEY_UP(CompletionStack &) {}
+    virtual void on_KEY_DOWN(CompletionStack &) {}
+    virtual void on_PAGE_UP(CompletionStack &) {}
+    virtual void on_PAGE_DOWN(CompletionStack &) {}
+    virtual void on_HOME(CompletionStack &) {}
+    virtual void on_END(CompletionStack &) {}
 
 protected:
     WINDOW * w{nullptr};
@@ -75,6 +91,6 @@ protected:
     int y{0};
     int x{0};
 
-    // static variable for storing the active window title
-    static std::string & active() { static std::string s; return s; }
+    // static variable for storing the active window
+    static AbstractWindow * & active() { static AbstractWindow * w{nullptr}; return w; }
 };

@@ -55,11 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-static int const PAGE_UP{339};
-static int const PAGE_DOWN{338};
 static int const TAB{9};
-static int const HOME{262};
-static int const END{360};
 
 
 void shell();
@@ -192,80 +188,17 @@ int main()
         }
         else if (ch == KEY_LEFT)
         {
-            AbstractWindow::set_active_window(completion_win);
+            AbstractWindow::set_active_window(&completion_win);
         }
         else if (ch == KEY_RIGHT)
         {
-            AbstractWindow::set_active_window(len_completion_win);
+            AbstractWindow::set_active_window(&len_completion_win);
         }
-        else if (ch == KEY_UP)
+        else
         {
-            auto & c = cs.top();
-
-            if (completion_win.is_active() && c.display_start > c.start)
-                --c.display_start;
-            else if (len_completion_win.is_active() && c.len_display_start > 0)
-                --c.len_display_start;
-        }
-        else if (ch == KEY_DOWN)
-        {
-            auto & c = cs.top();
-
-            if (completion_win.is_active() && c.display_start < c.start + c.length - 1)
-                ++c.display_start;
-            else if (len_completion_win.is_active() &&
-                    c.len_display_start < (int) c.length_completion.size() - 1)
-                ++c.len_display_start;
-        }
-        else if (ch == PAGE_UP)
-        {
-            auto & c = cs.top();
-
-            if (completion_win.is_active())
-            {
-                c.display_start -= completion_win.get_height() - 2;
-                if (c.display_start < c.start)
-                    c.display_start = c.start;
-            }
-            else if (len_completion_win.is_active())
-            {
-                c.len_display_start -= len_completion_win.get_height() - 2;
-                if (c.len_display_start < 0)
-                    c.len_display_start = 0;
-            }
-        }
-        else if (ch == PAGE_DOWN)
-        {
-            auto & c = cs.top();
-
-            if (completion_win.is_active())
-            {
-                c.display_start += completion_win.get_height() - 2;
-                if (c.display_start >= c.start + c.length)
-                    c.display_start = c.start + c.length - 1;
-            }
-            else if (len_completion_win.is_active())
-            {
-                c.len_display_start += len_completion_win.get_height() - 2;
-                if (c.len_display_start >= (int) c.length_completion.size())
-                    c.len_display_start = (int) c.length_completion.size() - 1;
-            }
-        }
-        else if (ch == HOME)
-        {
-            auto & c = cs.top();
-            if (completion_win.is_active())
-                c.display_start = c.start;
-            else if (len_completion_win.is_active())
-                c.len_display_start = 0;
-        }
-        else if (ch == END)
-        {
-            auto & c = cs.top();
-            if (completion_win.is_active())
-                c.display_start = c.start + c.length - 1;
-            else if (len_completion_win.is_active())
-                c.len_display_start = c.length_completion.size() - 1;
+            AbstractWindow * w = AbstractWindow::get_active_window();
+            if (nullptr != w)
+                w->on_KEY(ch, cs);
         }
     }
 

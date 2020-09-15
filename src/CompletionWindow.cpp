@@ -82,3 +82,51 @@ void CompletionWindow::draw_hook(CompletionStack const & cs)
             wattroff(w, A_REVERSE);
     }
 }
+
+
+void CompletionWindow::on_KEY_UP(CompletionStack & cs)
+{
+    auto & c = cs.top();
+    if (c.display_start > c.start)
+        --c.display_start;
+}
+
+
+void CompletionWindow::on_KEY_DOWN(CompletionStack & cs)
+{
+    auto & c = cs.top();
+    if (c.display_start < c.start + c.length - 1)
+        ++c.display_start;
+}
+
+
+void CompletionWindow::on_PAGE_UP(CompletionStack & cs)
+{
+    auto & c = cs.top();
+    c.display_start -= height - 2;
+    if (c.display_start < c.start)
+        c.display_start = c.start;
+}
+
+
+void CompletionWindow::on_PAGE_DOWN(CompletionStack & cs)
+{
+    auto & c = cs.top();
+    c.display_start += height - 2;
+    if (c.display_start >= c.start + c.length)
+        c.display_start = c.start + c.length - 1;
+}
+
+
+void CompletionWindow::on_HOME(CompletionStack & cs)
+{
+    auto & c = cs.top();
+    c.display_start = c.start;
+}
+
+
+void CompletionWindow::on_END(CompletionStack & cs)
+{
+    auto & c = cs.top();
+    c.display_start = c.start + c.length - 1;
+}
