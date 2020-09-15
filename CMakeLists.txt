@@ -34,6 +34,7 @@ set(
     src/CompletionStack.cpp
     src/CompletionWindow.cpp
     src/InputWindow.cpp
+    src/LengthCompletionWindow.cpp
     src/completable.cpp
 )
 

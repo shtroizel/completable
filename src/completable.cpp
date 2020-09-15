@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CompletionStack.h"
 #include "CompletionWindow.h"
 #include "InputWindow.h"
+#include "LengthCompletionWindow.h"
 
 
 
@@ -93,73 +94,6 @@ class PropertyWindow : public AbstractWindow
     virtual void draw_hook(int selected) = 0;
 };
 
-
-class LengthCompletionWindow : public AbstractWindow
-{
-public:
-    LengthCompletionWindow(CompletionWindow const & win) : AbstractWindow(), completion_win{win} {}
-
-private:
-    std::string const & title() const override
-    {
-        static std::string const t{"Length Completion"};
-        return t;
-    }
-
-    void resize_hook() override
-    {
-        y = completion_win.get_y() + completion_win.get_height();
-        x = 0;
-        height = root_y - y - 5;
-        width = completion_win.get_width();
-    }
-
-    void draw_hook(CompletionStack const & cs) override
-    {
-        auto const & cur_completion = cs.top();
-        int length = cur_completion.length_completion.size() - cur_completion.len_display_start;
-        if (length < 0)
-            return;
-
-        int long_index{0};
-
-        for (int i = 0; i < length && i < height - 2; ++i)
-        {
-            if (cur_completion.length_completion.size() > 0)
-            {
-                int length_completion_index = i + cur_completion.len_display_start;
-                if (length_completion_index >= (int) cur_completion.length_completion.size())
-                    return;
-
-                long_index = cur_completion.length_completion[length_completion_index];
-            }
-            else
-                long_index = i;
-
-            std::string const & complete_entry = matchmaker::at(matchmaker::by_longest()[long_index]);
-
-            if (active_win == Win::LengthCompletion && i == 0)
-                wattron(w, A_REVERSE);
-
-            // draw entry
-            for (int j = 0; j < (int) complete_entry.size() && j < width - 2; ++j)
-            {
-                mvwaddch(
-                    w,
-                    i + 1,
-                    j + 1,
-                    complete_entry[j]
-                );
-            }
-
-            if (active_win == Win::LengthCompletion && i == 0)
-                wattroff(w, A_REVERSE);
-        }
-    }
-
-private:
-    CompletionWindow const & completion_win;
-};
 
 
 class PartsOfSpeechWindow : public PropertyWindow
