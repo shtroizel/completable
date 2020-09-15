@@ -27,7 +27,6 @@ set(CMAKE_INSTALL_RPATH "${rpath_dir}")
 find_package(matchmaker 1.4 REQUIRED)
 
 find_package(Curses REQUIRED)
-include_directories(${CURSES_INCLUDE_DIRS})
 
 add_executable(completable src/completable.cpp)
 target_link_libraries(completable matchmaker ${CURSES_LIBRARIES})
