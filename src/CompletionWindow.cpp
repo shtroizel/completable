@@ -108,7 +108,7 @@ void CompletionWindow::on_KEY_DOWN(CompletionStack & cs)
 void CompletionWindow::on_PAGE_UP(CompletionStack & cs)
 {
     auto & c = cs.top();
-    c.display_start -= height - 2;
+    c.display_start -= height - 3;
     if (c.display_start < c.start)
         c.display_start = c.start;
 }
@@ -117,7 +117,7 @@ void CompletionWindow::on_PAGE_UP(CompletionStack & cs)
 void CompletionWindow::on_PAGE_DOWN(CompletionStack & cs)
 {
     auto & c = cs.top();
-    c.display_start += height - 2;
+    c.display_start += height - 3;
     if (c.display_start >= c.start + c.length)
         c.display_start = c.start + c.length - 1;
 }

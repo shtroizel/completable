@@ -128,7 +128,7 @@ void LengthCompletionWindow::on_KEY_DOWN(CompletionStack & cs)
 void LengthCompletionWindow::on_PAGE_UP(CompletionStack & cs)
 {
     auto & c = cs.top();
-    c.len_display_start -= height - 2;
+    c.len_display_start -= height - 3;
     if (c.len_display_start < 0)
         c.len_display_start = 0;
 }
@@ -137,7 +137,7 @@ void LengthCompletionWindow::on_PAGE_UP(CompletionStack & cs)
 void LengthCompletionWindow::on_PAGE_DOWN(CompletionStack & cs)
 {
     auto & c = cs.top();
-    c.len_display_start += height - 2;
+    c.len_display_start += height - 3;
     if (c.len_display_start >= (int) c.length_completion.size())
         c.len_display_start = (int) c.length_completion.size() - 1;
 }
