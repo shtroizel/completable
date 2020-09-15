@@ -48,6 +48,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CompletionWindow.h"
 #include "InputWindow.h"
 #include "LengthCompletionWindow.h"
+#include "PartsOfSpeechWindow.h"
 #include "PropertyWindow.h"
 
 
@@ -58,69 +59,6 @@ static int const TAB{9};
 static int const HOME{262};
 static int const END{360};
 
-
-
-class PartsOfSpeechWindow : public PropertyWindow
-{
-    using PropertyWindow::PropertyWindow;
-
-    std::string const & title() const override
-    {
-        static std::string const t{"Parts of Speech"};
-        return t;
-    }
-
-    void resize_hook() override
-    {
-        height = 5;
-        width = root_x;
-        y = root_y - height;
-        x = 0;
-    }
-
-    void draw_hook(int selected) override
-    {
-        int const cell_width{16};
-
-        auto const & flagged_pos = matchmaker::flagged_parts_of_speech(selected);
-
-        int x = 1;
-        int i = 0;
-        int y = 1;
-        while (i < (int) matchmaker::all_parts_of_speech().size())
-        {
-            if (flagged_pos[i] != 0)
-                wattron(w, A_REVERSE);
-
-            for(
-                int j = 0;
-                j < (int) matchmaker::all_parts_of_speech()[i].size() && j < x + cell_width - 2;
-                ++j
-            )
-                mvwaddch(w, y, j + x, matchmaker::all_parts_of_speech()[i][j]);
-
-            if (flagged_pos[i] != 0)
-                wattroff(w, A_REVERSE);
-
-            ++i;
-
-            x += cell_width;
-
-            if (x > cell_width * 5)
-            {
-                if (y < 4)
-                {
-                    y += 1;
-                    x = 1;
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
-    }
-};
 
 
 class SynonymWindow : public PropertyWindow
