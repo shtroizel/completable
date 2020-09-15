@@ -31,6 +31,7 @@ find_package(Curses REQUIRED)
 set(
     completable_srcs
     src/AbstractWindow.cpp
+    src/AntonymWindow.cpp
     src/CompletionStack.cpp
     src/CompletionWindow.cpp
     src/InputWindow.cpp

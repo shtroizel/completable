@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <matchmaker/matchmaker.h>
 
 #include "AbstractWindow.h"
+#include "AntonymWindow.h"
 #include "CompletionStack.h"
 #include "CompletionWindow.h"
 #include "InputWindow.h"
@@ -61,48 +62,7 @@ static int const HOME{262};
 static int const END{360};
 
 
-
-class AntonymWindow : public PropertyWindow
-{
-    using PropertyWindow::PropertyWindow;
-
-    std::string const & title() const override
-    {
-        static std::string const t{"Antonyms"};
-        return t;
-    }
-
-    void resize_hook() override
-    {
-        height = len_completion_win.get_height();
-        width = len_completion_win.get_width() + root_x % 2;
-        y = len_completion_win.get_y();
-        x = len_completion_win.get_width();
-    }
-
-    void draw_hook(int selected) override
-    {
-        auto const & antonyms = matchmaker::antonyms(selected);
-        for (int i = 0; i < (int) antonyms.size() && i < height - 2; ++i)
-        {
-            std::string const & ant = matchmaker::at(antonyms[i]);
-            for (int j = 0; j < (int) ant.length() && j < width - 2; ++j)
-            {
-                mvwaddch(
-                    w,
-                    i + 1,
-                    j + 1,
-                    ant[j]
-                );
-            }
-        }
-    }
-};
-
-
-
 void shell();
-
 
 
 int main()
