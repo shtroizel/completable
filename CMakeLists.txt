@@ -30,8 +30,9 @@ find_package(Curses REQUIRED)
 
 set(
     completable_srcs
-    src/completable.cpp
+    src/AbstractWindow.cpp
     src/CompletionStack.cpp
+    src/completable.cpp
 )
 
 add_executable(completable ${completable_srcs})

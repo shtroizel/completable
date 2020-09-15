@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <matchmaker/matchmaker.h>
 
+#include "AbstractWindow.h"
 #include "CompletionStack.h"
 
 
@@ -53,93 +54,11 @@ static int const TAB{9};
 static int const HOME{262};
 static int const END{360};
 
-// minimum required terminal height
-static int const MIN_ROOT_Y{30};
-
-// minimum required terminal width
-static int const MIN_ROOT_X{80};
 
 
 // TODO recode activation concept
 enum class Win{ Completion, LengthCompletion };
 Win active_win = Win::Completion;
-
-
-class AbstractWindow
-{
-public:
-    // one is enough
-    AbstractWindow(AbstractWindow const &) = delete;
-    AbstractWindow & operator=(AbstractWindow const &) = delete;
-
-    AbstractWindow() {}
-    virtual ~AbstractWindow() { delwin(w); }
-
-    void clear() { wclear(w); wrefresh(w); }
-
-    void resize()
-    {
-        if (nullptr != w)
-        {
-            clear();
-            delwin(w);
-        }
-
-        getmaxyx(stdscr, root_y, root_x);
-
-        resize_hook();
-
-        w = newwin(height, width, y, x);
-        keypad(w, true);
-    }
-
-    void draw(CompletionStack const & cs)
-    {
-        wclear(w);
-
-        // check terminal for minimum size requirement
-        if (root_y < MIN_ROOT_Y || root_x < MIN_ROOT_X)
-        {
-            wrefresh(w);
-            return;
-        }
-
-        // border
-        box(w, 0, 0);
-
-        // title
-        int const indent{width / 3 - (int) title().size() / 2};
-        mvwaddch(w, 0, indent - 1, ' ');
-        for (int i = 0; i < (int) title().size(); ++i)
-            mvwaddch(w, 0, i + indent, title()[i]);
-        mvwaddch(w, 0, title().size() + indent, ' ');
-
-        // window specific drawing
-        draw_hook(cs);
-
-        wrefresh(w);
-    }
-
-    int get_height() const { return height; }
-    int get_width() const { return width; }
-    int get_y() const { return y; }
-    int get_x() const { return x; }
-    WINDOW * get_WINDOW() const { return w; }
-
-private:
-    virtual std::string const & title() const = 0;
-    virtual void resize_hook() = 0;
-    virtual void draw_hook(CompletionStack const & cs) = 0;
-
-protected:
-    WINDOW * w{nullptr};
-    int root_y{0};
-    int root_x{0};
-    int height{0};
-    int width{0};
-    int y{0};
-    int x{0};
-};
 
 
 class PropertyWindow : public AbstractWindow
