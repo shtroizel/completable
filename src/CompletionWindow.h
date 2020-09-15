@@ -37,6 +37,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class CompletionWindow : public AbstractWindow
 {
+public:
+    CompletionWindow() { AbstractWindow::set_active_window(*this); }
+
+private:
     std::string const & title() const override;
     void resize_hook() override;
     void draw_hook(CompletionStack const & cs) override;

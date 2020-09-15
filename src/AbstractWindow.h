@@ -58,7 +58,7 @@ public:
     int get_x() const { return x; }
     WINDOW * get_WINDOW() const { return w; }
 
-    static void set_active_window(std::string const & act_win_title) { active() = act_win_title; }
+    static void set_active_window(AbstractWindow const & act_win) { active() = act_win.title(); }
     bool is_active() const { return active() == title(); }
 
 private:

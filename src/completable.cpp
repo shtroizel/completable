@@ -59,21 +59,23 @@ static int const END{360};
 
 
 
-// TODO recode activation concept
-enum class Win{ Completion, LengthCompletion };
-Win active_win = Win::Completion;
-
-
 class PropertyWindow : public AbstractWindow
 {
+public:
+    PropertyWindow(CompletionWindow const & cw, LengthCompletionWindow const & lcw)
+        : completion_win(cw), len_completion_win(lcw)
+    {
+    }
+
+private:
     void draw_hook(CompletionStack const & cs) override
     {
         int selected{0};
-        if (active_win == Win::Completion)
+        if (completion_win.is_active())
         {
             selected = cs.top().display_start;
         }
-        else if (active_win == Win::LengthCompletion)
+        else if (len_completion_win.is_active())
         {
             int length_completion_index = cs.top().len_display_start;
             if (length_completion_index >= (int) cs.top().length_completion.size())
@@ -92,12 +94,18 @@ class PropertyWindow : public AbstractWindow
     }
 
     virtual void draw_hook(int selected) = 0;
+
+protected:
+    CompletionWindow const & completion_win;
+    LengthCompletionWindow const & len_completion_win;
 };
 
 
 
 class PartsOfSpeechWindow : public PropertyWindow
 {
+    using PropertyWindow::PropertyWindow;
+
     std::string const & title() const override
     {
         static std::string const t{"Parts of Speech"};
@@ -159,10 +167,8 @@ class PartsOfSpeechWindow : public PropertyWindow
 
 class SynonymWindow : public PropertyWindow
 {
-public:
-    SynonymWindow(CompletionWindow const & win) : PropertyWindow(), completion_win{win} {}
+    using PropertyWindow::PropertyWindow;
 
-private:
     std::string const & title() const override
     {
         static std::string const t{"Synonyms"};
@@ -194,18 +200,13 @@ private:
             }
         }
     }
-
-private:
-    CompletionWindow const & completion_win;
 };
 
 
 class AntonymWindow : public PropertyWindow
 {
-public:
-    AntonymWindow(LengthCompletionWindow const & win) : PropertyWindow(), len_completion_win{win} {}
+    using PropertyWindow::PropertyWindow;
 
-private:
     std::string const & title() const override
     {
         static std::string const t{"Antonyms"};
@@ -237,9 +238,6 @@ private:
             }
         }
     }
-
-private:
-    LengthCompletionWindow const & len_completion_win;
 };
 
 
@@ -272,13 +270,13 @@ int main()
     LengthCompletionWindow len_completion_win{completion_win};
     len_completion_win.resize();
 
-    PartsOfSpeechWindow pos_win;
+    PartsOfSpeechWindow pos_win{completion_win, len_completion_win};
     pos_win.resize();
 
-    SynonymWindow syn_win{completion_win};
+    SynonymWindow syn_win{completion_win, len_completion_win};
     syn_win.resize();
 
-    AntonymWindow ant_win{len_completion_win};
+    AntonymWindow ant_win{completion_win, len_completion_win};
     ant_win.resize();
 
     CompletionStack cs;
@@ -375,28 +373,28 @@ int main()
         }
         else if (ch == KEY_LEFT)
         {
-            active_win = Win::Completion;
+            AbstractWindow::set_active_window(completion_win);
         }
         else if (ch == KEY_RIGHT)
         {
-            active_win = Win::LengthCompletion;
+            AbstractWindow::set_active_window(len_completion_win);
         }
         else if (ch == KEY_UP)
         {
             auto & c = cs.top();
 
-            if (active_win == Win::Completion && c.display_start > c.start)
+            if (completion_win.is_active() && c.display_start > c.start)
                 --c.display_start;
-            else if (active_win == Win::LengthCompletion && c.len_display_start > 0)
+            else if (len_completion_win.is_active() && c.len_display_start > 0)
                 --c.len_display_start;
         }
         else if (ch == KEY_DOWN)
         {
             auto & c = cs.top();
 
-            if (active_win == Win::Completion && c.display_start < c.start + c.length - 1)
+            if (completion_win.is_active() && c.display_start < c.start + c.length - 1)
                 ++c.display_start;
-            else if (active_win == Win::LengthCompletion &&
+            else if (len_completion_win.is_active() &&
                     c.len_display_start < (int) c.length_completion.size() - 1)
                 ++c.len_display_start;
         }
@@ -404,13 +402,13 @@ int main()
         {
             auto & c = cs.top();
 
-            if (active_win == Win::Completion)
+            if (completion_win.is_active())
             {
                 c.display_start -= completion_win.get_height() - 2;
                 if (c.display_start < c.start)
                     c.display_start = c.start;
             }
-            else if (active_win == Win::LengthCompletion)
+            else if (len_completion_win.is_active())
             {
                 c.len_display_start -= len_completion_win.get_height() - 2;
                 if (c.len_display_start < 0)
@@ -421,13 +419,13 @@ int main()
         {
             auto & c = cs.top();
 
-            if (active_win == Win::Completion)
+            if (completion_win.is_active())
             {
                 c.display_start += completion_win.get_height() - 2;
                 if (c.display_start >= c.start + c.length)
                     c.display_start = c.start + c.length - 1;
             }
-            else if (active_win == Win::LengthCompletion)
+            else if (len_completion_win.is_active())
             {
                 c.len_display_start += len_completion_win.get_height() - 2;
                 if (c.len_display_start >= (int) c.length_completion.size())
@@ -437,17 +435,17 @@ int main()
         else if (ch == HOME)
         {
             auto & c = cs.top();
-            if (active_win == Win::Completion)
+            if (completion_win.is_active())
                 c.display_start = c.start;
-            else if (active_win == Win::LengthCompletion)
+            else if (len_completion_win.is_active())
                 c.len_display_start = 0;
         }
         else if (ch == END)
         {
             auto & c = cs.top();
-            if (active_win == Win::Completion)
+            if (completion_win.is_active())
                 c.display_start = c.start + c.length - 1;
-            else if (active_win == Win::LengthCompletion)
+            else if (len_completion_win.is_active())
                 c.len_display_start = c.length_completion.size() - 1;
         }
     }
