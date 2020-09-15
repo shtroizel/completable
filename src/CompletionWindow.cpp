@@ -32,9 +32,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "CompletionWindow.h"
 
+#include <ncurses.h>
+
 #include <matchmaker/matchmaker.h>
 
 #include "CompletionStack.h"
+
 
 
 std::string const & CompletionWindow::title() const

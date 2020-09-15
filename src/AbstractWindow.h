@@ -33,8 +33,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <string>
 
-#include <ncurses.h>
 
+
+// ncurses window
+typedef struct _win_st WINDOW;
 
 class CompletionStack;
 
@@ -45,9 +47,9 @@ public:
     AbstractWindow & operator=(AbstractWindow const &) = delete;
 
     AbstractWindow() {}
-    virtual ~AbstractWindow() { delwin(w); }
+    virtual ~AbstractWindow();
 
-    void clear() { wclear(w); wrefresh(w); }
+    void clear();
     void resize();
     void draw(CompletionStack const & cs);
     int get_height() const { return height; }

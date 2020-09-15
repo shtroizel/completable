@@ -32,7 +32,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AbstractWindow.h"
 
+#include <ncurses.h>
+
 #include "CompletionStack.h"
+
 
 
 // minimum required terminal height
@@ -40,6 +43,20 @@ static int const MIN_ROOT_Y{30};
 
 // minimum required terminal width
 static int const MIN_ROOT_X{80};
+
+
+
+AbstractWindow::~AbstractWindow()
+{
+    delwin(w);
+}
+
+
+void AbstractWindow::clear()
+{
+    wclear(w);
+    wrefresh(w);
+}
 
 
 void AbstractWindow::resize()
