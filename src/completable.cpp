@@ -149,47 +149,44 @@ int main()
         }
         else if (ch == TAB)
         {
-            // TODO FIXME BROKEN
-//             decltype(cs) const & ccs = cs;
-//
-//             auto const & cur_completion = ccs.top();
-//             std::string const & prefix = cur_completion.prefix;
-//             if (cur_completion.length > 0)
-//             {
-//                 std::string const & first_entry =
-//                         matchmaker::at(cur_completion.start);
-//
-//
-//                 // find out the "target_completion_count" or the completion count after skipping
-//                 // by common characters
-//                 int target_completion_count = ccs.count();
-//                 bool ok = first_entry.size() > prefix.size();
-//                 while (ok)
-//                 {
-//                     for (
-//                         int i = cur_completion.start;
-//                         ok && i < cur_completion.start + cur_completion.length;
-//                         ++i
-//                     )
-//                     {
-//                         std::string const & entry = matchmaker::at(i);
-//
-//                         if ((int) entry.size() < target_completion_count)
-//                             ok = false;
-//                         else if ((int) first_entry.size() < target_completion_count)
-//                             ok = false;
-//                         else if (entry[target_completion_count] != first_entry[target_completion_count])
-//                             ok = false;
-//                     }
-//
-//                     if (ok)
-//                         ++target_completion_count;
-//                 }
-//
-//                 // grow up to the target completion count
-//                 for (int i = (int) prefix.size(); i < target_completion_count; ++i)
-//                     cs.push(first_entry[i]);
-//             }
+            decltype(cs) const & ccs = cs;
+
+            auto const & cur_completion = ccs.top();
+            std::string const & prefix = cur_completion.prefix;
+            if (cur_completion.length > 0)
+            {
+                std::string const & first_entry = matchmaker::at(cur_completion.start);
+
+                // find out the "target_completion_count" or the completion count after skipping
+                // by common characters
+                int target_completion_count = ccs.count() - 1;
+                bool ok = first_entry.size() > prefix.size();
+                while (ok)
+                {
+                    for (
+                        int i = cur_completion.start;
+                        ok && i < cur_completion.start + cur_completion.length;
+                        ++i
+                    )
+                    {
+                        std::string const & entry = matchmaker::at(i);
+
+                        if ((int) entry.size() < target_completion_count)
+                            ok = false;
+                        else if ((int) first_entry.size() < target_completion_count)
+                            ok = false;
+                        else if (entry[target_completion_count] != first_entry[target_completion_count])
+                            ok = false;
+                    }
+
+                    if (ok)
+                        ++target_completion_count;
+                }
+
+                // grow up to the target completion count
+                for (int i = (int) prefix.size(); i < target_completion_count; ++i)
+                    cs.push(first_entry[i]);
+            }
         }
         else if (ch == KEY_LEFT)
         {
@@ -211,7 +208,6 @@ int main()
 
     return 0;
 }
-
 
 
 void shell()
@@ -424,7 +420,6 @@ void shell()
             }
             else if (words[0] == ":it")
             {
-
                 for (int i = start; i < matchmaker::size() && i < start + count; ++i)
                 {
                     auto start = std::chrono::high_resolution_clock::now();
