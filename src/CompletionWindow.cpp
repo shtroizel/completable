@@ -1,5 +1,3 @@
-#pragma once
-
 /*
 Copyright (c) 2020, Eric Hyer
 All rights reserved.
@@ -31,48 +29,53 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#include <string>
 
-#include <ncurses.h>
+#include "CompletionWindow.h"
+
+#include <matchmaker/matchmaker.h>
+
+#include "CompletionStack.h"
 
 
-class CompletionStack;
-
-class AbstractWindow
+std::string const & CompletionWindow::title() const
 {
-public:
-    AbstractWindow(AbstractWindow const &) = delete;
-    AbstractWindow & operator=(AbstractWindow const &) = delete;
+    static std::string const t{"Completion"};
+    return t;
+}
 
-    AbstractWindow() {}
-    virtual ~AbstractWindow() { delwin(w); }
 
-    void clear() { wclear(w); wrefresh(w); }
-    void resize();
-    void draw(CompletionStack const & cs);
-    int get_height() const { return height; }
-    int get_width() const { return width; }
-    int get_y() const { return y; }
-    int get_x() const { return x; }
-    WINDOW * get_WINDOW() const { return w; }
+void CompletionWindow::resize_hook()
+{
+    int combined_height = root_y - 5 - y;
+    height = y + ((combined_height * 9) / 17);
+    width = root_x / 2;
+    y = 3;
+    x = 0;
+}
 
-    static void set_active_window(std::string const & act_win_title) { active() = act_win_title; }
-    bool is_active() const { return active() == title(); }
 
-private:
-    virtual std::string const & title() const = 0;
-    virtual void resize_hook() = 0;
-    virtual void draw_hook(CompletionStack const & cs) = 0;
+void CompletionWindow::draw_hook(CompletionStack const & cs)
+{
+    auto const & cur_completion = cs.top();
+    int length = cur_completion.length - (cur_completion.display_start - cur_completion.start);
+    for (int i = 0; i < length && i < height - 2; ++i)
+    {
+        std::string const & complete_entry = matchmaker::at(cur_completion.display_start + i);
 
-protected:
-    WINDOW * w{nullptr};
-    int root_y{0};
-    int root_x{0};
-    int height{0};
-    int width{0};
-    int y{0};
-    int x{0};
+        if (is_active() && i == 0)
+            wattron(w, A_REVERSE);
 
-    // static variable for storing the active window title
-    static std::string & active() { static std::string s; return s; }
-};
+        for (int j = 0; j < (int) complete_entry.size() && j < width - 2; ++j)
+        {
+            mvwaddch(
+                w,
+                i + 1,
+                j + 1,
+                complete_entry[j]
+            );
+        }
+
+        if (is_active() && i == 0)
+            wattroff(w, A_REVERSE);
+    }
+}

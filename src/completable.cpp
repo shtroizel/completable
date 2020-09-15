@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AbstractWindow.h"
 #include "CompletionStack.h"
+#include "CompletionWindow.h"
 #include "InputWindow.h"
 
 
@@ -90,48 +91,6 @@ class PropertyWindow : public AbstractWindow
     }
 
     virtual void draw_hook(int selected) = 0;
-};
-
-
-class CompletionWindow : public AbstractWindow
-{
-    std::string const & title() const override { static std::string const t{"Completion"}; return t; }
-
-    void resize_hook() override
-    {
-        int combined_height = root_y - 5 - y;
-        height = y + ((combined_height * 9) / 17);
-        width = root_x / 2;
-        y = 3;
-        x = 0;
-    }
-
-    void draw_hook(CompletionStack const & cs) override
-    {
-        auto const & cur_completion = cs.top();
-        int length = cur_completion.length - (cur_completion.display_start - cur_completion.start);
-        for (int i = 0; i < length && i < height - 2; ++i)
-        {
-            std::string const & complete_entry = matchmaker::at(cur_completion.display_start + i);
-
-            if (active_win == Win::Completion && i == 0)
-                wattron(w, A_REVERSE);
-
-            // draw complete_entry letter by letter
-            for (int j = 0; j < (int) complete_entry.size() && j < width - 2; ++j)
-            {
-                mvwaddch(
-                    w,
-                    i + 1,
-                    j + 1,
-                    complete_entry[j]
-                );
-            }
-
-            if (active_win == Win::Completion && i == 0)
-                wattroff(w, A_REVERSE);
-        }
-    }
 };
 
 
