@@ -50,6 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "LengthCompletionWindow.h"
 #include "PartsOfSpeechWindow.h"
 #include "PropertyWindow.h"
+#include "SynonymWindow.h"
 
 
 
@@ -59,44 +60,6 @@ static int const TAB{9};
 static int const HOME{262};
 static int const END{360};
 
-
-
-class SynonymWindow : public PropertyWindow
-{
-    using PropertyWindow::PropertyWindow;
-
-    std::string const & title() const override
-    {
-        static std::string const t{"Synonyms"};
-        return t;
-    }
-
-    void resize_hook() override
-    {
-        height = completion_win.get_height();
-        width = completion_win.get_width() + root_x % 2;
-        y = completion_win.get_y();
-        x = completion_win.get_width();
-    }
-
-    void draw_hook(int selected) override
-    {
-        auto const & synonyms = matchmaker::synonyms(selected);
-        for (int i = 0; i < (int) synonyms.size() && i < height - 2; ++i)
-        {
-            std::string const & syn = matchmaker::at(synonyms[i]);
-            for (int j = 0; j < (int) syn.length() && j < width - 2; ++j)
-            {
-                mvwaddch(
-                    w,
-                    i + 1,
-                    j + 1,
-                    syn[j]
-                );
-            }
-        }
-    }
-};
 
 
 class AntonymWindow : public PropertyWindow
