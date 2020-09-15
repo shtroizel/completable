@@ -71,11 +71,9 @@ void AbstractWindow::resize()
     }
 
     getmaxyx(stdscr, root_y, root_x);
-
     resize_hook();
-
     w = newwin(height, width, y, x);
-    keypad(w, true);
+    post_resize_hook();
 }
 
 

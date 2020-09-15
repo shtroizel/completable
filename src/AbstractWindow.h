@@ -74,6 +74,7 @@ public:
 private:
     virtual std::string const & title() const = 0;
     virtual void resize_hook() = 0;
+    virtual void post_resize_hook() {};
     virtual void draw_hook(CompletionStack const & cs) = 0;
     virtual void on_KEY_UP(CompletionStack &) {}
     virtual void on_KEY_DOWN(CompletionStack &) {}

@@ -38,12 +38,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-InputWindow::InputWindow() : AbstractWindow()
-{
-    keypad(w, true);
-}
-
-
 std::string const & InputWindow::title() const
 {
     static std::string const t{"Input"};
@@ -57,6 +51,12 @@ void InputWindow::resize_hook()
     width = root_x / 2;
     y = 0;
     x = root_x / 2 - width / 2;
+}
+
+
+void InputWindow::post_resize_hook()
+{
+    keypad(w, true);
 }
 
 
