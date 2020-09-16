@@ -43,13 +43,14 @@ class LengthCompletionWindow;
 class PropertyWindow : public AbstractWindow
 {
 public:
-    PropertyWindow(CompletionWindow const & cw, LengthCompletionWindow const & lcw);
+    PropertyWindow(CompletionWindow & cw, LengthCompletionWindow & lcw);
+    ~PropertyWindow() override;
 
 private:
     void draw_hook(CompletionStack const & cs) override;
     virtual void draw_hook(int selected) = 0;
 
 protected:
-    CompletionWindow const & completion_win;
-    LengthCompletionWindow const & len_completion_win;
+    CompletionWindow & completion_win;
+    LengthCompletionWindow & len_completion_win;
 };

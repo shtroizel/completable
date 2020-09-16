@@ -32,6 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include <string>
+#include <vector>
 
 
 // ncurses window
@@ -64,12 +65,16 @@ public:
     int get_x() const { return x; }
     WINDOW * get_WINDOW() const { return w; }
 
-    static void set_active_window(AbstractWindow * act_win) { active() = act_win; }
+    static void set_active_window(AbstractWindow * act_win);
     static AbstractWindow * get_active_window() { return active(); }
 
     bool is_active() const { return nullptr != active() && active()->title() == title(); }
 
     void on_KEY(int key, CompletionStack & cs);
+
+    void mark_dirty();
+    void add_dirty_dependency(AbstractWindow * win);
+    void remove_dirty_dependency(AbstractWindow * win);
 
 private:
     virtual std::string const & title() const = 0;
@@ -91,6 +96,10 @@ protected:
     int width{0};
     int y{0};
     int x{0};
+
+private:
+    bool dirty{false};
+    std::vector<AbstractWindow *> dirty_dependencies;
 
     // static variable for storing the active window
     static AbstractWindow * & active() { static AbstractWindow * w{nullptr}; return w; }

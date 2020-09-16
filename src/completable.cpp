@@ -79,10 +79,10 @@ int main()
     InputWindow input_win;
     input_win.resize();
 
-    CompletionWindow completion_win;
+    CompletionWindow completion_win{input_win};
     completion_win.resize();
 
-    LengthCompletionWindow len_completion_win{completion_win};
+    LengthCompletionWindow len_completion_win{completion_win, input_win};
     len_completion_win.resize();
 
     PartsOfSpeechWindow pos_win{completion_win, len_completion_win};
@@ -141,11 +141,18 @@ int main()
         }
         else if (ch > 31 && ch < 127) // printable ascii
         {
+            bool old_count = cs.count();
             cs.push(ch);
+            if (cs.count() != old_count)
+                input_win.mark_dirty();
         }
         else if (ch == KEY_BACKSPACE)
         {
+            int old_count = cs.count();
             cs.pop();
+            int new_count = cs.count();
+            if (new_count != old_count)
+                input_win.mark_dirty();
         }
         else if (ch == TAB)
         {
@@ -183,9 +190,16 @@ int main()
                         ++target_completion_count;
                 }
 
+                bool cs_modified{false};
                 // grow up to the target completion count
                 for (int i = (int) prefix.size(); i < target_completion_count; ++i)
+                {
                     cs.push(first_entry[i]);
+                    cs_modified = true;
+                }
+
+                if (cs_modified)
+                    input_win.mark_dirty();
             }
         }
         else if (ch == KEY_LEFT)

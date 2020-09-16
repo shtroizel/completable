@@ -37,7 +37,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <matchmaker/matchmaker.h>
 
 #include "CompletionStack.h"
+#include "InputWindow.h"
 
+
+
+CompletionWindow::CompletionWindow(InputWindow & iw)
+    : input_win{iw}
+{
+    AbstractWindow::set_active_window(this);
+    input_win.add_dirty_dependency(this);
+}
+
+
+CompletionWindow::~CompletionWindow()
+{
+    input_win.remove_dirty_dependency(this);
+}
 
 
 std::string const & CompletionWindow::title() const
@@ -93,7 +108,10 @@ void CompletionWindow::on_KEY_UP(CompletionStack & cs)
 {
     auto & c = cs.top();
     if (c.display_start > c.start)
+    {
         --c.display_start;
+        mark_dirty();
+    }
 }
 
 
@@ -101,37 +119,58 @@ void CompletionWindow::on_KEY_DOWN(CompletionStack & cs)
 {
     auto & c = cs.top();
     if (c.display_start < c.start + c.length - 1)
+    {
         ++c.display_start;
+        mark_dirty();
+    }
 }
 
 
 void CompletionWindow::on_PAGE_UP(CompletionStack & cs)
 {
     auto & c = cs.top();
-    c.display_start -= height - 3;
-    if (c.display_start < c.start)
-        c.display_start = c.start;
+    if (c.display_start != c.start)
+    {
+        c.display_start -= height - 3;
+        if (c.display_start < c.start)
+            c.display_start = c.start;
+        mark_dirty();
+    }
 }
 
 
 void CompletionWindow::on_PAGE_DOWN(CompletionStack & cs)
 {
     auto & c = cs.top();
-    c.display_start += height - 3;
-    if (c.display_start >= c.start + c.length)
-        c.display_start = c.start + c.length - 1;
+    int const end = c.start + c.length - 1;
+    if (c.display_start != end)
+    {
+        c.display_start += height - 3;
+        if (c.display_start > end)
+            c.display_start = end;
+        mark_dirty();
+    }
 }
 
 
 void CompletionWindow::on_HOME(CompletionStack & cs)
 {
     auto & c = cs.top();
-    c.display_start = c.start;
+    if (c.display_start != c.start)
+    {
+        c.display_start = c.start;
+        mark_dirty();
+    }
 }
 
 
 void CompletionWindow::on_END(CompletionStack & cs)
 {
     auto & c = cs.top();
-    c.display_start = c.start + c.length - 1;
+    int const end = c.start + c.length - 1;
+    if (c.display_start != end)
+    {
+        c.display_start = end;
+        mark_dirty();
+    }
 }

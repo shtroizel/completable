@@ -35,10 +35,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractWindow.h"
 
 
+
+class InputWindow;
+
 class CompletionWindow : public AbstractWindow
 {
 public:
-    CompletionWindow() { AbstractWindow::set_active_window(this); }
+    CompletionWindow(InputWindow & iw);
+    ~CompletionWindow() override;
 
 private:
     std::string const & title() const override;
@@ -50,4 +54,7 @@ private:
     void on_PAGE_DOWN(CompletionStack & cs) override;
     void on_HOME(CompletionStack & cs) override;
     void on_END(CompletionStack & cs) override;
+
+private:
+    InputWindow & input_win;
 };

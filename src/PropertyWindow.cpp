@@ -39,9 +39,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "LengthCompletionWindow.h"
 
 
-PropertyWindow::PropertyWindow(CompletionWindow const & cw, LengthCompletionWindow const & lcw)
+PropertyWindow::PropertyWindow(CompletionWindow & cw, LengthCompletionWindow & lcw)
     : completion_win(cw), len_completion_win(lcw)
 {
+    completion_win.add_dirty_dependency(this);
+    len_completion_win.add_dirty_dependency(this);
+}
+
+
+PropertyWindow::~PropertyWindow()
+{
+    completion_win.remove_dirty_dependency(this);
+    len_completion_win.remove_dirty_dependency(this);
 }
 
 

@@ -36,11 +36,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 class CompletionWindow;
+class InputWindow;
 
 class LengthCompletionWindow : public AbstractWindow
 {
 public:
-    explicit LengthCompletionWindow(CompletionWindow const & win);
+    LengthCompletionWindow(CompletionWindow const &, InputWindow &);
+    ~LengthCompletionWindow() override;
 
 private:
     std::string const & title() const override;
@@ -55,4 +57,5 @@ private:
 
 private:
     CompletionWindow const & completion_win;
+    InputWindow & input_win;
 };

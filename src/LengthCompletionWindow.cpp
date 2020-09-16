@@ -38,11 +38,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "CompletionStack.h"
 #include "CompletionWindow.h"
+#include "InputWindow.h"
 
 
-LengthCompletionWindow::LengthCompletionWindow(CompletionWindow const & win)
-        : AbstractWindow(), completion_win{win}
+LengthCompletionWindow::LengthCompletionWindow(
+    CompletionWindow const & cw,
+    InputWindow & iw
+)
+    : AbstractWindow()
+    , completion_win(cw)
+    , input_win(iw)
 {
+    input_win.add_dirty_dependency(this);
+}
+
+
+LengthCompletionWindow::~LengthCompletionWindow()
+{
+    input_win.remove_dirty_dependency(this);
 }
 
 
@@ -113,7 +126,10 @@ void LengthCompletionWindow::on_KEY_UP(CompletionStack & cs)
 {
     auto & c = cs.top();
     if (c.len_display_start > 0)
+    {
         --c.len_display_start;
+        mark_dirty();
+    }
 }
 
 
@@ -121,36 +137,60 @@ void LengthCompletionWindow::on_KEY_DOWN(CompletionStack & cs)
 {
     auto & c = cs.top();
     if (c.len_display_start < (int) c.length_completion.size() - 1)
+    {
         ++c.len_display_start;
+        mark_dirty();
+    }
 }
 
 
 void LengthCompletionWindow::on_PAGE_UP(CompletionStack & cs)
 {
     auto & c = cs.top();
-    c.len_display_start -= height - 3;
-    if (c.len_display_start < 0)
-        c.len_display_start = 0;
+    if (c.len_display_start != 0)
+    {
+        c.len_display_start -= height - 3;
+        if (c.len_display_start < 0)
+            c.len_display_start = 0;
+
+        mark_dirty();
+    }
 }
 
 
 void LengthCompletionWindow::on_PAGE_DOWN(CompletionStack & cs)
 {
     auto & c = cs.top();
-    c.len_display_start += height - 3;
-    if (c.len_display_start >= (int) c.length_completion.size())
-        c.len_display_start = (int) c.length_completion.size() - 1;
+    int const end = (int) c.length_completion.size() - 1;
+    if (c.len_display_start != end)
+    {
+        c.len_display_start += height - 3;
+        if (c.len_display_start > end)
+            c.len_display_start = end;
+
+        mark_dirty();
+    }
 }
 
 
 void LengthCompletionWindow::on_HOME(CompletionStack & cs)
 {
-    cs.top().len_display_start = 0;
+    auto & c = cs.top();
+    if (c.len_display_start != 0)
+    {
+        c.len_display_start = 0;
+        mark_dirty();
+    }
 }
 
 
 void LengthCompletionWindow::on_END(CompletionStack & cs)
 {
     auto & c = cs.top();
-    c.len_display_start = c.length_completion.size() - 1;
+    int const end = c.length_completion.size() - 1;
+    if (c.len_display_start != end)
+    {
+        c.len_display_start = end;
+        mark_dirty();
+    }
 }

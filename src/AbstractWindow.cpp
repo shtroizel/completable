@@ -32,6 +32,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AbstractWindow.h"
 
+#include <algorithm>
+
 #include <ncurses.h>
 
 #include "CompletionStack.h"
@@ -72,6 +74,7 @@ void AbstractWindow::resize()
     resize_hook();
     w = newwin(height, width, y, x);
     post_resize_hook();
+    mark_dirty();
 }
 
 
@@ -84,6 +87,9 @@ void AbstractWindow::draw(CompletionStack const & cs, bool clear_first)
         wrefresh(w);
         return;
     }
+
+    if (!dirty && !clear_first)
+        return;
 
     if (clear_first)
         wclear(w);
@@ -106,7 +112,21 @@ void AbstractWindow::draw(CompletionStack const & cs, bool clear_first)
     // window specific drawing
     draw_hook(cs);
 
+    dirty = false;
+
     wrefresh(w);
+}
+
+
+void AbstractWindow::set_active_window(AbstractWindow * act_win)
+{
+    if (active() != nullptr)
+        active()->mark_dirty();
+
+    active() = act_win;
+
+    if (active() != nullptr)
+        active()->mark_dirty();
 }
 
 
@@ -121,4 +141,31 @@ void AbstractWindow::on_KEY(int key, CompletionStack & cs)
         case HOME      : on_HOME(cs);      break;
         case END       : on_END(cs);       break;
     }
+}
+
+
+void AbstractWindow::mark_dirty()
+{
+    dirty = true;
+    for (auto dep : dirty_dependencies)
+        dep->mark_dirty();
+}
+
+
+void AbstractWindow::add_dirty_dependency(AbstractWindow * dep)
+{
+    dirty_dependencies.push_back(dep);
+}
+
+
+void AbstractWindow::remove_dirty_dependency(AbstractWindow * dep)
+{
+    dirty_dependencies.erase(
+        std::remove_if(
+            dirty_dependencies.begin(),
+            dirty_dependencies.end(),
+            [&](AbstractWindow * w){ return w->title() == dep->title(); }
+        ),
+        dirty_dependencies.end()
+    );
 }
