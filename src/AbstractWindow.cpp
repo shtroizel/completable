@@ -48,9 +48,7 @@ static int const MIN_ROOT_X{80};
 
 AbstractWindow::~AbstractWindow()
 {
-    if (is_active())
-        set_active_window(nullptr);
-
+    set_active_window(nullptr);
     delwin(w);
 }
 
