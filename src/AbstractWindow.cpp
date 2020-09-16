@@ -156,16 +156,3 @@ void AbstractWindow::add_dirty_dependency(AbstractWindow * dep)
 {
     dirty_dependencies.push_back(dep);
 }
-
-
-void AbstractWindow::remove_dirty_dependency(AbstractWindow * dep)
-{
-    dirty_dependencies.erase(
-        std::remove_if(
-            dirty_dependencies.begin(),
-            dirty_dependencies.end(),
-            [&](AbstractWindow * w){ return w->title() == dep->title(); }
-        ),
-        dirty_dependencies.end()
-    );
-}

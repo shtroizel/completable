@@ -51,7 +51,6 @@ CompletionWindow::CompletionWindow(InputWindow & iw)
 
 CompletionWindow::~CompletionWindow()
 {
-    input_win.remove_dirty_dependency(this);
 }
 
 

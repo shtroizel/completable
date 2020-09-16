@@ -74,7 +74,6 @@ public:
 
     void mark_dirty();
     void add_dirty_dependency(AbstractWindow * win);
-    void remove_dirty_dependency(AbstractWindow * win);
 
 private:
     virtual std::string const & title() const = 0;

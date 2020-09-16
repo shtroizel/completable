@@ -55,7 +55,6 @@ LengthCompletionWindow::LengthCompletionWindow(
 
 LengthCompletionWindow::~LengthCompletionWindow()
 {
-    input_win.remove_dirty_dependency(this);
 }
 
 

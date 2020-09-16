@@ -49,8 +49,6 @@ PropertyWindow::PropertyWindow(CompletionWindow & cw, LengthCompletionWindow & l
 
 PropertyWindow::~PropertyWindow()
 {
-    completion_win.remove_dirty_dependency(this);
-    len_completion_win.remove_dirty_dependency(this);
 }
 
 
