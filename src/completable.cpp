@@ -154,7 +154,7 @@ int main(int argc, char ** argv)
             if (cs.count() != old_count)
                 input_win.mark_dirty();
         }
-        else if (ch == KEY_BACKSPACE)
+        else if (ch == KEY_BACKSPACE || ch == 127 || ch == '\b')
         {
             int old_count = cs.count();
             cs.pop();
