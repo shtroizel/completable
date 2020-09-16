@@ -95,34 +95,8 @@ void AbstractWindow::draw(CompletionStack const & cs, bool clear_first)
         wclear(w);
 
     // border
-    if (simple_borders())
-    {
-        // top
-        for (int i = 1; i < width - 1; ++i)
-            mvwaddch(w, 0, i, '-');
-
-        // bottom
-        for (int i = 1; i < width - 1; ++i)
-            mvwaddch(w, height - 1, i, '-');
-
-        // left
-        for (int i = 1; i < height - 1; ++i)
-            mvwaddch(w, i, 0, '|');
-
-        // right
-        for (int i = 1; i < height - 1; ++i)
-            mvwaddch(w, i, width - 1, '|');
-
-        // corners
-        mvwaddch(w, 0, 0, '+');
-        mvwaddch(w, 0, width - 1, '+');
-        mvwaddch(w, height - 1, 0, '+');
-        mvwaddch(w, height - 1, width - 1, '+');
-    }
-    else
-    {
+    if (borders())
         box(w, 0, 0);
-    }
 
     // title
     int const indent{width / 3 - (int) title().size() / 2};

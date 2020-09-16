@@ -67,8 +67,8 @@ int main(int argc, char ** argv)
     if (argc == 2)
     {
         std::string const a1{argv[1]};
-        if (a1 == "simple_borders")
-            AbstractWindow::simple_borders() = true;
+        if (a1 == "no_borders")
+            AbstractWindow::borders() = false;
     }
 
     initscr();

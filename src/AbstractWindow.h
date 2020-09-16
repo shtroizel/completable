@@ -75,7 +75,7 @@ public:
     void mark_dirty();
     void add_dirty_dependency(AbstractWindow * win);
 
-    static bool & simple_borders(){ static bool sb{false}; return sb; }
+    static bool & borders(){ static bool sb{true}; return sb; }
 
 private:
     virtual std::string const & title() const = 0;
