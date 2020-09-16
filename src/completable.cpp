@@ -293,8 +293,7 @@ void shell()
             }
             else if (words[0] == ":len")
             {
-                std::cout << "The following index offsets are for :longest ('<nth>' values)" << std::endl;
-                std::cout << "The later index is inclusive\n" << std::endl;
+                std::cout << "The following length index offsets can be used with ':itl'" << std::endl;
 
                 int index{0};
                 int count{0};
