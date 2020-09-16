@@ -55,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
+static int const ESC{27};
 static int const TAB{9};
 
 
@@ -210,6 +211,15 @@ int main()
         {
             AbstractWindow::set_active_window(&len_completion_win);
         }
+        else if (ch == ESC)
+        {
+            nodelay(input_win.get_WINDOW(), true);
+            ch = wgetch(input_win.get_WINDOW());
+            nodelay(input_win.get_WINDOW(), false);
+
+            if (ch == ERR)
+                break;
+        }
         else
         {
             AbstractWindow * w = AbstractWindow::get_active_window();
@@ -277,7 +287,11 @@ void shell()
         }
         else if (words.size() == 1 && words[0].size() > 0)
         {
-            if (words[0] == ":len")
+            if (words[0] == ":q")
+            {
+                exit(EXIT_SUCCESS);
+            }
+            else if (words[0] == ":len")
             {
                 std::cout << "The following index offsets are for :longest ('<nth>' values)" << std::endl;
                 std::cout << "The later index is inclusive\n" << std::endl;
