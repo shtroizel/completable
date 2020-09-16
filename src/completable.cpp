@@ -62,8 +62,15 @@ static int const TAB{9};
 void shell();
 
 
-int main()
+int main(int argc, char ** argv)
 {
+    if (argc == 2)
+    {
+        std::string const a1{argv[1]};
+        if (a1 == "simple_borders")
+            AbstractWindow::simple_borders() = true;
+    }
+
     initscr();
     noecho();
     curs_set(FALSE);

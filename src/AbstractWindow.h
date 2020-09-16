@@ -75,6 +75,8 @@ public:
     void mark_dirty();
     void add_dirty_dependency(AbstractWindow * win);
 
+    static bool & simple_borders(){ static bool sb{false}; return sb; }
+
 private:
     virtual std::string const & title() const = 0;
     virtual void resize_hook() = 0;
