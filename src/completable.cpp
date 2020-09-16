@@ -255,7 +255,7 @@ void shell()
         std::cout << "\n\n";
         if (help)
             std::cout << "{ just enter a word for lookup                                                }\n"
-                      << "{ prefix the word with ':' for completion                                     }\n"
+                      << "{ prefix the word with '!' for completion                                     }\n"
                       << "{ use  :it <index> <count>        to iterate <count> words from <index>       }\n"
                       << "{ use  :pos <word>                for parts of speech of <word>               }\n"
                       << "{ use  :s <word>                  for synonyms of <word>                      }\n"
@@ -312,7 +312,7 @@ void shell()
             {
                 help = !help;
             }
-            else if (words[0][0] == ':')
+            else if (words[0][0] == '!')
             {
                 CompletionStack::completion c;
                 c.prefix = words[0].substr(1);
