@@ -300,7 +300,7 @@ void shell()
             }
             else if (words[0] == ":len")
             {
-                std::cout << "The following length index offsets can be used with ':itl'" << std::endl;
+                std::cout << "The following length indexes can be used with ':itl'" << std::endl;
 
                 int index{0};
                 int count{0};
