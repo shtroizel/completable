@@ -40,5 +40,5 @@ class InputWindow : public AbstractWindow
     std::string const & title() const override;
     void resize_hook() override;
     void post_resize_hook() override;
-    void draw_hook(CompletionStack const & cs) override;
+    void draw_hook(CompletionStack & cs) override;
 };

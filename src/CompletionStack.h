@@ -43,13 +43,29 @@ class CompletionStack
 public:
     struct completion
     {
-        std::string prefix;                 // user input state
-        int start{0};                       // index of first word in dictionary that starts with prefix
-        int length{0};                      // number of words in the dictionary that start with prefix
-        int display_start{0};               // index of first word displayed in "Completion"
-        int len_display_start{0};           // index of first word displayed in "Length Completion"
-        std::vector<int> length_completion; // each "length index" is stored for length completion instead
-                                            // of just start + length because they are noncontiguous
+        // user input state
+        std::string prefix;
+
+        // index of first word in dictionary that starts with prefix
+        int start{0};
+
+        // number of words in the dictionary that start with prefix
+        int length{0};
+
+        // index of first word displayed in "Completion"
+        int display_start{0};
+
+        // first index of "length_completion" or first word displayed in "Length Completion"
+        int len_display_start{0};
+
+        // sorted but noncontiguous length indexes
+        std::vector<int> length_completion;
+
+        // index of first word displayed in "Synonyms"
+        int syn_display_start{0};
+
+        // index of first word displayed in "Antonyms"
+        int ant_display_start{0};
     };
 
     CompletionStack() { clear_top(); }

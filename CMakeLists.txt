@@ -37,7 +37,6 @@ set(
     src/InputWindow.cpp
     src/LengthCompletionWindow.cpp
     src/PartsOfSpeechWindow.cpp
-    src/PropertyWindow.cpp
     src/SynonymWindow.cpp
     src/completable.cpp
 )

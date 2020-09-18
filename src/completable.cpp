@@ -50,13 +50,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "InputWindow.h"
 #include "LengthCompletionWindow.h"
 #include "PartsOfSpeechWindow.h"
-#include "PropertyWindow.h"
 #include "SynonymWindow.h"
 
 
 
 static int const ESC{27};
 static int const TAB{9};
+
+static int const RET(10);
+static int const DEL{330};
 
 
 void shell();
@@ -90,19 +92,22 @@ int main(int argc, char ** argv)
     CompletionWindow completion_win{input_win};
     completion_win.resize();
 
-    LengthCompletionWindow len_completion_win{completion_win, input_win};
+    LengthCompletionWindow len_completion_win{input_win, completion_win};
     len_completion_win.resize();
 
-    PartsOfSpeechWindow pos_win{completion_win, len_completion_win};
+    PartsOfSpeechWindow pos_win;
     pos_win.resize();
 
-    SynonymWindow syn_win{completion_win, len_completion_win};
+    SynonymWindow syn_win{completion_win};
     syn_win.resize();
 
     AntonymWindow ant_win{completion_win, len_completion_win};
     ant_win.resize();
 
     CompletionStack cs;
+
+    // stores words for navigation with RET and DEL
+    std::stack<std::pair<std::string, AbstractWindow *>> word_stack;
 
     bool resized_draw{true};
     int ch{0};
@@ -147,12 +152,32 @@ int main(int argc, char ** argv)
             reset_prog_mode();
             resized_draw = true;
         }
-        else if (ch > 31 && ch < 127) // printable ascii
+        else if (ch == RET)
         {
-            bool old_count = cs.count();
-            cs.push(ch);
-            if (cs.count() != old_count)
+            AbstractWindow * w = AbstractWindow::get_active_window();
+            if (nullptr != w)
+            {
+                w->on_RETURN(cs, word_stack);
                 input_win.mark_dirty();
+            }
+        }
+        else if (ch == DEL)
+        {
+            if (word_stack.size() == 0)
+                continue;
+
+            auto & [s, w] = word_stack.top();
+
+            while (cs.count() > 1)
+                cs.pop();
+
+            for (auto ch : s)
+                cs.push(ch);
+
+            word_stack.pop();
+
+            AbstractWindow::set_active_window(w);
+            input_win.mark_dirty();
         }
         else if (ch == KEY_BACKSPACE || ch == 127 || ch == '\b')
         {
@@ -212,11 +237,31 @@ int main(int argc, char ** argv)
         }
         else if (ch == KEY_LEFT)
         {
-            AbstractWindow::set_active_window(&completion_win);
+            if (ant_win.is_active())
+                AbstractWindow::set_active_window(&len_completion_win);
+            else
+                if (len_completion_win.is_active())
+                    AbstractWindow::set_active_window(&syn_win);
+                else
+                    if (syn_win.is_active())
+                        AbstractWindow::set_active_window(&completion_win);
+                    else
+                        if (!completion_win.is_active())
+                            AbstractWindow::set_active_window(&completion_win);
         }
-        else if (ch == KEY_RIGHT)
+        else if (ch == ',' || ch == KEY_RIGHT)
         {
-            AbstractWindow::set_active_window(&len_completion_win);
+            if (completion_win.is_active())
+                AbstractWindow::set_active_window(&syn_win);
+            else
+                if (syn_win.is_active())
+                    AbstractWindow::set_active_window(&len_completion_win);
+                else
+                    if (len_completion_win.is_active())
+                        AbstractWindow::set_active_window(&ant_win);
+                    else
+                        if (!ant_win.is_active())
+                            AbstractWindow::set_active_window(&ant_win);
         }
         else if (ch == ESC)
         {
@@ -226,6 +271,13 @@ int main(int argc, char ** argv)
 
             if (ch == ERR)
                 break;
+        }
+        else if (ch > 31 && ch < 127) // printable ascii
+        {
+            bool old_count = cs.count();
+            cs.push(ch);
+            if (cs.count() != old_count)
+                input_win.mark_dirty();
         }
         else
         {

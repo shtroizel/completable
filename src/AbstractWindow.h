@@ -32,6 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include <string>
+#include <stack>
 #include <vector>
 
 
@@ -47,6 +48,8 @@ static int const HOME{262};
 static int const END{360};
 
 
+using WordStack = std::stack<std::pair<std::string, class AbstractWindow *>>;
+
 class AbstractWindow
 {
 public:
@@ -58,7 +61,7 @@ public:
 
     void clear();
     void resize();
-    void draw(CompletionStack const & cs, bool clear_first);
+    void draw(CompletionStack & cs, bool clear_first);
     int get_height() const { return height; }
     int get_width() const { return width; }
     int get_y() const { return y; }
@@ -71,6 +74,7 @@ public:
     bool is_active() const { return nullptr != active() && active()->title() == title(); }
 
     void on_KEY(int key, CompletionStack & cs);
+    void on_RETURN(CompletionStack & cs, WordStack &);
 
     void mark_dirty();
     void add_dirty_dependency(AbstractWindow * win);
@@ -81,13 +85,14 @@ private:
     virtual std::string const & title() const = 0;
     virtual void resize_hook() = 0;
     virtual void post_resize_hook() {};
-    virtual void draw_hook(CompletionStack const & cs) = 0;
+    virtual void draw_hook(CompletionStack & cs) = 0;
     virtual void on_KEY_UP(CompletionStack &) {}
     virtual void on_KEY_DOWN(CompletionStack &) {}
     virtual void on_PAGE_UP(CompletionStack &) {}
     virtual void on_PAGE_DOWN(CompletionStack &) {}
     virtual void on_HOME(CompletionStack &) {}
     virtual void on_END(CompletionStack &) {}
+    virtual void on_RETURN_hook(CompletionStack &, WordStack &) {}
 
 protected:
     WINDOW * w{nullptr};

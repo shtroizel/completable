@@ -42,12 +42,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 LengthCompletionWindow::LengthCompletionWindow(
-    CompletionWindow const & cw,
-    InputWindow & iw
+    InputWindow & iw,
+    CompletionWindow const & cw
 )
     : AbstractWindow()
-    , completion_win(cw)
     , input_win(iw)
+    , completion_win(cw)
 {
     input_win.add_dirty_dependency(this);
 }
@@ -74,30 +74,27 @@ void LengthCompletionWindow::resize_hook()
 }
 
 
-void LengthCompletionWindow::draw_hook(CompletionStack const & cs)
+void LengthCompletionWindow::draw_hook(CompletionStack & cs)
 {
     auto const & cur_completion = cs.top();
-    int length = cur_completion.length_completion.size() - cur_completion.len_display_start;
-    if (length < 0)
-        return;
 
+    int display_count = cur_completion.length_completion.size() - cur_completion.len_display_start;
+
+    int length_completion_index{0};
     int long_index{0};
 
     int i = 0;
-    for (; i < length && i < height - 2; ++i)
+    for (; i < display_count && i < height - 2; ++i)
     {
-        if (cur_completion.length_completion.size() > 0)
-        {
-            int length_completion_index = i + cur_completion.len_display_start;
-            if (length_completion_index >= (int) cur_completion.length_completion.size())
-                return;
+        length_completion_index = i + cur_completion.len_display_start;
 
-            long_index = cur_completion.length_completion[length_completion_index];
-        }
-        else
-            long_index = i;
+        // make sure len_display_start set properly (should be impossible)
+        if (length_completion_index >= (int) cur_completion.length_completion.size())
+            break;
 
-        std::string const & complete_entry = matchmaker::at(matchmaker::by_longest()[long_index]);
+        long_index = cur_completion.length_completion[length_completion_index];
+
+        std::string const & complete_entry = matchmaker::at(matchmaker::from_longest(long_index));
 
         if (is_active() && i == 0)
             wattron(w, A_REVERSE);
@@ -192,4 +189,28 @@ void LengthCompletionWindow::on_END(CompletionStack & cs)
         c.len_display_start = end;
         mark_dirty();
     }
+}
+
+
+void LengthCompletionWindow::on_RETURN_hook(
+    CompletionStack & cs,
+    std::stack<std::pair<std::string, AbstractWindow *>> & word_stack
+)
+{
+    auto & c = cs.top();
+
+    if (c.length_completion.size() == 0)
+        return;
+
+    int selected_index = matchmaker::from_longest(c.length_completion[c.len_display_start]);
+    std::string const & selected = matchmaker::at(selected_index);
+
+    // nothing to do?
+    if (c.prefix == selected)
+        return;
+
+    word_stack.push(std::make_pair(c.prefix, AbstractWindow::get_active_window()));
+
+    for (auto i = c.prefix.length(); i < selected.length(); ++i)
+        cs.push(selected[i]);
 }

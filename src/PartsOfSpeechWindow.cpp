@@ -36,6 +36,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <matchmaker/matchmaker.h>
 
+#include "CompletionStack.h"
+
 
 
 std::string const & PartsOfSpeechWindow::title() const
@@ -54,11 +56,11 @@ void PartsOfSpeechWindow::resize_hook()
 }
 
 
-void PartsOfSpeechWindow::draw_hook(int selected)
+void PartsOfSpeechWindow::draw_hook(CompletionStack & cs)
 {
     int const cell_width{16};
 
-    auto const & flagged_pos = matchmaker::flagged_parts_of_speech(selected);
+    auto const & flagged_pos = matchmaker::flagged_parts_of_speech(cs.top().display_start);
 
     int x = 1;
     int i = 0;

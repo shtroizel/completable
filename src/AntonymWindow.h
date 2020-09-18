@@ -32,15 +32,29 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "PropertyWindow.h"
+#include "AbstractWindow.h"
 
 
+class CompletionWindow;
+class LengthCompletionWindow;
 
-class AntonymWindow : public PropertyWindow
+class AntonymWindow : public AbstractWindow
 {
-    using PropertyWindow::PropertyWindow;
+public:
+    AntonymWindow(CompletionWindow & cw, LengthCompletionWindow & lcw);
 
+private:
     std::string const & title() const override;
     void resize_hook() override;
-    void draw_hook(int selected) override;
+    void draw_hook(CompletionStack &) override;
+    void on_KEY_UP(CompletionStack &) override;
+    void on_KEY_DOWN(CompletionStack &) override;
+    void on_PAGE_UP(CompletionStack &) override;
+    void on_PAGE_DOWN(CompletionStack &) override;
+    void on_HOME(CompletionStack &) override;
+    void on_END(CompletionStack &) override;
+    void on_RETURN_hook(CompletionStack &, WordStack &) override;
+
+private:
+    LengthCompletionWindow & len_completion_win;
 };

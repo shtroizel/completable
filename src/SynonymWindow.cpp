@@ -37,7 +37,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <matchmaker/matchmaker.h>
 
 #include "CompletionWindow.h"
+#include "CompletionStack.h"
+#include "InputWindow.h"
+#include "LengthCompletionWindow.h"
 
+
+
+SynonymWindow::SynonymWindow(CompletionWindow & cw) : completion_win(cw)
+{
+    completion_win.add_dirty_dependency(this);
+}
 
 
 std::string const & SynonymWindow::title() const
@@ -56,18 +65,27 @@ void SynonymWindow::resize_hook()
 }
 
 
-void SynonymWindow::draw_hook(int selected)
+void SynonymWindow::draw_hook(CompletionStack & cs)
 {
-    auto const & synonyms = matchmaker::synonyms(selected);
+    auto const & c = cs.top();
+    auto const & synonyms = matchmaker::synonyms(c.display_start);
+
+    int display_count = (int) synonyms.size() - c.syn_display_start;
 
     int i = 0;
-    for (; i < (int) synonyms.size() && i < height - 2; ++i)
+    for (; i < display_count && i < height - 2; ++i)
     {
-        std::string const & syn = matchmaker::at(synonyms[i]);
+        std::string const & syn = matchmaker::at(synonyms[c.syn_display_start + i]);
+
+        if (is_active() && i == 0)
+            wattron(w, A_REVERSE);
 
         int j = 0;
         for (; j < (int) syn.length() && j < width - 2; ++j)
             mvwaddch(w, i + 1, j + 1, syn[j]);
+
+        if (is_active() && i == 0)
+            wattroff(w, A_REVERSE);
 
         // blank out rest of line
         for (; j < width - 2; ++j)
@@ -78,4 +96,114 @@ void SynonymWindow::draw_hook(int selected)
     for (; i < height - 2; ++i)
         for (int j = 0; j < width - 2; ++j)
             mvwaddch(w, i + 1, j + 1, ' ');
+}
+
+
+void SynonymWindow::on_KEY_UP(CompletionStack & cs)
+{
+    auto & c = cs.top();
+
+    if (c.syn_display_start > 0)
+    {
+        --c.syn_display_start;
+        mark_dirty();
+    }
+}
+
+
+void SynonymWindow::on_KEY_DOWN(CompletionStack & cs)
+{
+    auto & c = cs.top();
+
+    if (c.syn_display_start < (int) matchmaker::synonyms(c.display_start).size() - 1)
+    {
+        ++c.syn_display_start;
+        mark_dirty();
+    }
+}
+
+
+void SynonymWindow::on_PAGE_UP(CompletionStack & cs)
+{
+    auto & c = cs.top();
+
+    if (c.syn_display_start != 0)
+    {
+        c.syn_display_start -= height - 3;
+        if (c.syn_display_start < 0)
+            c.syn_display_start = 0;
+        mark_dirty();
+    }
+}
+
+
+void SynonymWindow::on_PAGE_DOWN(CompletionStack & cs)
+{
+    auto & c = cs.top();
+
+    if (matchmaker::synonyms(c.display_start).size() == 0)
+        return;
+
+    int const end = (int) matchmaker::synonyms(c.display_start).size() - 1;
+    if (c.syn_display_start != end)
+    {
+        c.syn_display_start += height - 3;
+        if (c.syn_display_start > end)
+            c.syn_display_start = end;
+        mark_dirty();
+    }
+}
+
+
+void SynonymWindow::on_HOME(CompletionStack & cs)
+{
+    auto & c = cs.top();
+
+    if (c.syn_display_start != 0)
+    {
+        c.syn_display_start = 0;
+        mark_dirty();
+    }
+}
+
+
+void SynonymWindow::on_END(CompletionStack & cs)
+{
+    auto & c = cs.top();
+
+    if (matchmaker::synonyms(c.display_start).size() == 0)
+        return;
+
+    int const end = (int) matchmaker::synonyms(c.display_start).size() - 1;
+
+    if (c.syn_display_start != end)
+    {
+        c.syn_display_start = end;
+        mark_dirty();
+    }
+}
+
+
+void SynonymWindow::on_RETURN_hook(CompletionStack & cs, WordStack & ws)
+{
+    auto const & synonyms = matchmaker::synonyms(cs.top().display_start);
+
+    // do we even have synonyms?
+    if (cs.top().syn_display_start >= (int) synonyms.size())
+        return;
+
+    std::string const & selected = matchmaker::at(synonyms[cs.top().syn_display_start]);
+
+    // nothing to do?
+    if (selected == cs.top().prefix)
+        return;
+
+    // save old prefix to word_stack
+    ws.push(std::make_pair(cs.top().prefix, AbstractWindow::get_active_window()));
+
+    // update completion stack
+    while (cs.count() > 1)
+        cs.pop();
+    for (auto ch : selected)
+        cs.push(ch);
 }

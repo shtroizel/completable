@@ -78,7 +78,7 @@ void AbstractWindow::resize()
 }
 
 
-void AbstractWindow::draw(CompletionStack const & cs, bool clear_first)
+void AbstractWindow::draw(CompletionStack & cs, bool clear_first)
 {
     // check terminal for minimum size requirement
     if (root_y < MIN_ROOT_Y || root_x < MIN_ROOT_X)
@@ -88,6 +88,7 @@ void AbstractWindow::draw(CompletionStack const & cs, bool clear_first)
         return;
     }
 
+    // always draw when clear_first
     if (!dirty && !clear_first)
         return;
 
@@ -99,16 +100,19 @@ void AbstractWindow::draw(CompletionStack const & cs, bool clear_first)
         box(w, 0, 0);
 
     // title
-    int const indent{width / 3 - (int) title().size() / 2};
-    mvwaddch(w, 0, indent - 1, ' ');
-    if (is_active())
     {
-        mvwaddch(w, 0, indent - 2, '>');
-        mvwaddch(w, 0, title().size() + indent + 1, '<');
+        int const indent{width / 3 - (int) title().size() / 2};
+        mvwaddch(w, 0, indent - 1, ' ');
+        {
+            int const active_indicator_left = is_active() ? '>' : ' ';
+            int const active_indicator_right = is_active() ? '<' : ' ';
+            mvwaddch(w, 0, indent - 2, active_indicator_left);
+            mvwaddch(w, 0, title().size() + indent + 1, active_indicator_right);
+        }
+        for (int i = 0; i < (int) title().size(); ++i)
+            mvwaddch(w, 0, i + indent, title()[i]);
+        mvwaddch(w, 0, title().size() + indent, ' ');
     }
-    for (int i = 0; i < (int) title().size(); ++i)
-        mvwaddch(w, 0, i + indent, title()[i]);
-    mvwaddch(w, 0, title().size() + indent, ' ');
 
     // window specific drawing
     draw_hook(cs);
@@ -135,13 +139,25 @@ void AbstractWindow::on_KEY(int key, CompletionStack & cs)
 {
     switch (key)
     {
-        case KEY_UP    : on_KEY_UP(cs);    break;
-        case KEY_DOWN  : on_KEY_DOWN(cs);  break;
-        case PAGE_UP   : on_PAGE_UP(cs);   break;
-        case PAGE_DOWN : on_PAGE_DOWN(cs); break;
-        case HOME      : on_HOME(cs);      break;
-        case END       : on_END(cs);       break;
+        case KEY_UP    : on_KEY_UP(cs);    return;
+        case KEY_DOWN  : on_KEY_DOWN(cs);  return;
+        case PAGE_UP   : on_PAGE_UP(cs);   return;
+        case PAGE_DOWN : on_PAGE_DOWN(cs); return;
+        case HOME      : on_HOME(cs);      return;
+        case END       : on_END(cs);       return;
     }
+}
+
+
+void AbstractWindow::on_RETURN(CompletionStack & cs, WordStack & ws)
+{
+    if (!is_active())
+        return;
+
+    if (cs.top().length == 0)
+        return;
+
+    on_RETURN_hook(cs, ws);
 }
 
 

@@ -71,24 +71,24 @@ void CompletionWindow::resize_hook()
 }
 
 
-void CompletionWindow::draw_hook(CompletionStack const & cs)
+void CompletionWindow::draw_hook(CompletionStack & cs)
 {
     auto const & cur_completion = cs.top();
-    int length = cur_completion.length - (cur_completion.display_start - cur_completion.start);
+    int display_count = cur_completion.length - (cur_completion.display_start - cur_completion.start);
 
     int i = 0;
-    for (; i < length && i < height - 2; ++i)
+    for (; i < display_count && i < height - 2; ++i)
     {
         std::string const & complete_entry = matchmaker::at(cur_completion.display_start + i);
 
-        if (is_active() && i == 0)
+        if (i == 0)
             wattron(w, A_REVERSE);
 
         int j = 0;
         for (; j < (int) complete_entry.size() && j < width - 2; ++j)
             mvwaddch(w, i + 1, j + 1, complete_entry[j]);
 
-        if (is_active() && i == 0)
+        if (i == 0)
             wattroff(w, A_REVERSE);
 
         // blank out rest of line
@@ -172,4 +172,20 @@ void CompletionWindow::on_END(CompletionStack & cs)
         c.display_start = end;
         mark_dirty();
     }
+}
+
+
+void CompletionWindow::on_RETURN_hook(CompletionStack & cs, WordStack & ws)
+{
+    auto & c = cs.top();
+
+    std::string const & selected = matchmaker::at(c.display_start);
+
+    if (selected == c.prefix)
+        return;
+
+    ws.push(std::make_pair(c.prefix, AbstractWindow::get_active_window()));
+
+    for (auto i = c.prefix.length(); i < selected.length(); ++i)
+        cs.push(selected[i]);
 }

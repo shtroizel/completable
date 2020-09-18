@@ -47,13 +47,14 @@ public:
 private:
     std::string const & title() const override;
     void resize_hook() override;
-    void draw_hook(CompletionStack const & cs) override;
+    void draw_hook(CompletionStack & cs) override;
     void on_KEY_UP(CompletionStack & cs) override;
     void on_KEY_DOWN(CompletionStack & cs) override;
     void on_PAGE_UP(CompletionStack & cs) override;
     void on_PAGE_DOWN(CompletionStack & cs) override;
     void on_HOME(CompletionStack & cs) override;
     void on_END(CompletionStack & cs) override;
+    void on_RETURN_hook(CompletionStack & cs, WordStack & ws) override;
 
 private:
     InputWindow & input_win;
