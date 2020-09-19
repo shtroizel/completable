@@ -70,22 +70,14 @@ void CompletionStack::push(int ch)
     }
 
     // calculate length completion
-    //
-    // first by filling a priority q with each completion entry's length index
-    std::priority_queue<int, std::vector<int>, std::greater<std::vector<int>::value_type>> q;
-    for (
-        int i = top().start;
-        i < top().start + top().length;
-        ++i
-    )
-        q.push(matchmaker::as_longest(i));
-    //
-    // then by extracting each length index from the q
-    while (!q.empty())
+    top().length_completion.reserve(top().length);
+    std::make_heap(top().length_completion.begin(), top().length_completion.end());
+    for (int i = top().start; i < top().start + top().length; ++i)
     {
-        top().length_completion.push_back(q.top());
-        q.pop();
+        top().length_completion.push_back(matchmaker::as_longest(i));
+        std::push_heap(top().length_completion.begin(), top().length_completion.end());
     }
+    std::sort_heap(top().length_completion.begin(), top().length_completion.end());
 
     // set selected entry to first for both normal completion and length completion
     // notice how for normal completion this is a matchmaker index while for length completion
