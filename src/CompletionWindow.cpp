@@ -82,14 +82,24 @@ void CompletionWindow::draw_hook(CompletionStack & cs)
         std::string const & complete_entry = matchmaker::at(cur_completion.display_start + i);
 
         if (i == 0)
-            wattron(w, A_REVERSE);
+        {
+            if (is_active())
+                wattron(w, A_REVERSE);
+            else
+                wattron(w, A_BOLD);
+        }
 
         int j = 0;
         for (; j < (int) complete_entry.size() && j < width - 2; ++j)
             mvwaddch(w, i + 1, j + 1, complete_entry[j]);
 
         if (i == 0)
-            wattroff(w, A_REVERSE);
+        {
+            if (is_active())
+                wattroff(w, A_REVERSE);
+            else
+                wattroff(w, A_BOLD);
+        }
 
         // blank out rest of line
         for (; j < width - 2; ++j)
