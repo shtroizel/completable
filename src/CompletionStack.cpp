@@ -105,6 +105,8 @@ void CompletionStack::clear_top()
     top().length = 0;
     top().len_display_start = 0;
     top().length_completion.clear();
+    top().syn_display_start = 0;
+    top().ant_display_start = 0;
 
     if (completion_count == 1)
     {
