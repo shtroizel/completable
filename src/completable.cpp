@@ -246,7 +246,9 @@ int main(int argc, char ** argv)
                     if (syn_win.is_active())
                         AbstractWindow::set_active_window(&completion_win);
                     else
-                        if (!completion_win.is_active())
+                        if (completion_win.is_active())
+                            AbstractWindow::set_active_window(&ant_win);
+                        else
                             AbstractWindow::set_active_window(&completion_win);
         }
         else if (ch == ',' || ch == KEY_RIGHT)
@@ -260,7 +262,9 @@ int main(int argc, char ** argv)
                     if (len_completion_win.is_active())
                         AbstractWindow::set_active_window(&ant_win);
                     else
-                        if (!ant_win.is_active())
+                        if (ant_win.is_active())
+                            AbstractWindow::set_active_window(&completion_win);
+                        else
                             AbstractWindow::set_active_window(&ant_win);
         }
         else if (ch == ESC)
