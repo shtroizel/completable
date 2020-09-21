@@ -52,13 +52,17 @@ AbstractWindow::~AbstractWindow()
 {
     set_active_window(nullptr);
     delwin(w);
+    w = nullptr;
 }
 
 
 void AbstractWindow::clear()
 {
-    wclear(w);
-    wrefresh(w);
+    if (nullptr != w)
+    {
+        wclear(w);
+        wrefresh(w);
+    }
 }
 
 
@@ -68,6 +72,7 @@ void AbstractWindow::resize()
     {
         clear();
         delwin(w);
+        w = nullptr;
     }
 
     getmaxyx(stdscr, root_y, root_x);
