@@ -117,7 +117,7 @@ void AbstractWindow::draw(bool clear_first)
 
     // title
     {
-        int const indent{width / 3 - (int) title().size() / 2};
+        int indent = width - (int) ((width / 1.618 + title().length() / 2.0) + 0.5);
         mvwaddch(w, 0, indent - 1, ' ');
         {
             int const active_indicator_left = is_active() ? '>' : ' ';
