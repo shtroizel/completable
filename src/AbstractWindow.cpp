@@ -47,6 +47,11 @@ static int const MIN_ROOT_Y{30};
 static int const MIN_ROOT_X{80};
 
 
+AbstractWindow::AbstractWindow(CompletionStack & completion_stack, WordStack & word_stack)
+    : cs{completion_stack}, ws{word_stack}
+{
+}
+
 
 AbstractWindow::~AbstractWindow()
 {
@@ -83,7 +88,7 @@ void AbstractWindow::resize()
 }
 
 
-void AbstractWindow::draw(CompletionStack & cs, bool clear_first)
+void AbstractWindow::draw(bool clear_first)
 {
     // check terminal for minimum size requirement
     if (root_y < MIN_ROOT_Y || root_x < MIN_ROOT_X)
@@ -120,7 +125,7 @@ void AbstractWindow::draw(CompletionStack & cs, bool clear_first)
     }
 
     // window specific drawing
-    draw_hook(cs);
+    draw_hook();
 
     dirty = false;
 
@@ -140,21 +145,21 @@ void AbstractWindow::set_active_window(AbstractWindow * act_win)
 }
 
 
-void AbstractWindow::on_KEY(int key, CompletionStack & cs)
+void AbstractWindow::on_KEY(int key)
 {
     switch (key)
     {
-        case KEY_UP    : on_KEY_UP(cs);    return;
-        case KEY_DOWN  : on_KEY_DOWN(cs);  return;
-        case PAGE_UP   : on_PAGE_UP(cs);   return;
-        case PAGE_DOWN : on_PAGE_DOWN(cs); return;
-        case HOME      : on_HOME(cs);      return;
-        case END       : on_END(cs);       return;
+        case KEY_UP    : on_KEY_UP();    return;
+        case KEY_DOWN  : on_KEY_DOWN();  return;
+        case PAGE_UP   : on_PAGE_UP();   return;
+        case PAGE_DOWN : on_PAGE_DOWN(); return;
+        case HOME      : on_HOME();      return;
+        case END       : on_END();       return;
     }
 }
 
 
-void AbstractWindow::on_RETURN(CompletionStack & cs, WordStack & ws)
+void AbstractWindow::on_RETURN()
 {
     if (!is_active())
         return;
@@ -162,7 +167,7 @@ void AbstractWindow::on_RETURN(CompletionStack & cs, WordStack & ws)
     if (cs.top().length == 0)
         return;
 
-    on_RETURN_hook(cs, ws);
+    on_RETURN_hook();
 }
 
 

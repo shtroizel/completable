@@ -56,12 +56,12 @@ public:
     AbstractWindow(AbstractWindow const &) = delete;
     AbstractWindow & operator=(AbstractWindow const &) = delete;
 
-    AbstractWindow() {}
+    AbstractWindow(CompletionStack &, WordStack &);
     virtual ~AbstractWindow();
 
     void clear();
     void resize();
-    void draw(CompletionStack & cs, bool clear_first);
+    void draw(bool clear_first);
     int get_height() const { return height; }
     int get_width() const { return width; }
     int get_y() const { return y; }
@@ -73,8 +73,8 @@ public:
 
     bool is_active() const { return nullptr != active() && active()->title() == title(); }
 
-    void on_KEY(int key, CompletionStack & cs);
-    void on_RETURN(CompletionStack & cs, WordStack &);
+    void on_KEY(int key);
+    void on_RETURN();
 
     void mark_dirty();
     void add_dirty_dependency(AbstractWindow * win);
@@ -85,16 +85,19 @@ private:
     virtual std::string const & title() const = 0;
     virtual void resize_hook() = 0;
     virtual void post_resize_hook() {};
-    virtual void draw_hook(CompletionStack & cs) = 0;
-    virtual void on_KEY_UP(CompletionStack &) {}
-    virtual void on_KEY_DOWN(CompletionStack &) {}
-    virtual void on_PAGE_UP(CompletionStack &) {}
-    virtual void on_PAGE_DOWN(CompletionStack &) {}
-    virtual void on_HOME(CompletionStack &) {}
-    virtual void on_END(CompletionStack &) {}
-    virtual void on_RETURN_hook(CompletionStack &, WordStack &) {}
+    virtual void draw_hook() = 0;
+    virtual void pre_disable_hook() {}
+    virtual void on_KEY_UP() {}
+    virtual void on_KEY_DOWN() {}
+    virtual void on_PAGE_UP() {}
+    virtual void on_PAGE_DOWN() {}
+    virtual void on_HOME() {}
+    virtual void on_END() {}
+    virtual void on_RETURN_hook() {}
 
 protected:
+    CompletionStack & cs;
+    WordStack & ws;
     WINDOW * w{nullptr};
     int root_y{0};
     int root_x{0};

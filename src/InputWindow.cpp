@@ -60,7 +60,7 @@ void InputWindow::post_resize_hook()
 }
 
 
-void InputWindow::draw_hook(CompletionStack & cs)
+void InputWindow::draw_hook()
 {
     std::string const & prefix = cs.top().prefix;
 

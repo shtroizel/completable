@@ -41,8 +41,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-CompletionWindow::CompletionWindow(InputWindow & iw)
-    : input_win{iw}
+CompletionWindow::CompletionWindow(CompletionStack & cs, WordStack & ws, InputWindow & iw)
+    : AbstractWindow::AbstractWindow(cs, ws)
+    , input_win{iw}
 {
     AbstractWindow::set_active_window(this);
     input_win.add_dirty_dependency(this);
@@ -71,7 +72,7 @@ void CompletionWindow::resize_hook()
 }
 
 
-void CompletionWindow::draw_hook(CompletionStack & cs)
+void CompletionWindow::draw_hook()
 {
     auto const & cur_completion = cs.top();
     int display_count = cur_completion.length - (cur_completion.display_start - cur_completion.start);
@@ -113,7 +114,7 @@ void CompletionWindow::draw_hook(CompletionStack & cs)
 }
 
 
-void CompletionWindow::on_KEY_UP(CompletionStack & cs)
+void CompletionWindow::on_KEY_UP()
 {
     auto & c = cs.top();
     if (c.display_start > c.start)
@@ -124,7 +125,7 @@ void CompletionWindow::on_KEY_UP(CompletionStack & cs)
 }
 
 
-void CompletionWindow::on_KEY_DOWN(CompletionStack & cs)
+void CompletionWindow::on_KEY_DOWN()
 {
     auto & c = cs.top();
     if (c.display_start < c.start + c.length - 1)
@@ -135,7 +136,7 @@ void CompletionWindow::on_KEY_DOWN(CompletionStack & cs)
 }
 
 
-void CompletionWindow::on_PAGE_UP(CompletionStack & cs)
+void CompletionWindow::on_PAGE_UP()
 {
     auto & c = cs.top();
     if (c.display_start != c.start)
@@ -148,7 +149,7 @@ void CompletionWindow::on_PAGE_UP(CompletionStack & cs)
 }
 
 
-void CompletionWindow::on_PAGE_DOWN(CompletionStack & cs)
+void CompletionWindow::on_PAGE_DOWN()
 {
     auto & c = cs.top();
     int const end = c.start + c.length - 1;
@@ -162,7 +163,7 @@ void CompletionWindow::on_PAGE_DOWN(CompletionStack & cs)
 }
 
 
-void CompletionWindow::on_HOME(CompletionStack & cs)
+void CompletionWindow::on_HOME()
 {
     auto & c = cs.top();
     if (c.display_start != c.start)
@@ -173,7 +174,7 @@ void CompletionWindow::on_HOME(CompletionStack & cs)
 }
 
 
-void CompletionWindow::on_END(CompletionStack & cs)
+void CompletionWindow::on_END()
 {
     auto & c = cs.top();
     int const end = c.start + c.length - 1;
@@ -185,7 +186,7 @@ void CompletionWindow::on_END(CompletionStack & cs)
 }
 
 
-void CompletionWindow::on_RETURN_hook(CompletionStack & cs, WordStack & ws)
+void CompletionWindow::on_RETURN_hook()
 {
     auto & c = cs.top();
 

@@ -36,24 +36,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 class CompletionWindow;
+struct word_filter;
 
 class SynonymWindow : public AbstractWindow
 {
 public:
-    explicit SynonymWindow(CompletionWindow &);
+    SynonymWindow(CompletionStack &, WordStack &, CompletionWindow &, word_filter &);
 
 private:
     std::string const & title() const override;
     void resize_hook() override;
-    void draw_hook(CompletionStack &) override;
-    void on_KEY_UP(CompletionStack &) override;
-    void on_KEY_DOWN(CompletionStack &) override;
-    void on_PAGE_UP(CompletionStack &) override;
-    void on_PAGE_DOWN(CompletionStack &) override;
-    void on_HOME(CompletionStack &) override;
-    void on_END(CompletionStack &) override;
-    void on_RETURN_hook(CompletionStack &, WordStack &) override;
+    void draw_hook() override;
+    void on_KEY_UP() override;
+    void on_KEY_DOWN() override;
+    void on_PAGE_UP() override;
+    void on_PAGE_DOWN() override;
+    void on_HOME() override;
+    void on_END() override;
+    void on_RETURN_hook() override;
 
 private:
     CompletionWindow & completion_win;
+    word_filter & wf;
 };

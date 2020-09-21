@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "LengthCompletionWindow.h"
 #include "PartsOfSpeechWindow.h"
 #include "SynonymWindow.h"
+#include "word_filter.h"
 
 
 
@@ -86,28 +87,29 @@ int main(int argc, char ** argv)
     int prev_root_y{root_y};
     int prev_root_x{root_x};
 
-    InputWindow input_win;
+    word_filter wf;
+    CompletionStack cs{};
+    std::stack<std::pair<std::string, AbstractWindow *>> ws; // for navigation with RET and DEL
+
+
+    InputWindow input_win{cs, ws};
     input_win.resize();
 
-    CompletionWindow completion_win{input_win};
+    CompletionWindow completion_win{cs, ws, input_win};
     completion_win.resize();
 
-    LengthCompletionWindow len_completion_win{input_win, completion_win};
+    LengthCompletionWindow len_completion_win{cs, ws, input_win, completion_win};
     len_completion_win.resize();
 
-    PartsOfSpeechWindow pos_win;
+    PartsOfSpeechWindow pos_win{cs, ws};
     pos_win.resize();
 
-    SynonymWindow syn_win{completion_win};
+    SynonymWindow syn_win{cs, ws, completion_win, wf};
     syn_win.resize();
 
-    AntonymWindow ant_win{completion_win, len_completion_win};
+    AntonymWindow ant_win{cs, ws, completion_win, len_completion_win, wf};
     ant_win.resize();
 
-    CompletionStack cs;
-
-    // stores words for navigation with RET and DEL
-    std::stack<std::pair<std::string, AbstractWindow *>> word_stack;
 
     bool resized_draw{true};
     int ch{0};
@@ -131,12 +133,12 @@ int main(int argc, char ** argv)
         }
         // ***********************************
 
-        input_win.draw(cs, resized_draw);
-        completion_win.draw(cs, resized_draw);
-        len_completion_win.draw(cs, resized_draw);
-        pos_win.draw(cs, resized_draw);
-        syn_win.draw(cs, resized_draw);
-        ant_win.draw(cs, resized_draw);
+        input_win.draw(resized_draw);
+        completion_win.draw(resized_draw);
+        len_completion_win.draw(resized_draw);
+        pos_win.draw(resized_draw);
+        syn_win.draw(resized_draw);
+        ant_win.draw(resized_draw);
 
         resized_draw = false;
 
@@ -157,16 +159,16 @@ int main(int argc, char ** argv)
             AbstractWindow * w = AbstractWindow::get_active_window();
             if (nullptr != w)
             {
-                w->on_RETURN(cs, word_stack);
+                w->on_RETURN();
                 input_win.mark_dirty();
             }
         }
         else if (ch == DEL)
         {
-            if (word_stack.size() == 0)
+            if (ws.size() == 0)
                 continue;
 
-            auto & [s, w] = word_stack.top();
+            auto & [s, w] = ws.top();
 
             while (cs.count() > 1)
                 cs.pop();
@@ -174,7 +176,7 @@ int main(int argc, char ** argv)
             for (auto ch : s)
                 cs.push(ch);
 
-            word_stack.pop();
+            ws.pop();
 
             AbstractWindow::set_active_window(w);
             input_win.mark_dirty();
@@ -287,7 +289,7 @@ int main(int argc, char ** argv)
         {
             AbstractWindow * w = AbstractWindow::get_active_window();
             if (nullptr != w)
-                w->on_KEY(ch, cs);
+                w->on_KEY(ch);
         }
     }
 

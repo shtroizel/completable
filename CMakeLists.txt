@@ -42,5 +42,10 @@ set(
 
 add_executable(completable ${completable_srcs})
 target_link_libraries(completable matchmaker ${CURSES_LIBRARIES})
-target_include_directories(completable PRIVATE include)
+target_include_directories(
+    completable
+    PRIVATE
+    include
+    matchmaker/matchable/include
+)
 install(TARGETS completable DESTINATION bin)

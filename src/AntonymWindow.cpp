@@ -39,11 +39,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CompletionStack.h"
 #include "CompletionWindow.h"
 #include "LengthCompletionWindow.h"
+#include "word_filter.h"
 
 
 
-AntonymWindow::AntonymWindow(CompletionWindow & cw, LengthCompletionWindow & lcw)
-    : AbstractWindow(), len_completion_win(lcw)
+AntonymWindow::AntonymWindow(
+    CompletionStack & cs,
+    WordStack & ws,
+    CompletionWindow & cw,
+    LengthCompletionWindow & lcw,
+    word_filter & f
+)
+    : AbstractWindow(cs, ws)
+    , len_completion_win(lcw)
+    , wf(f)
 {
     cw.add_dirty_dependency(this);
 }
@@ -65,7 +74,7 @@ void AntonymWindow::resize_hook()
 }
 
 
-void AntonymWindow::draw_hook(CompletionStack & cs)
+void AntonymWindow::draw_hook()
 {
     auto const & c = cs.top();
     auto const & antonyms = matchmaker::antonyms(c.display_start);
@@ -100,7 +109,7 @@ void AntonymWindow::draw_hook(CompletionStack & cs)
 }
 
 
-void AntonymWindow::on_KEY_UP(CompletionStack & cs)
+void AntonymWindow::on_KEY_UP()
 {
     auto & c = cs.top();
     if (c.ant_display_start > 0)
@@ -111,7 +120,7 @@ void AntonymWindow::on_KEY_UP(CompletionStack & cs)
 }
 
 
-void AntonymWindow::on_KEY_DOWN(CompletionStack & cs)
+void AntonymWindow::on_KEY_DOWN()
 {
     auto & c = cs.top();
     if (c.ant_display_start < (int) matchmaker::antonyms(c.display_start).size() - 1)
@@ -122,7 +131,7 @@ void AntonymWindow::on_KEY_DOWN(CompletionStack & cs)
 }
 
 
-void AntonymWindow::on_PAGE_UP(CompletionStack & cs)
+void AntonymWindow::on_PAGE_UP()
 {
     auto & c = cs.top();
     if (c.ant_display_start != 0)
@@ -136,7 +145,7 @@ void AntonymWindow::on_PAGE_UP(CompletionStack & cs)
 }
 
 
-void AntonymWindow::on_PAGE_DOWN(CompletionStack & cs)
+void AntonymWindow::on_PAGE_DOWN()
 {
     auto & c = cs.top();
     int const end = (int) matchmaker::antonyms(c.display_start).size() - 1;
@@ -151,7 +160,7 @@ void AntonymWindow::on_PAGE_DOWN(CompletionStack & cs)
 }
 
 
-void AntonymWindow::on_HOME(CompletionStack & cs)
+void AntonymWindow::on_HOME()
 {
     auto & c = cs.top();
     if (c.ant_display_start != 0)
@@ -162,7 +171,7 @@ void AntonymWindow::on_HOME(CompletionStack & cs)
 }
 
 
-void AntonymWindow::on_END(CompletionStack & cs)
+void AntonymWindow::on_END()
 {
     auto & c = cs.top();
     int const end = matchmaker::antonyms(c.display_start).size() - 1;
@@ -174,7 +183,7 @@ void AntonymWindow::on_END(CompletionStack & cs)
 }
 
 
-void AntonymWindow::on_RETURN_hook(CompletionStack & cs, WordStack & ws)
+void AntonymWindow::on_RETURN_hook()
 {
     auto const & antonyms = matchmaker::antonyms(cs.top().display_start);
 

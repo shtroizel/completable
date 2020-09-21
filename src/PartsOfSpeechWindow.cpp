@@ -56,7 +56,7 @@ void PartsOfSpeechWindow::resize_hook()
 }
 
 
-void PartsOfSpeechWindow::draw_hook(CompletionStack & cs)
+void PartsOfSpeechWindow::draw_hook()
 {
     int const cell_width{16};
 

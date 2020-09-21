@@ -40,10 +40,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CompletionStack.h"
 #include "InputWindow.h"
 #include "LengthCompletionWindow.h"
+#include "word_filter.h"
 
 
 
-SynonymWindow::SynonymWindow(CompletionWindow & cw) : completion_win(cw)
+SynonymWindow::SynonymWindow(CompletionStack & cs, WordStack & ws, CompletionWindow & cw, word_filter & f)
+    : AbstractWindow(cs, ws)
+    , completion_win(cw)
+    , wf(f)
 {
     completion_win.add_dirty_dependency(this);
 }
@@ -65,7 +69,7 @@ void SynonymWindow::resize_hook()
 }
 
 
-void SynonymWindow::draw_hook(CompletionStack & cs)
+void SynonymWindow::draw_hook()
 {
     auto const & c = cs.top();
     auto const & synonyms = matchmaker::synonyms(c.display_start);
@@ -99,7 +103,7 @@ void SynonymWindow::draw_hook(CompletionStack & cs)
 }
 
 
-void SynonymWindow::on_KEY_UP(CompletionStack & cs)
+void SynonymWindow::on_KEY_UP()
 {
     auto & c = cs.top();
 
@@ -111,7 +115,7 @@ void SynonymWindow::on_KEY_UP(CompletionStack & cs)
 }
 
 
-void SynonymWindow::on_KEY_DOWN(CompletionStack & cs)
+void SynonymWindow::on_KEY_DOWN()
 {
     auto & c = cs.top();
 
@@ -123,7 +127,7 @@ void SynonymWindow::on_KEY_DOWN(CompletionStack & cs)
 }
 
 
-void SynonymWindow::on_PAGE_UP(CompletionStack & cs)
+void SynonymWindow::on_PAGE_UP()
 {
     auto & c = cs.top();
 
@@ -137,7 +141,7 @@ void SynonymWindow::on_PAGE_UP(CompletionStack & cs)
 }
 
 
-void SynonymWindow::on_PAGE_DOWN(CompletionStack & cs)
+void SynonymWindow::on_PAGE_DOWN()
 {
     auto & c = cs.top();
 
@@ -155,7 +159,7 @@ void SynonymWindow::on_PAGE_DOWN(CompletionStack & cs)
 }
 
 
-void SynonymWindow::on_HOME(CompletionStack & cs)
+void SynonymWindow::on_HOME()
 {
     auto & c = cs.top();
 
@@ -167,7 +171,7 @@ void SynonymWindow::on_HOME(CompletionStack & cs)
 }
 
 
-void SynonymWindow::on_END(CompletionStack & cs)
+void SynonymWindow::on_END()
 {
     auto & c = cs.top();
 
@@ -184,7 +188,7 @@ void SynonymWindow::on_END(CompletionStack & cs)
 }
 
 
-void SynonymWindow::on_RETURN_hook(CompletionStack & cs, WordStack & ws)
+void SynonymWindow::on_RETURN_hook()
 {
     auto const & synonyms = matchmaker::synonyms(cs.top().display_start);
 

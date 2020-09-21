@@ -37,8 +37,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class InputWindow : public AbstractWindow
 {
+    using AbstractWindow::AbstractWindow;
+
     std::string const & title() const override;
     void resize_hook() override;
     void post_resize_hook() override;
-    void draw_hook(CompletionStack & cs) override;
+    void draw_hook() override;
 };

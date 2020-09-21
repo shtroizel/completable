@@ -41,20 +41,20 @@ class InputWindow;
 class CompletionWindow : public AbstractWindow
 {
 public:
-    CompletionWindow(InputWindow & iw);
+    CompletionWindow(CompletionStack &, WordStack &, InputWindow &);
     ~CompletionWindow() override;
 
 private:
     std::string const & title() const override;
     void resize_hook() override;
-    void draw_hook(CompletionStack & cs) override;
-    void on_KEY_UP(CompletionStack & cs) override;
-    void on_KEY_DOWN(CompletionStack & cs) override;
-    void on_PAGE_UP(CompletionStack & cs) override;
-    void on_PAGE_DOWN(CompletionStack & cs) override;
-    void on_HOME(CompletionStack & cs) override;
-    void on_END(CompletionStack & cs) override;
-    void on_RETURN_hook(CompletionStack & cs, WordStack & ws) override;
+    void draw_hook() override;
+    void on_KEY_UP() override;
+    void on_KEY_DOWN() override;
+    void on_PAGE_UP() override;
+    void on_PAGE_DOWN() override;
+    void on_HOME() override;
+    void on_END() override;
+    void on_RETURN_hook() override;
 
 private:
     InputWindow & input_win;

@@ -42,10 +42,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 LengthCompletionWindow::LengthCompletionWindow(
+    CompletionStack & cs,
+    WordStack & ws,
     InputWindow & iw,
     CompletionWindow const & cw
 )
-    : AbstractWindow()
+    : AbstractWindow(cs, ws)
     , input_win(iw)
     , completion_win(cw)
 {
@@ -74,7 +76,7 @@ void LengthCompletionWindow::resize_hook()
 }
 
 
-void LengthCompletionWindow::draw_hook(CompletionStack & cs)
+void LengthCompletionWindow::draw_hook()
 {
     auto const & cur_completion = cs.top();
 
@@ -118,7 +120,7 @@ void LengthCompletionWindow::draw_hook(CompletionStack & cs)
 }
 
 
-void LengthCompletionWindow::on_KEY_UP(CompletionStack & cs)
+void LengthCompletionWindow::on_KEY_UP()
 {
     auto & c = cs.top();
     if (c.len_display_start > 0)
@@ -129,7 +131,7 @@ void LengthCompletionWindow::on_KEY_UP(CompletionStack & cs)
 }
 
 
-void LengthCompletionWindow::on_KEY_DOWN(CompletionStack & cs)
+void LengthCompletionWindow::on_KEY_DOWN()
 {
     auto & c = cs.top();
     if (c.len_display_start < (int) c.length_completion.size() - 1)
@@ -140,7 +142,7 @@ void LengthCompletionWindow::on_KEY_DOWN(CompletionStack & cs)
 }
 
 
-void LengthCompletionWindow::on_PAGE_UP(CompletionStack & cs)
+void LengthCompletionWindow::on_PAGE_UP()
 {
     auto & c = cs.top();
     if (c.len_display_start != 0)
@@ -154,7 +156,7 @@ void LengthCompletionWindow::on_PAGE_UP(CompletionStack & cs)
 }
 
 
-void LengthCompletionWindow::on_PAGE_DOWN(CompletionStack & cs)
+void LengthCompletionWindow::on_PAGE_DOWN()
 {
     auto & c = cs.top();
     int const end = (int) c.length_completion.size() - 1;
@@ -169,7 +171,7 @@ void LengthCompletionWindow::on_PAGE_DOWN(CompletionStack & cs)
 }
 
 
-void LengthCompletionWindow::on_HOME(CompletionStack & cs)
+void LengthCompletionWindow::on_HOME()
 {
     auto & c = cs.top();
     if (c.len_display_start != 0)
@@ -180,7 +182,7 @@ void LengthCompletionWindow::on_HOME(CompletionStack & cs)
 }
 
 
-void LengthCompletionWindow::on_END(CompletionStack & cs)
+void LengthCompletionWindow::on_END()
 {
     auto & c = cs.top();
     int const end = c.length_completion.size() - 1;
@@ -192,10 +194,7 @@ void LengthCompletionWindow::on_END(CompletionStack & cs)
 }
 
 
-void LengthCompletionWindow::on_RETURN_hook(
-    CompletionStack & cs,
-    std::stack<std::pair<std::string, AbstractWindow *>> & word_stack
-)
+void LengthCompletionWindow::on_RETURN_hook()
 {
     auto & c = cs.top();
 
@@ -209,7 +208,7 @@ void LengthCompletionWindow::on_RETURN_hook(
     if (c.prefix == selected)
         return;
 
-    word_stack.push(std::make_pair(c.prefix, AbstractWindow::get_active_window()));
+    ws.push(std::make_pair(c.prefix, AbstractWindow::get_active_window()));
 
     for (auto i = c.prefix.length(); i < selected.length(); ++i)
         cs.push(selected[i]);
