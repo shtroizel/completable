@@ -73,6 +73,9 @@ void AbstractWindow::clear()
 
 void AbstractWindow::resize()
 {
+    if (!enabled)
+        return;
+
     if (nullptr != w)
     {
         clear();
@@ -90,6 +93,9 @@ void AbstractWindow::resize()
 
 void AbstractWindow::draw(bool clear_first)
 {
+    if (!enabled)
+        return;
+
     // check terminal for minimum size requirement
     if (root_y < MIN_ROOT_Y || root_x < MIN_ROOT_X)
     {
@@ -147,6 +153,9 @@ void AbstractWindow::set_active_window(AbstractWindow * act_win)
 
 void AbstractWindow::on_KEY(int key)
 {
+    if (!enabled)
+        return;
+
     switch (key)
     {
         case KEY_UP    : on_KEY_UP();    return;
@@ -161,10 +170,10 @@ void AbstractWindow::on_KEY(int key)
 
 void AbstractWindow::on_RETURN()
 {
-    if (!is_active())
+    if (!enabled)
         return;
 
-    if (cs.top().length == 0)
+    if (!is_active())
         return;
 
     on_RETURN_hook();
@@ -182,4 +191,26 @@ void AbstractWindow::mark_dirty()
 void AbstractWindow::add_dirty_dependency(AbstractWindow * dep)
 {
     dirty_dependencies.push_back(dep);
+}
+
+
+void AbstractWindow::enable()
+{
+    enabled = true;
+    resize();
+}
+
+
+void AbstractWindow::disable()
+{
+    pre_disable_hook();
+
+    if (nullptr != w)
+    {
+        clear();
+        delwin(w);
+        w = nullptr;
+    }
+
+    enabled = false;
 }

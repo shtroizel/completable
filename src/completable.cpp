@@ -47,6 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AntonymWindow.h"
 #include "CompletionStack.h"
 #include "CompletionWindow.h"
+#include "FilterWindow.h"
 #include "InputWindow.h"
 #include "LengthCompletionWindow.h"
 #include "PartsOfSpeechWindow.h"
@@ -88,27 +89,28 @@ int main(int argc, char ** argv)
     int prev_root_x{root_x};
 
     word_filter wf;
-    CompletionStack cs{};
+    CompletionStack cs{wf};
     std::stack<std::pair<std::string, AbstractWindow *>> ws; // for navigation with RET and DEL
 
+    FilterWindow filter_win{cs, ws, wf};
 
     InputWindow input_win{cs, ws};
-    input_win.resize();
+    input_win.enable();
 
     CompletionWindow completion_win{cs, ws, input_win};
-    completion_win.resize();
+    completion_win.enable();
 
     LengthCompletionWindow len_completion_win{cs, ws, input_win, completion_win};
-    len_completion_win.resize();
+    len_completion_win.enable();
 
     PartsOfSpeechWindow pos_win{cs, ws};
-    pos_win.resize();
+    pos_win.enable();
 
     SynonymWindow syn_win{cs, ws, completion_win, wf};
-    syn_win.resize();
+    syn_win.enable();
 
-    AntonymWindow ant_win{cs, ws, completion_win, len_completion_win, wf};
-    ant_win.resize();
+    AntonymWindow ant_win{cs, ws, completion_win, len_completion_win, syn_win, wf};
+    ant_win.enable();
 
 
     bool resized_draw{true};
@@ -128,6 +130,7 @@ int main(int argc, char ** argv)
             pos_win.resize();
             syn_win.resize();
             ant_win.resize();
+            filter_win.resize();
 
             resized_draw = true;
         }
@@ -139,10 +142,14 @@ int main(int argc, char ** argv)
         pos_win.draw(resized_draw);
         syn_win.draw(resized_draw);
         ant_win.draw(resized_draw);
+        filter_win.draw(resized_draw);
 
         resized_draw = false;
 
-        ch = wgetch(input_win.get_WINDOW());
+        if (input_win.is_enabled())
+            ch = wgetch(input_win.get_WINDOW());
+        else if (filter_win.is_enabled())
+            ch = wgetch(filter_win.get_WINDOW());
 
         if (ch == '$' || ch == '~' || ch == '`')
         {
@@ -156,134 +163,218 @@ int main(int argc, char ** argv)
         }
         else if (ch == RET)
         {
-            AbstractWindow * w = AbstractWindow::get_active_window();
-            if (nullptr != w)
+            if (filter_win.is_enabled())
             {
-                w->on_RETURN();
-                input_win.mark_dirty();
+                filter_win.toggle_hovered();
+            }
+            else
+            {
+                AbstractWindow * w = AbstractWindow::get_active_window();
+                if (nullptr != w)
+                {
+                    w->on_RETURN();
+                    input_win.mark_dirty();
+                }
             }
         }
         else if (ch == DEL)
         {
-            if (ws.size() == 0)
-                continue;
+            if (filter_win.is_enabled())
+            {
+            }
+            else
+            {
+                if (ws.size() == 0)
+                    continue;
 
-            auto & [s, w] = ws.top();
+                auto & [s, w] = ws.top();
 
-            while (cs.count() > 1)
-                cs.pop();
+                while (cs.count() > 1)
+                    cs.pop();
 
-            for (auto ch : s)
-                cs.push(ch);
+                for (auto ch : s)
+                    cs.push(ch);
 
-            ws.pop();
+                ws.pop();
 
-            AbstractWindow::set_active_window(w);
-            input_win.mark_dirty();
+                AbstractWindow::set_active_window(w);
+                input_win.mark_dirty();
+            }
         }
         else if (ch == KEY_BACKSPACE || ch == 127 || ch == '\b')
         {
-            int old_count = cs.count();
-            cs.pop();
-            int new_count = cs.count();
-            if (new_count != old_count)
-                input_win.mark_dirty();
+            if (filter_win.is_enabled())
+            {
+            }
+            else
+            {
+                int old_count = cs.count();
+                cs.pop();
+                int new_count = cs.count();
+                if (new_count != old_count)
+                    input_win.mark_dirty();
+            }
         }
         else if (ch == TAB)
         {
-            decltype(cs) const & ccs = cs;
-
-            auto const & cur_completion = ccs.top();
-            std::string const & prefix = cur_completion.prefix;
-            if (cur_completion.length > 0)
+            if (filter_win.is_enabled())
             {
-                std::string const & first_entry = matchmaker::at(cur_completion.start);
+            }
+            else
+            {
+                decltype(cs) const & ccs = cs;
 
-                // find out the "target_completion_count" or the completion count after skipping
-                // by common characters
-                int target_completion_count = ccs.count() - 1;
-                bool ok = first_entry.size() > prefix.size();
-                while (ok)
+                auto const & c = ccs.top();
+                std::string const & prefix = c.prefix;
+
+                if (c.standard_completion.size() > 0)
                 {
-                    for (
-                        int i = cur_completion.start;
-                        ok && i < cur_completion.start + cur_completion.length;
-                        ++i
-                    )
-                    {
-                        std::string const & entry = matchmaker::at(i);
+                    std::string const & first_entry = matchmaker::at(c.standard_completion[0]);
 
-                        if ((int) entry.size() < target_completion_count)
-                            ok = false;
-                        else if ((int) first_entry.size() < target_completion_count)
-                            ok = false;
-                        else if (entry[target_completion_count] != first_entry[target_completion_count])
-                            ok = false;
+                    // find out the "target_completion_count" or the completion count after skipping
+                    // by common characters
+                    int target_completion_count = ccs.count() - 1;
+                    bool ok = first_entry.size() > prefix.size();
+                    while (ok)
+                    {
+                        for (auto i : c.standard_completion)
+                        {
+                            std::string const & entry = matchmaker::at(i);
+
+                            if ((int) entry.size() < target_completion_count)
+                                ok = false;
+                            else if ((int) first_entry.size() < target_completion_count)
+                                ok = false;
+                            else if (entry[target_completion_count] != first_entry[target_completion_count])
+                                ok = false;
+                        }
+
+                        if (ok)
+                            ++target_completion_count;
                     }
 
-                    if (ok)
-                        ++target_completion_count;
-                }
+                    bool cs_modified{false};
+                    // grow up to the target completion count
+                    for (int i = (int) prefix.size(); i < target_completion_count; ++i)
+                    {
+                        cs.push(first_entry[i]);
+                        cs_modified = true;
+                    }
 
-                bool cs_modified{false};
-                // grow up to the target completion count
-                for (int i = (int) prefix.size(); i < target_completion_count; ++i)
-                {
-                    cs.push(first_entry[i]);
-                    cs_modified = true;
+                    if (cs_modified)
+                        input_win.mark_dirty();
                 }
-
-                if (cs_modified)
-                    input_win.mark_dirty();
             }
         }
         else if (ch == KEY_LEFT)
         {
-            if (ant_win.is_active())
-                AbstractWindow::set_active_window(&len_completion_win);
+            if (filter_win.is_enabled())
+            {
+            }
             else
-                if (len_completion_win.is_active())
-                    AbstractWindow::set_active_window(&syn_win);
-                else
-                    if (syn_win.is_active())
-                        AbstractWindow::set_active_window(&completion_win);
-                    else
-                        if (completion_win.is_active())
-                            AbstractWindow::set_active_window(&ant_win);
-                        else
-                            AbstractWindow::set_active_window(&completion_win);
-        }
-        else if (ch == ',' || ch == KEY_RIGHT)
-        {
-            if (completion_win.is_active())
-                AbstractWindow::set_active_window(&syn_win);
-            else
-                if (syn_win.is_active())
+            {
+                if (ant_win.is_active())
                     AbstractWindow::set_active_window(&len_completion_win);
                 else
                     if (len_completion_win.is_active())
-                        AbstractWindow::set_active_window(&ant_win);
+                        AbstractWindow::set_active_window(&syn_win);
                     else
-                        if (ant_win.is_active())
+                        if (syn_win.is_active())
                             AbstractWindow::set_active_window(&completion_win);
                         else
+                            if (completion_win.is_active())
+                                AbstractWindow::set_active_window(&ant_win);
+                            else
+                                AbstractWindow::set_active_window(&completion_win);
+            }
+        }
+        else if (ch == KEY_RIGHT)
+        {
+            if (filter_win.is_enabled())
+            {
+            }
+            else
+            {
+                if (completion_win.is_active())
+                    AbstractWindow::set_active_window(&syn_win);
+                else
+                    if (syn_win.is_active())
+                        AbstractWindow::set_active_window(&len_completion_win);
+                    else
+                        if (len_completion_win.is_active())
                             AbstractWindow::set_active_window(&ant_win);
+                        else
+                            if (ant_win.is_active())
+                                AbstractWindow::set_active_window(&completion_win);
+                            else
+                                AbstractWindow::set_active_window(&ant_win);
+            }
+        }
+        else if (ch == KEY_F(1)  ||
+                 ch == KEY_F(2)  ||
+                 ch == KEY_F(3)  ||
+                 ch == KEY_F(4)  ||
+                 ch == KEY_F(5)  ||
+                 ch == KEY_F(6)  ||
+                 ch == KEY_F(7)  ||
+                 ch == KEY_F(8)  ||
+                 ch == KEY_F(9)  ||
+                 ch == KEY_F(10) ||
+                 ch == KEY_F(11) ||
+                 ch == KEY_F(12))
+        {
+            filter_win.set_enabled(!filter_win.is_enabled());
+
+            if (filter_win.is_enabled())
+            {
+                AbstractWindow::set_active_window(&filter_win);
+            }
+            else
+            {
+                AbstractWindow::set_active_window(&completion_win);
+                input_win.mark_dirty();
+                completion_win.mark_dirty();
+                len_completion_win.mark_dirty();
+                pos_win.mark_dirty();
+                syn_win.mark_dirty();
+                ant_win.mark_dirty();
+            }
         }
         else if (ch == ESC)
         {
-            nodelay(input_win.get_WINDOW(), true);
-            ch = wgetch(input_win.get_WINDOW());
-            nodelay(input_win.get_WINDOW(), false);
+            if (filter_win.is_enabled())
+            {
+                filter_win.disable();
+                AbstractWindow::set_active_window(&completion_win);
+                input_win.mark_dirty();
+                completion_win.mark_dirty();
+                len_completion_win.mark_dirty();
+                pos_win.mark_dirty();
+                syn_win.mark_dirty();
+                ant_win.mark_dirty();
+            }
+            else
+            {
+                nodelay(input_win.get_WINDOW(), true);
+                ch = wgetch(input_win.get_WINDOW());
+                nodelay(input_win.get_WINDOW(), false);
 
-            if (ch == ERR)
-                break;
+                if (ch == ERR)
+                    break;
+            }
         }
         else if (ch > 31 && ch < 127) // printable ascii
         {
-            bool old_count = cs.count();
-            cs.push(ch);
-            if (cs.count() != old_count)
-                input_win.mark_dirty();
+            if (filter_win.is_enabled())
+            {
+            }
+            else
+            {
+                bool old_count = cs.count();
+                cs.push(ch);
+                if (cs.count() != old_count)
+                    input_win.mark_dirty();
+            }
         }
         else
         {
@@ -378,14 +469,14 @@ void shell()
             }
             else if (words[0][0] == '!')
             {
-                CompletionStack::completion c;
-                c.prefix = words[0].substr(1);
+                int completion_start{0};
+                int completion_length{0};
                 auto start = std::chrono::high_resolution_clock::now();
-                matchmaker::complete(c.prefix, c.start, c.length);
+                matchmaker::complete(words[0].substr(1), completion_start, completion_length);
                 auto stop = std::chrono::high_resolution_clock::now();
                 auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-                std::cout << "completion (" << c.length << ") : ";
-                for (int i = c.start; i < c.start + c.length; ++i)
+                std::cout << "completion (" << completion_length << ") : ";
+                for (int i = completion_start; i < completion_start + completion_length; ++i)
                     std::cout << " " << matchmaker::at(i);
                 std::cout << "\ncompletion done in " << duration.count() << " microseconds" << std::endl;
             }

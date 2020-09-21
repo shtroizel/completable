@@ -81,6 +81,11 @@ public:
 
     static bool & borders(){ static bool sb{true}; return sb; }
 
+    void set_enabled(bool state) { if (state) enable(); else disable(); }
+    bool is_enabled() const { return enabled; }
+    void enable();
+    void disable();
+
 private:
     virtual std::string const & title() const = 0;
     virtual void resize_hook() = 0;
@@ -107,6 +112,7 @@ protected:
     int x{0};
 
 private:
+    bool enabled{false};
     bool dirty{false};
     std::vector<AbstractWindow *> dirty_dependencies;
 

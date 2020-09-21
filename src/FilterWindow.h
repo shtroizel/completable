@@ -35,30 +35,27 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractWindow.h"
 
 
-class CompletionWindow;
+
 struct word_filter;
 
-class SynonymWindow : public AbstractWindow
+class FilterWindow : public AbstractWindow
 {
 public:
-    SynonymWindow(CompletionStack &, WordStack &, CompletionWindow &, word_filter &);
+    FilterWindow(CompletionStack &, WordStack &, word_filter &);
+    ~FilterWindow() override;
+
+    void toggle_hovered();
 
 private:
     std::string const & title() const override;
     void resize_hook() override;
+    void post_resize_hook() override;
+    void pre_disable_hook() override;
     void draw_hook() override;
     void on_KEY_UP() override;
     void on_KEY_DOWN() override;
-    void on_PAGE_UP() override;
-    void on_PAGE_DOWN() override;
-    void on_HOME() override;
-    void on_END() override;
-    void on_RETURN_hook() override;
 
 private:
-    void get_synonyms(std::vector<int> &);
-
-private:
-    CompletionWindow & completion_win;
+    int hover{-1};
     word_filter & wf;
 };

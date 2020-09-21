@@ -74,13 +74,14 @@ void CompletionWindow::resize_hook()
 
 void CompletionWindow::draw_hook()
 {
-    auto const & cur_completion = cs.top();
-    int display_count = cur_completion.length - (cur_completion.display_start - cur_completion.start);
+    auto const & c = cs.top();
+
+    int display_count = c.standard_completion.size() - c.display_start;
 
     int i = 0;
     for (; i < display_count && i < height - 2; ++i)
     {
-        std::string const & complete_entry = matchmaker::at(cur_completion.display_start + i);
+        std::string const & complete_entry = matchmaker::at(c.standard_completion[c.display_start + i]);
 
         if (i == 0)
         {
@@ -117,7 +118,7 @@ void CompletionWindow::draw_hook()
 void CompletionWindow::on_KEY_UP()
 {
     auto & c = cs.top();
-    if (c.display_start > c.start)
+    if (c.display_start > 0)
     {
         --c.display_start;
         mark_dirty();
@@ -128,7 +129,7 @@ void CompletionWindow::on_KEY_UP()
 void CompletionWindow::on_KEY_DOWN()
 {
     auto & c = cs.top();
-    if (c.display_start < c.start + c.length - 1)
+    if (c.display_start < (int) c.standard_completion.size() - 1)
     {
         ++c.display_start;
         mark_dirty();
@@ -139,11 +140,11 @@ void CompletionWindow::on_KEY_DOWN()
 void CompletionWindow::on_PAGE_UP()
 {
     auto & c = cs.top();
-    if (c.display_start != c.start)
+    if (c.display_start != 0)
     {
         c.display_start -= height - 3;
-        if (c.display_start < c.start)
-            c.display_start = c.start;
+        if (c.display_start < 0)
+            c.display_start = 0;
         mark_dirty();
     }
 }
@@ -152,7 +153,7 @@ void CompletionWindow::on_PAGE_UP()
 void CompletionWindow::on_PAGE_DOWN()
 {
     auto & c = cs.top();
-    int const end = c.start + c.length - 1;
+    int const end = (int) c.standard_completion.size() - 1;
     if (c.display_start != end)
     {
         c.display_start += height - 3;
@@ -166,9 +167,9 @@ void CompletionWindow::on_PAGE_DOWN()
 void CompletionWindow::on_HOME()
 {
     auto & c = cs.top();
-    if (c.display_start != c.start)
+    if (c.display_start != 0)
     {
-        c.display_start = c.start;
+        c.display_start = 0;
         mark_dirty();
     }
 }
@@ -177,7 +178,7 @@ void CompletionWindow::on_HOME()
 void CompletionWindow::on_END()
 {
     auto & c = cs.top();
-    int const end = c.start + c.length - 1;
+    int const end = (int) c.standard_completion.size() - 1;
     if (c.display_start != end)
     {
         c.display_start = end;

@@ -34,7 +34,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <vector>
 
+#include <matchable/matchable_fwd.h>
 
+
+struct word_filter;
 
 class CompletionStack
 {
@@ -46,40 +49,37 @@ public:
         // user input state
         std::string prefix;
 
-        // index of first word in dictionary that starts with prefix
-        int start{0};
+        std::vector<int> standard_completion;
 
-        // number of words in the dictionary that start with prefix
-        int length{0};
-
-        // index of first word displayed in "Completion"
+        // first index displayed for standard_completion
         int display_start{0};
 
-        // first index of "length_completion" or first word displayed in "Length Completion"
-        int len_display_start{0};
-
-        // sorted but noncontiguous length indexes
         std::vector<int> length_completion;
 
-        // index of first word displayed in "Synonyms"
+        // first index displayed for length_completion
+        int len_display_start{0};
+
+        // first synonym displayed
         int syn_display_start{0};
 
-        // index of first word displayed in "Antonyms"
+        // first antonym displayed
         int ant_display_start{0};
     };
 
-    CompletionStack() { clear_top(); }
+    CompletionStack(word_filter const &);
 
     void push(int ch);
     void pop();
     int count() const { return completion_count; }
     completion const & top() const { return completions[completion_count - 1]; }
     completion & top() { return completions[completion_count - 1]; }
+    void clear_top();
 
 
 private:
-    void clear_top();
 
     completion completions[CAPACITY];
     int completion_count{1};
+
+    word_filter const & wf;
 };

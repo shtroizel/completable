@@ -39,6 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CompletionStack.h"
 #include "CompletionWindow.h"
 #include "LengthCompletionWindow.h"
+#include "SynonymWindow.h"
 #include "word_filter.h"
 
 
@@ -48,10 +49,12 @@ AntonymWindow::AntonymWindow(
     WordStack & ws,
     CompletionWindow & cw,
     LengthCompletionWindow & lcw,
+    SynonymWindow & sw,
     word_filter & f
 )
     : AbstractWindow(cs, ws)
     , len_completion_win(lcw)
+    , syn_win(sw)
     , wf(f)
 {
     cw.add_dirty_dependency(this);
@@ -76,11 +79,20 @@ void AntonymWindow::resize_hook()
 
 void AntonymWindow::draw_hook()
 {
-    auto const & c = cs.top();
-    auto const & antonyms = matchmaker::antonyms(c.display_start);
+    auto & c = cs.top();
+    if (c.standard_completion.size() == 0)
+        return;
+
+    std::vector<int> antonyms;
+    get_antonyms(antonyms);
+
+    // new filter could result in syn_display_start out of bounds so clamp
+    if (c.ant_display_start >= (int) antonyms.size())
+        c.ant_display_start = (int) antonyms.size() - 1;
+    if (c.ant_display_start < 0)
+        c.ant_display_start = 0;
 
     int display_count = (int) antonyms.size() - c.ant_display_start;
-
 
     int i = 0;
     for (; i < display_count && i < height - 2; ++i)
@@ -122,10 +134,20 @@ void AntonymWindow::on_KEY_UP()
 
 void AntonymWindow::on_KEY_DOWN()
 {
+    std::vector<int> ant;
+    get_antonyms(ant);
+    if (ant.size() == 0)
+        return;
+
+    int const end = (int) ant.size() - 1;
     auto & c = cs.top();
-    if (c.ant_display_start < (int) matchmaker::antonyms(c.display_start).size() - 1)
+    if (c.ant_display_start != end)
     {
         ++c.ant_display_start;
+
+        if (c.ant_display_start > end)
+            c.ant_display_start = end;
+
         mark_dirty();
     }
 }
@@ -147,11 +169,17 @@ void AntonymWindow::on_PAGE_UP()
 
 void AntonymWindow::on_PAGE_DOWN()
 {
+    std::vector<int> ant;
+    get_antonyms(ant);
+    if (ant.size() == 0)
+        return;
+
+    int const end = (int) ant.size() - 1;
     auto & c = cs.top();
-    int const end = (int) matchmaker::antonyms(c.display_start).size() - 1;
     if (c.ant_display_start != end)
     {
         c.ant_display_start += height - 3;
+
         if (c.ant_display_start > end)
             c.ant_display_start = end;
 
@@ -173,8 +201,13 @@ void AntonymWindow::on_HOME()
 
 void AntonymWindow::on_END()
 {
+    std::vector<int> ant;
+    get_antonyms(ant);
+    if (ant.size() == 0)
+        return;
+
+    int const end = (int) ant.size() - 1;
     auto & c = cs.top();
-    int const end = matchmaker::antonyms(c.display_start).size() - 1;
     if (c.ant_display_start != end)
     {
         c.ant_display_start = end;
@@ -185,17 +218,16 @@ void AntonymWindow::on_END()
 
 void AntonymWindow::on_RETURN_hook()
 {
-    auto const & antonyms = matchmaker::antonyms(cs.top().display_start);
+    std::vector<int> ant;
+    get_antonyms(ant);
 
-    // do we even have antonyms?
-    if (cs.top().ant_display_start >= (int) antonyms.size())
+    if (ant.size() == 0)
         return;
 
-    std::string const & selected = matchmaker::at(antonyms[cs.top().ant_display_start]);
+    if (cs.top().ant_display_start >= (int) ant.size())
+        cs.top().ant_display_start = (int) ant.size() - 1;
 
-    // nothing to do?
-    if (selected == cs.top().prefix)
-        return;
+    std::string const & selected = matchmaker::at(ant[cs.top().ant_display_start]);
 
     // save old prefix to word_stack
     ws.push(std::make_pair(cs.top().prefix, AbstractWindow::get_active_window()));
@@ -205,4 +237,28 @@ void AntonymWindow::on_RETURN_hook()
         cs.pop();
     for (auto ch : selected)
         cs.push(ch);
+
+    AbstractWindow::set_active_window(&syn_win);
 }
+
+
+void AntonymWindow::get_antonyms(std::vector<int> & antonyms)
+{
+    antonyms.clear();
+
+    auto & c = cs.top();
+
+    if (c.standard_completion.size() == 0)
+        return;
+
+    if (c.display_start >= (int) c.standard_completion.size())
+        c.display_start = (int) c.standard_completion.size() - 1;
+
+    auto const & unfiltered = matchmaker::antonyms(c.standard_completion[c.display_start]);
+
+    antonyms.reserve(unfiltered.size());
+    for (auto ant : unfiltered)
+        if (wf.passes(ant))
+            antonyms.push_back(ant);
+}
+

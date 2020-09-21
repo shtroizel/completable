@@ -71,8 +71,18 @@ void SynonymWindow::resize_hook()
 
 void SynonymWindow::draw_hook()
 {
-    auto const & c = cs.top();
-    auto const & synonyms = matchmaker::synonyms(c.display_start);
+    auto & c = cs.top();
+    if (c.standard_completion.size() == 0)
+        return;
+
+    std::vector<int> synonyms;
+    get_synonyms(synonyms);
+
+    // new filter could result in syn_display_start out of bounds so clamp
+    if (c.syn_display_start >= (int) synonyms.size())
+        c.syn_display_start = (int) synonyms.size() - 1;
+    if (c.syn_display_start < 0)
+        c.syn_display_start = 0;
 
     int display_count = (int) synonyms.size() - c.syn_display_start;
 
@@ -117,11 +127,20 @@ void SynonymWindow::on_KEY_UP()
 
 void SynonymWindow::on_KEY_DOWN()
 {
-    auto & c = cs.top();
+    std::vector<int> syn;
+    get_synonyms(syn);
+    if (syn.size() == 0)
+        return;
 
-    if (c.syn_display_start < (int) matchmaker::synonyms(c.display_start).size() - 1)
+    int const end = (int) syn.size() - 1;
+    auto & c = cs.top();
+    if (c.syn_display_start != end)
     {
         ++c.syn_display_start;
+
+        if (c.syn_display_start > end)
+            c.syn_display_start = end;
+
         mark_dirty();
     }
 }
@@ -143,17 +162,20 @@ void SynonymWindow::on_PAGE_UP()
 
 void SynonymWindow::on_PAGE_DOWN()
 {
-    auto & c = cs.top();
-
-    if (matchmaker::synonyms(c.display_start).size() == 0)
+    std::vector<int> syn;
+    get_synonyms(syn);
+    if (syn.size() == 0)
         return;
 
-    int const end = (int) matchmaker::synonyms(c.display_start).size() - 1;
+    int const end = (int) syn.size() - 1;
+    auto & c = cs.top();
     if (c.syn_display_start != end)
     {
         c.syn_display_start += height - 3;
+
         if (c.syn_display_start > end)
             c.syn_display_start = end;
+
         mark_dirty();
     }
 }
@@ -173,13 +195,13 @@ void SynonymWindow::on_HOME()
 
 void SynonymWindow::on_END()
 {
-    auto & c = cs.top();
-
-    if (matchmaker::synonyms(c.display_start).size() == 0)
+    std::vector<int> syn;
+    get_synonyms(syn);
+    if (syn.size() == 0)
         return;
 
-    int const end = (int) matchmaker::synonyms(c.display_start).size() - 1;
-
+    int const end = (int) syn.size() - 1;
+    auto & c = cs.top();
     if (c.syn_display_start != end)
     {
         c.syn_display_start = end;
@@ -190,17 +212,16 @@ void SynonymWindow::on_END()
 
 void SynonymWindow::on_RETURN_hook()
 {
-    auto const & synonyms = matchmaker::synonyms(cs.top().display_start);
+    std::vector<int> syn;
+    get_synonyms(syn);
 
-    // do we even have synonyms?
-    if (cs.top().syn_display_start >= (int) synonyms.size())
+    if (syn.size() == 0)
         return;
 
-    std::string const & selected = matchmaker::at(synonyms[cs.top().syn_display_start]);
+    if (cs.top().syn_display_start >= (int) syn.size())
+        cs.top().syn_display_start = (int) syn.size() - 1;
 
-    // nothing to do?
-    if (selected == cs.top().prefix)
-        return;
+    std::string const & selected = matchmaker::at(syn[cs.top().syn_display_start]);
 
     // save old prefix to word_stack
     ws.push(std::make_pair(cs.top().prefix, AbstractWindow::get_active_window()));
@@ -210,4 +231,24 @@ void SynonymWindow::on_RETURN_hook()
         cs.pop();
     for (auto ch : selected)
         cs.push(ch);
+}
+
+
+void SynonymWindow::get_synonyms(std::vector<int> & synonyms)
+{
+    synonyms.clear();
+    auto & c = cs.top();
+
+    if (c.standard_completion.size() == 0)
+        return;
+
+    if (c.display_start >= (int) c.standard_completion.size())
+        c.display_start = (int) c.standard_completion.size() - 1;
+
+    auto const & unfiltered = matchmaker::synonyms(c.standard_completion[c.display_start]);
+
+    synonyms.reserve(unfiltered.size());
+    for (auto syn : unfiltered)
+        if (wf.passes(syn))
+            synonyms.push_back(syn);
 }

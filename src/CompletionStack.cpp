@@ -36,6 +36,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <matchmaker/matchmaker.h>
 
+#include "word_filter.h"
+
+
+
+CompletionStack::CompletionStack(word_filter const & f) : wf(f)
+{
+    clear_top();
+}
 
 
 void CompletionStack::push(int ch)
@@ -56,23 +64,31 @@ void CompletionStack::push(int ch)
     top().prefix += ch;
 
     // get new completion
-    matchmaker::complete(
-        top().prefix,
-        top().start,
-        top().length
-    );
-
-    // if adding 'ch' would make an unknown word then ignore (undo) the push
-    if (top().length == 0)
     {
-        pop();
-        return;
+        int start{0};
+        int length{0};
+        matchmaker::complete(
+            top().prefix,
+            start,
+            length
+        );
+        top().standard_completion.reserve(length);
+        for (int i = start; i < start + length; ++i)
+            if (wf.passes(i))
+                top().standard_completion.push_back(i);
+
+        // if adding 'ch' would make an unknown word then ignore (undo) the push
+        if (top().standard_completion.size() == 0)
+        {
+            pop();
+            return;
+        }
     }
 
     // calculate length completion
-    top().length_completion.reserve(top().length);
+    top().length_completion.reserve(top().standard_completion.size());
     std::make_heap(top().length_completion.begin(), top().length_completion.end());
-    for (int i = top().start; i < top().start + top().length; ++i)
+    for (auto const & i : top().standard_completion)
     {
         top().length_completion.push_back(matchmaker::as_longest(i));
         std::push_heap(top().length_completion.begin(), top().length_completion.end());
@@ -82,7 +98,7 @@ void CompletionStack::push(int ch)
     // set selected entry to first for both normal completion and length completion
     // notice how for normal completion this is a matchmaker index while for length completion
     // this is the first element in the "length_completion" vector
-    top().display_start = top().start;
+    top().display_start = 0;
     top().len_display_start = 0;
 }
 
@@ -100,9 +116,8 @@ void CompletionStack::pop()
 void CompletionStack::clear_top()
 {
     top().prefix.clear();
-    top().start = 0;
+    top().standard_completion.clear();
     top().display_start = 0;
-    top().length = 0;
     top().len_display_start = 0;
     top().length_completion.clear();
     top().syn_display_start = 0;
@@ -112,15 +127,18 @@ void CompletionStack::clear_top()
     {
         // use entire dictionary for completions
 
-        top().length = matchmaker::size();
-
-        std::priority_queue<int, std::vector<int>, std::greater<std::vector<int>::value_type>> q;
+        top().standard_completion.reserve(matchmaker::size());
         for (int i = 0; i < matchmaker::size(); ++i)
-            q.push(matchmaker::as_longest(i));
-        while (!q.empty())
+            if (wf.passes(i))
+                top().standard_completion.push_back(i);
+
+        top().length_completion.reserve(top().standard_completion.size());
+        std::make_heap(top().length_completion.begin(), top().length_completion.end());
+        for (auto const & i : top().standard_completion)
         {
-            top().length_completion.push_back(q.top());
-            q.pop();
+            top().length_completion.push_back(matchmaker::as_longest(i));
+            std::push_heap(top().length_completion.begin(), top().length_completion.end());
         }
+        std::sort_heap(top().length_completion.begin(), top().length_completion.end());
     }
 }
