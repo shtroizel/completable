@@ -44,6 +44,7 @@ PROPERTYx1_MATCHABLE(
     filter_func,
     func,
     word_attribute,
+    name,
     male_spc_name,
     female_spc_name,
     place,
@@ -64,6 +65,7 @@ static bool all_labels_missing(int word)
 
 
 
+SET_PROPERTY(word_attribute, name, func, &matchmaker::is_name);
 SET_PROPERTY(word_attribute, male_spc_name, func, &matchmaker::is_male_name);
 SET_PROPERTY(word_attribute, female_spc_name, func, &matchmaker::is_female_name);
 SET_PROPERTY(word_attribute, place, func, &matchmaker::is_place);
