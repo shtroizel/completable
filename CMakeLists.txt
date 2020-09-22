@@ -31,12 +31,12 @@ set(
     completable_srcs
     src/AbstractWindow.cpp
     src/AntonymWindow.cpp
+    src/AttributeWindow.cpp
     src/CompletionStack.cpp
     src/CompletionWindow.cpp
     src/FilterWindow.cpp
     src/InputWindow.cpp
     src/LengthCompletionWindow.cpp
-    src/PartsOfSpeechWindow.cpp
     src/SynonymWindow.cpp
     src/completable.cpp
 )

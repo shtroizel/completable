@@ -30,7 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "PartsOfSpeechWindow.h"
+#include "AttributeWindow.h"
 
 #include <iostream>
 
@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-PartsOfSpeechWindow::PartsOfSpeechWindow(
+AttributeWindow::AttributeWindow(
     CompletionStack & cs,
     WordStack & ws,
     CompletionWindow & cw,
@@ -64,14 +64,14 @@ PartsOfSpeechWindow::PartsOfSpeechWindow(
 }
 
 
-std::string const & PartsOfSpeechWindow::title() const
+std::string const & AttributeWindow::title() const
 {
     static std::string const t{"Attributes"};
     return t;
 }
 
 
-void PartsOfSpeechWindow::resize_hook()
+void AttributeWindow::resize_hook()
 {
     height = 5;
     width = root_x;
@@ -80,7 +80,7 @@ void PartsOfSpeechWindow::resize_hook()
 }
 
 
-void PartsOfSpeechWindow::draw_hook()
+void AttributeWindow::draw_hook()
 {
     auto const & c = cs.top();
     int selection = c.standard_completion[c.display_start];

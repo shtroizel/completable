@@ -45,12 +45,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AbstractWindow.h"
 #include "AntonymWindow.h"
+#include "AttributeWindow.h"
 #include "CompletionStack.h"
 #include "CompletionWindow.h"
 #include "FilterWindow.h"
 #include "InputWindow.h"
 #include "LengthCompletionWindow.h"
-#include "PartsOfSpeechWindow.h"
 #include "SynonymWindow.h"
 #include "word_filter.h"
 
@@ -109,7 +109,7 @@ int main(int argc, char ** argv)
     AntonymWindow ant_win{cs, ws, completion_win, len_completion_win, syn_win, wf};
     ant_win.enable();
 
-    PartsOfSpeechWindow pos_win{cs, ws, completion_win, len_completion_win, syn_win, ant_win};
+    AttributeWindow pos_win{cs, ws, completion_win, len_completion_win, syn_win, ant_win};
     pos_win.enable();
 
 

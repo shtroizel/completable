@@ -41,10 +41,10 @@ class LengthCompletionWindow;
 class SynonymWindow;
 class AntonymWindow;
 
-class PartsOfSpeechWindow : public AbstractWindow
+class AttributeWindow : public AbstractWindow
 {
 public:
-    PartsOfSpeechWindow(
+    AttributeWindow(
         CompletionStack &,
         WordStack &,
         CompletionWindow &,
