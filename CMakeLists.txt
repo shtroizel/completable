@@ -7,7 +7,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra")
 
-# work around broken ncurses
 if(EXISTS /etc/gentoo-release)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ltinfo")
 endif()
@@ -24,7 +23,7 @@ endif()
 get_filename_component(rpath_dir "${matchmaker_DIR}/.." REALPATH)
 set(CMAKE_INSTALL_RPATH "${rpath_dir}")
 
-find_package(matchmaker 1.5 REQUIRED)
+find_package(matchmaker 1.6 REQUIRED)
 
 find_package(Curses REQUIRED)
 
