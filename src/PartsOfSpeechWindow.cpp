@@ -32,12 +32,36 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "PartsOfSpeechWindow.h"
 
+#include <iostream>
+
 #include <ncurses.h>
 
 #include <matchmaker/matchmaker.h>
 
 #include "CompletionStack.h"
+#include "CompletionWindow.h"
+#include "LengthCompletionWindow.h"
+#include "SynonymWindow.h"
+#include "AntonymWindow.h"
 
+
+
+
+PartsOfSpeechWindow::PartsOfSpeechWindow(
+    CompletionStack & cs,
+    WordStack & ws,
+    CompletionWindow & cw,
+    LengthCompletionWindow & lcw,
+    SynonymWindow & sw,
+    AntonymWindow & aw
+)
+    : AbstractWindow(cs, ws)
+{
+    cw.add_dirty_dependency(this);
+    lcw.add_dirty_dependency(this);
+    sw.add_dirty_dependency(this);
+    aw.add_dirty_dependency(this);
+}
 
 
 std::string const & PartsOfSpeechWindow::title() const
@@ -58,43 +82,81 @@ void PartsOfSpeechWindow::resize_hook()
 
 void PartsOfSpeechWindow::draw_hook()
 {
-    int const cell_width{16};
+    auto const & c = cs.top();
+    int selection = c.standard_completion[c.display_start];
+    int line = 1;
 
-    auto const & flagged_pos = matchmaker::flagged_parts_of_speech(cs.top().display_start);
-
-    int x = 1;
-    int i = 0;
-    int y = 1;
-    while (i < (int) matchmaker::all_parts_of_speech().size())
     {
-        if (flagged_pos[i] != 0)
-            wattron(w, A_REVERSE);
+        std::string const att_label{"     Attributes:"};
+        mvwprintw(w, line, 1, att_label.c_str());
 
-        for(
-            int j = 0;
-            j < (int) matchmaker::all_parts_of_speech()[i].size() && j < x + cell_width - 2;
-            ++j
-        )
-            mvwaddch(w, y, j + x, matchmaker::all_parts_of_speech()[i][j]);
+        static std::string const att_name = "name";
+        static std::string const att_male_name = "male name";
+        static std::string const att_female_name = "female name";
+        static std::string const att_place = "place";
+        static std::string const att_compound = "compound";
+        static std::string const att_acronym = "acronym";
 
-        if (flagged_pos[i] != 0)
-            wattroff(w, A_REVERSE);
+        std::vector<std::string const *> attributes;
+        if (matchmaker::is_name(selection))        attributes.push_back(&att_name);
+        if (matchmaker::is_male_name(selection))   attributes.push_back(&att_male_name);
+        if (matchmaker::is_female_name(selection)) attributes.push_back(&att_female_name);
+        if (matchmaker::is_place(selection))       attributes.push_back(&att_place);
+        if (matchmaker::is_compound(selection))    attributes.push_back(&att_compound);
+        if (matchmaker::is_acronym(selection))     attributes.push_back(&att_acronym);
 
-        ++i;
-
-        x += cell_width;
-
-        if (x > cell_width * 5)
+        int indent = att_label.size() + 1;
+        for (auto att : attributes)
         {
-            if (y < 4)
+            if (width - indent <= (int) att->length() + 2)
+                break;
+
+            mvwprintw(w, line, indent, "  ");
+            mvwprintw(w, line, indent + 2, att->c_str());
+            indent += att->length() + 2;
+        }
+
+        for (; indent < width - 1; ++indent)
+            mvwaddch(w, line, indent, ' ');
+    }
+
+    ++line;
+
+    {
+        std::vector<std::string const *> pos;
+        matchmaker::parts_of_speech(selection, pos);
+
+        std::string const pos_label{"Parts of Speech:"};
+        mvwprintw(w, line, 1, pos_label.c_str());
+
+        int indent = pos_label.size() + 1;
+        for (auto p : pos)
+        {
+            if (width - indent <= (int) p->length() + 2)
             {
-                y += 1;
-                x = 1;
+                for (; indent < width - 1; ++indent)
+                    mvwaddch(w, line, indent, ' ');
+
+                ++line;
+                indent = pos_label.size() + 1;
             }
-            else
+            if (line > 3)
             {
+                line = 3;
                 break;
             }
+
+            mvwprintw(w, line, indent, "  ");
+            mvwprintw(w, line, indent + 2, p->c_str());
+            indent += p->length() + 2;
+        }
+
+        for (; line < 4; ++line)
+        {
+            for (; indent < width - 1; ++indent)
+                mvwaddch(w, line, indent, ' ');
+
+            indent = pos_label.size() + 1;
         }
     }
 }

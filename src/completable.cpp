@@ -103,14 +103,14 @@ int main(int argc, char ** argv)
     LengthCompletionWindow len_completion_win{cs, ws, input_win, completion_win};
     len_completion_win.enable();
 
-    PartsOfSpeechWindow pos_win{cs, ws};
-    pos_win.enable();
-
     SynonymWindow syn_win{cs, ws, completion_win, wf};
     syn_win.enable();
 
     AntonymWindow ant_win{cs, ws, completion_win, len_completion_win, syn_win, wf};
     ant_win.enable();
+
+    PartsOfSpeechWindow pos_win{cs, ws, completion_win, len_completion_win, syn_win, ant_win};
+    pos_win.enable();
 
 
     bool resized_draw{true};

@@ -36,9 +36,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
+class CompletionWindow;
+class LengthCompletionWindow;
+class SynonymWindow;
+class AntonymWindow;
+
 class PartsOfSpeechWindow : public AbstractWindow
 {
-    using AbstractWindow::AbstractWindow;
+public:
+    PartsOfSpeechWindow(
+        CompletionStack &,
+        WordStack &,
+        CompletionWindow &,
+        LengthCompletionWindow &,
+        SynonymWindow &,
+        AntonymWindow &
+    );
+
+private:
+    static int & most_width() { static int w{0}; return w; }
+    static std::string & most_width_str() { static std::string s; return s; }
     std::string const & title() const override;
     void resize_hook() override;
     void draw_hook() override;
