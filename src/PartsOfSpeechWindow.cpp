@@ -66,7 +66,7 @@ PartsOfSpeechWindow::PartsOfSpeechWindow(
 
 std::string const & PartsOfSpeechWindow::title() const
 {
-    static std::string const t{"Parts of Speech"};
+    static std::string const t{"Attributes"};
     return t;
 }
 
