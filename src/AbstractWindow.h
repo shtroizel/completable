@@ -35,6 +35,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stack>
 #include <vector>
 
+#include <matchable/matchable_fwd.h>
+
 
 // ncurses window
 typedef struct _win_st WINDOW;
@@ -49,6 +51,9 @@ static int const END{360};
 
 
 using WordStack = std::stack<std::pair<std::string, class AbstractWindow *>>;
+
+MATCHABLE_FWD(TitleOrientation)
+
 
 class AbstractWindow
 {
@@ -71,7 +76,7 @@ public:
     static void set_active_window(AbstractWindow * act_win);
     static AbstractWindow * get_active_window() { return active(); }
 
-    bool is_active() const { return nullptr != active() && active()->title() == title(); }
+    bool is_active() { return nullptr != active() && active()->title() == title(); }
 
     void on_KEY(int key);
     void on_RETURN();
@@ -87,7 +92,8 @@ public:
     void disable();
 
 private:
-    virtual std::string const & title() const = 0;
+    virtual std::string title() = 0;
+    virtual TitleOrientation::Type title_orientation() const = 0;
     virtual void resize_hook() = 0;
     virtual void post_resize_hook() {};
     virtual void draw_hook() = 0;

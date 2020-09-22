@@ -45,7 +45,8 @@ public:
     ~LengthCompletionWindow() override;
 
 private:
-    std::string const & title() const override;
+    std::string title() override;
+    TitleOrientation::Type title_orientation() const override;
     void resize_hook() override;
     void draw_hook() override;
     void on_KEY_UP() override;

@@ -32,30 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "AbstractWindow.h"
+#include <matchable/matchable.h>
 
 
-
-class CompletionWindow;
-class LengthCompletionWindow;
-class SynonymWindow;
-class AntonymWindow;
-
-class AttributeWindow : public AbstractWindow
-{
-public:
-    AttributeWindow(
-        CompletionStack &,
-        WordStack &,
-        CompletionWindow &,
-        LengthCompletionWindow &,
-        SynonymWindow &,
-        AntonymWindow &
-    );
-
-private:
-    std::string title() override;
-    TitleOrientation::Type title_orientation() const override;
-    void resize_hook() override;
-    void draw_hook() override;
-};
+MATCHABLE(TitleOrientation, Left, Center, Right)

@@ -38,11 +38,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <matchmaker/matchmaker.h>
 
+#include "AntonymWindow.h"
 #include "CompletionStack.h"
 #include "CompletionWindow.h"
 #include "LengthCompletionWindow.h"
 #include "SynonymWindow.h"
-#include "AntonymWindow.h"
+#include "TitleOrientation.h"
 
 
 
@@ -64,10 +65,16 @@ AttributeWindow::AttributeWindow(
 }
 
 
-std::string const & AttributeWindow::title() const
+std::string AttributeWindow::title()
 {
     static std::string const t{"Attributes"};
     return t;
+}
+
+
+TitleOrientation::Type AttributeWindow::title_orientation() const
+{
+    return TitleOrientation::Center::grab();
 }
 
 

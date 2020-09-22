@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CompletionStack.h"
 #include "word_filter.h"
 #include "InputWindow.h"
+#include "TitleOrientation.h"
 
 
 
@@ -57,10 +58,16 @@ FilterWindow::~FilterWindow()
 }
 
 
-std::string const & FilterWindow::title() const
+std::string FilterWindow::title()
 {
     static std::string const t{"Filter"};
     return t;
+}
+
+
+TitleOrientation::Type FilterWindow::title_orientation() const
+{
+    return TitleOrientation::Center::grab();
 }
 
 

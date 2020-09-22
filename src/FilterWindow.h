@@ -47,7 +47,8 @@ public:
     void toggle_hovered();
 
 private:
-    std::string const & title() const override;
+    std::string title() override;
+    TitleOrientation::Type title_orientation() const override;
     void resize_hook() override;
     void post_resize_hook() override;
     void pre_disable_hook() override;

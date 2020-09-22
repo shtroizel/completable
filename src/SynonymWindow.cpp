@@ -40,6 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CompletionStack.h"
 #include "InputWindow.h"
 #include "LengthCompletionWindow.h"
+#include "TitleOrientation.h"
 #include "word_filter.h"
 
 
@@ -53,10 +54,23 @@ SynonymWindow::SynonymWindow(CompletionStack & cs, WordStack & ws, CompletionWin
 }
 
 
-std::string const & SynonymWindow::title() const
+std::string SynonymWindow::title()
 {
-    static std::string const t{"Synonyms"};
+    std::string t{"Synonyms ("};
+
+    std::vector<int> syn;
+    get_synonyms(syn);
+    t += std::to_string(syn.size());
+
+    t += ")";
+
     return t;
+}
+
+
+TitleOrientation::Type SynonymWindow::title_orientation() const
+{
+    return TitleOrientation::Right::grab();
 }
 
 

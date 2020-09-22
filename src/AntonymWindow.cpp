@@ -40,6 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CompletionWindow.h"
 #include "LengthCompletionWindow.h"
 #include "SynonymWindow.h"
+#include "TitleOrientation.h"
 #include "word_filter.h"
 
 
@@ -61,10 +62,23 @@ AntonymWindow::AntonymWindow(
 }
 
 
-std::string const & AntonymWindow::title() const
+std::string AntonymWindow::title()
 {
-    static std::string const t{"Antonyms"};
+    std::string t{"Antonyms ("};
+
+    std::vector<int> ant;
+    get_antonyms(ant);
+    t += std::to_string(ant.size());
+
+    t += ")";
+
     return t;
+}
+
+
+TitleOrientation::Type AntonymWindow::title_orientation() const
+{
+    return TitleOrientation::Right::grab();
 }
 
 
