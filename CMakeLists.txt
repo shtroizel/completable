@@ -35,6 +35,7 @@ set(
     src/CompletionStack.cpp
     src/CompletionWindow.cpp
     src/FilterWindow.cpp
+    src/HelpWindow.cpp
     src/InputWindow.cpp
     src/LengthCompletionWindow.cpp
     src/SynonymWindow.cpp

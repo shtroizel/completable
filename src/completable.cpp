@@ -49,6 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CompletionStack.h"
 #include "CompletionWindow.h"
 #include "FilterWindow.h"
+#include "HelpWindow.h"
 #include "InputWindow.h"
 #include "LengthCompletionWindow.h"
 #include "SynonymWindow.h"
@@ -92,8 +93,6 @@ int main(int argc, char ** argv)
     CompletionStack cs{wf};
     std::stack<std::pair<std::string, AbstractWindow *>> ws; // for navigation with RET and DEL
 
-    FilterWindow filter_win{cs, ws, wf};
-
     InputWindow input_win{cs, ws};
     input_win.enable();
 
@@ -112,6 +111,11 @@ int main(int argc, char ** argv)
     AttributeWindow pos_win{cs, ws, completion_win, len_completion_win, syn_win, ant_win};
     pos_win.enable();
 
+    FilterWindow filter_win{cs, ws, wf};
+
+    HelpWindow help_win{cs, ws};
+    help_win.enable();
+    AbstractWindow::set_active_window(&help_win);
 
     bool resized_draw{true};
     int ch{0};
@@ -131,6 +135,7 @@ int main(int argc, char ** argv)
             syn_win.resize();
             ant_win.resize();
             filter_win.resize();
+            help_win.resize();
 
             resized_draw = true;
         }
@@ -143,6 +148,7 @@ int main(int argc, char ** argv)
         syn_win.draw(resized_draw);
         ant_win.draw(resized_draw);
         filter_win.draw(resized_draw);
+        help_win.draw(resized_draw);
 
         resized_draw = false;
 
@@ -163,7 +169,18 @@ int main(int argc, char ** argv)
         }
         else if (ch == RET)
         {
-            if (filter_win.is_enabled())
+            if (help_win.is_enabled())
+            {
+                help_win.disable();
+                AbstractWindow::set_active_window(&completion_win);
+                input_win.mark_dirty();
+                completion_win.mark_dirty();
+                len_completion_win.mark_dirty();
+                pos_win.mark_dirty();
+                syn_win.mark_dirty();
+                ant_win.mark_dirty();
+            }
+            else if (filter_win.is_enabled())
             {
                 filter_win.toggle_hovered();
             }
@@ -179,7 +196,10 @@ int main(int argc, char ** argv)
         }
         else if (ch == DEL)
         {
-            if (filter_win.is_enabled())
+            if (help_win.is_enabled())
+            {
+            }
+            else if (filter_win.is_enabled())
             {
             }
             else
@@ -203,7 +223,10 @@ int main(int argc, char ** argv)
         }
         else if (ch == KEY_BACKSPACE || ch == 127 || ch == '\b')
         {
-            if (filter_win.is_enabled())
+            if (help_win.is_enabled())
+            {
+            }
+            else if (filter_win.is_enabled())
             {
             }
             else
@@ -217,7 +240,10 @@ int main(int argc, char ** argv)
         }
         else if (ch == TAB)
         {
-            if (filter_win.is_enabled())
+            if (help_win.is_enabled())
+            {
+            }
+            else if (filter_win.is_enabled())
             {
             }
             else
@@ -268,7 +294,10 @@ int main(int argc, char ** argv)
         }
         else if (ch == KEY_LEFT)
         {
-            if (filter_win.is_enabled())
+            if (help_win.is_enabled())
+            {
+            }
+            else if (filter_win.is_enabled())
             {
             }
             else
@@ -290,7 +319,10 @@ int main(int argc, char ** argv)
         }
         else if (ch == KEY_RIGHT)
         {
-            if (filter_win.is_enabled())
+            if (help_win.is_enabled())
+            {
+            }
+            else if (filter_win.is_enabled())
             {
             }
             else
@@ -323,6 +355,9 @@ int main(int argc, char ** argv)
                  ch == KEY_F(11) ||
                  ch == KEY_F(12))
         {
+            if (help_win.is_enabled())
+                continue;
+
             filter_win.set_enabled(!filter_win.is_enabled());
 
             if (filter_win.is_enabled())
@@ -365,6 +400,9 @@ int main(int argc, char ** argv)
         }
         else if (ch > 31 && ch < 127) // printable ascii
         {
+            if (help_win.is_enabled())
+            {
+            }
             if (filter_win.is_enabled())
             {
             }
