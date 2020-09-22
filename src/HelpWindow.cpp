@@ -80,6 +80,7 @@ void HelpWindow::draw_hook()
     content.push_back(std::string("    push input stack    Return"));
     content.push_back(std::string("     pop input stack    Del"));
     content.push_back(std::string("toggle filter window    any F key (F1..F12)"));
+    content.push_back(std::string("    enter shell mode    any of '$', '~', '`'"));
     content.push_back(std::string("                quit    Esc, ctrl + c"));
     content.push_back(std::string("          close help    Return"));
 
