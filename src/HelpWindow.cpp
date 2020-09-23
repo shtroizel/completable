@@ -32,17 +32,23 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "HelpWindow.h"
 
-#include <iostream>
-
 #include <ncurses.h>
 
 #include <matchmaker/matchmaker.h>
 
-#include "CompletionStack.h"
-#include "word_filter.h"
 #include "InputWindow.h"
 
 
+
+HelpWindow::HelpWindow(
+    CompletionStack & cs,
+    WordStack & ws,
+    InputWindow & iw
+)
+    : AbstractWindow(cs, ws)
+    , input_win(iw)
+{
+}
 
 
 std::string HelpWindow::title()
@@ -96,4 +102,12 @@ void HelpWindow::draw_hook()
     for (; i < height - 2 - top_margin; ++i)
         for (int j = 0; j < width - 2; ++j)
             mvwaddch(w, i + 1 + top_margin, j + 1, ' ');
+}
+
+
+void HelpWindow::on_RETURN()
+{
+    disable();
+    AbstractWindow::set_active_window_to_previous();
+    input_win.mark_dirty();
 }

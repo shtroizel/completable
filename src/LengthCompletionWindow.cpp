@@ -195,7 +195,7 @@ void LengthCompletionWindow::on_END()
 }
 
 
-void LengthCompletionWindow::on_RETURN_hook()
+void LengthCompletionWindow::on_RETURN()
 {
     auto & c = cs.top();
 
@@ -213,4 +213,6 @@ void LengthCompletionWindow::on_RETURN_hook()
 
     for (auto i = c.prefix.length(); i < selected.length(); ++i)
         cs.push(selected[i]);
+
+    input_win.mark_dirty();
 }

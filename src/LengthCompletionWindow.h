@@ -54,7 +54,7 @@ private:
     void on_PAGE_DOWN() override;
     void on_HOME() override;
     void on_END() override;
-    void on_RETURN_hook() override;
+    void on_RETURN() override;
 
 private:
     InputWindow & input_win;

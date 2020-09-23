@@ -160,7 +160,7 @@ void FilterWindow::on_KEY_DOWN()
 }
 
 
-void FilterWindow::toggle_hovered()
+void FilterWindow::on_RETURN()
 {
     if (hover == -1)
     {

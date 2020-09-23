@@ -45,7 +45,6 @@ CompletionWindow::CompletionWindow(CompletionStack & cs, WordStack & ws, InputWi
     : AbstractWindow::AbstractWindow(cs, ws)
     , input_win{iw}
 {
-    AbstractWindow::set_active_window(this);
     input_win.add_dirty_dependency(this);
 }
 
@@ -189,7 +188,7 @@ void CompletionWindow::on_END()
 }
 
 
-void CompletionWindow::on_RETURN_hook()
+void CompletionWindow::on_RETURN()
 {
     auto & c = cs.top();
 
@@ -202,4 +201,6 @@ void CompletionWindow::on_RETURN_hook()
 
     for (auto i = c.prefix.length(); i < selected.length(); ++i)
         cs.push(selected[i]);
+
+    input_win.mark_dirty();
 }

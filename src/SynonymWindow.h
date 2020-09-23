@@ -36,12 +36,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 class CompletionWindow;
+class InputWindow;
 struct word_filter;
 
 class SynonymWindow : public AbstractWindow
 {
 public:
-    SynonymWindow(CompletionStack &, WordStack &, CompletionWindow &, word_filter &);
+    SynonymWindow(CompletionStack &, WordStack &, InputWindow &, CompletionWindow &, word_filter &);
 
 private:
     std::string title() override;
@@ -53,12 +54,13 @@ private:
     void on_PAGE_DOWN() override;
     void on_HOME() override;
     void on_END() override;
-    void on_RETURN_hook() override;
+    void on_RETURN() override;
 
 private:
     void get_synonyms(std::vector<int> &);
 
 private:
+    InputWindow & input_win;
     CompletionWindow & completion_win;
     word_filter & wf;
 };

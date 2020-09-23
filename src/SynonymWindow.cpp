@@ -44,8 +44,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-SynonymWindow::SynonymWindow(CompletionStack & cs, WordStack & ws, CompletionWindow & cw, word_filter & f)
+SynonymWindow::SynonymWindow(
+    CompletionStack & cs,
+    WordStack & ws,
+    InputWindow & iw,
+    CompletionWindow & cw,
+    word_filter & f
+)
     : AbstractWindow(cs, ws)
+    , input_win(iw)
     , completion_win(cw)
     , wf(f)
 {
@@ -217,7 +224,7 @@ void SynonymWindow::on_END()
 }
 
 
-void SynonymWindow::on_RETURN_hook()
+void SynonymWindow::on_RETURN()
 {
     std::vector<int> syn;
     get_synonyms(syn);
@@ -238,6 +245,8 @@ void SynonymWindow::on_RETURN_hook()
         cs.pop();
     for (auto ch : selected)
         cs.push(ch);
+
+    input_win.mark_dirty();
 }
 
 

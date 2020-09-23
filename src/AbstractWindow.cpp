@@ -171,6 +171,9 @@ void AbstractWindow::on_KEY(int key)
     if (!enabled)
         return;
 
+    if (!is_active())
+        return;
+
     switch (key)
     {
         case KEY_UP    : on_KEY_UP();    return;
@@ -179,19 +182,8 @@ void AbstractWindow::on_KEY(int key)
         case PAGE_DOWN : on_PAGE_DOWN(); return;
         case HOME      : on_HOME();      return;
         case END       : on_END();       return;
+        case RETURN    : on_RETURN();    return;
     }
-}
-
-
-void AbstractWindow::on_RETURN()
-{
-    if (!enabled)
-        return;
-
-    if (!is_active())
-        return;
-
-    on_RETURN_hook();
 }
 
 

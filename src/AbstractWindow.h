@@ -48,6 +48,7 @@ static int const PAGE_UP{339};
 static int const PAGE_DOWN{338};
 static int const HOME{262};
 static int const END{360};
+static int const RETURN(10);
 
 
 using WordStack = std::stack<std::pair<std::string, class AbstractWindow *>>;
@@ -78,7 +79,6 @@ public:
     bool is_active() { return nullptr != active() && active()->title() == title(); }
 
     void on_KEY(int key);
-    void on_RETURN();
 
     void mark_dirty();
     void add_dirty_dependency(AbstractWindow * win);
@@ -102,7 +102,7 @@ private:
     virtual void on_PAGE_DOWN() {}
     virtual void on_HOME() {}
     virtual void on_END() {}
-    virtual void on_RETURN_hook() {}
+    virtual void on_RETURN() {}
 
 protected:
     CompletionStack & cs;

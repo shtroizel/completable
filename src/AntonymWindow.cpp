@@ -38,6 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "CompletionStack.h"
 #include "CompletionWindow.h"
+#include "InputWindow.h"
 #include "LengthCompletionWindow.h"
 #include "SynonymWindow.h"
 #include "word_filter.h"
@@ -47,12 +48,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 AntonymWindow::AntonymWindow(
     CompletionStack & cs,
     WordStack & ws,
+    InputWindow & iw,
     CompletionWindow & cw,
     LengthCompletionWindow & lcw,
     SynonymWindow & sw,
     word_filter & f
 )
     : AbstractWindow(cs, ws)
+    , input_win(iw)
     , len_completion_win(lcw)
     , syn_win(sw)
     , wf(f)
@@ -223,7 +226,7 @@ void AntonymWindow::on_END()
 }
 
 
-void AntonymWindow::on_RETURN_hook()
+void AntonymWindow::on_RETURN()
 {
     std::vector<int> ant;
     get_antonyms(ant);
@@ -246,6 +249,7 @@ void AntonymWindow::on_RETURN_hook()
         cs.push(ch);
 
     AbstractWindow::set_active_window(&syn_win);
+    input_win.mark_dirty();
 }
 
 

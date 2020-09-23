@@ -44,8 +44,6 @@ public:
     FilterWindow(CompletionStack &, WordStack &, word_filter &);
     ~FilterWindow() override;
 
-    void toggle_hovered();
-
 private:
     std::string title() override;
     void resize_hook() override;
@@ -54,6 +52,7 @@ private:
     void draw_hook() override;
     void on_KEY_UP() override;
     void on_KEY_DOWN() override;
+    void on_RETURN() override;
 
 private:
     int hover{-1};

@@ -36,6 +36,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 class CompletionWindow;
+class InputWindow;
 class LengthCompletionWindow;
 class SynonymWindow;
 struct word_filter;
@@ -46,6 +47,7 @@ public:
     AntonymWindow(
         CompletionStack &,
         WordStack &,
+        InputWindow &,
         CompletionWindow &,
         LengthCompletionWindow &,
         SynonymWindow &,
@@ -62,12 +64,13 @@ private:
     void on_PAGE_DOWN() override;
     void on_HOME() override;
     void on_END() override;
-    void on_RETURN_hook() override;
+    void on_RETURN() override;
 
 private:
     void get_antonyms(std::vector<int> & antonyms);
 
 private:
+    InputWindow & input_win;
     LengthCompletionWindow & len_completion_win;
     SynonymWindow & syn_win;
     word_filter & wf;
