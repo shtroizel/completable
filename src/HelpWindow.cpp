@@ -41,7 +41,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CompletionStack.h"
 #include "word_filter.h"
 #include "InputWindow.h"
-#include "TitleOrientation.h"
 
 
 
@@ -50,12 +49,6 @@ std::string HelpWindow::title()
 {
     static std::string const t{"Help"};
     return t;
-}
-
-
-TitleOrientation::Type HelpWindow::title_orientation() const
-{
-    return TitleOrientation::Center::grab();
 }
 
 

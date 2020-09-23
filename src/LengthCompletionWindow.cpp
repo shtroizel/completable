@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CompletionStack.h"
 #include "CompletionWindow.h"
 #include "InputWindow.h"
-#include "TitleOrientation.h"
+
 
 
 LengthCompletionWindow::LengthCompletionWindow(
@@ -65,12 +65,6 @@ std::string LengthCompletionWindow::title()
 {
     static std::string const t{"Length Completion"};
     return t;
-}
-
-
-TitleOrientation::Type LengthCompletionWindow::title_orientation() const
-{
-    return TitleOrientation::Left::grab();
 }
 
 

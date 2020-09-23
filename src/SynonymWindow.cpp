@@ -40,7 +40,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CompletionStack.h"
 #include "InputWindow.h"
 #include "LengthCompletionWindow.h"
-#include "TitleOrientation.h"
 #include "word_filter.h"
 
 
@@ -65,12 +64,6 @@ std::string SynonymWindow::title()
     t += ")";
 
     return t;
-}
-
-
-TitleOrientation::Type SynonymWindow::title_orientation() const
-{
-    return TitleOrientation::Right::grab();
 }
 
 

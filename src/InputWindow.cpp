@@ -35,7 +35,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ncurses.h>
 
 #include "CompletionStack.h"
-#include "TitleOrientation.h"
 
 
 
@@ -43,12 +42,6 @@ std::string InputWindow::title()
 {
     static std::string const t{"Input"};
     return t;
-}
-
-
-TitleOrientation::Type InputWindow::title_orientation() const
-{
-    return TitleOrientation::Center::grab();
 }
 
 

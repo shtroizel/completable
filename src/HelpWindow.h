@@ -40,7 +40,6 @@ class HelpWindow : public AbstractWindow
 {
     using AbstractWindow::AbstractWindow;
     std::string title() override;
-    TitleOrientation::Type title_orientation() const override;
     void resize_hook() override;
     void draw_hook() override;
 };

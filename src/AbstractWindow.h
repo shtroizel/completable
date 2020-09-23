@@ -52,8 +52,6 @@ static int const END{360};
 
 using WordStack = std::stack<std::pair<std::string, class AbstractWindow *>>;
 
-MATCHABLE_FWD(TitleOrientation)
-
 
 class AbstractWindow
 {
@@ -93,7 +91,6 @@ public:
 
 private:
     virtual std::string title() = 0;
-    virtual TitleOrientation::Type title_orientation() const = 0;
     virtual void resize_hook() = 0;
     virtual void post_resize_hook() {};
     virtual void draw_hook() = 0;

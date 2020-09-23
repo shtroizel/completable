@@ -43,8 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CompletionWindow.h"
 #include "LengthCompletionWindow.h"
 #include "SynonymWindow.h"
-#include "TitleOrientation.h"
-
 
 
 
@@ -69,12 +67,6 @@ std::string AttributeWindow::title()
 {
     static std::string const t{"Attributes"};
     return t;
-}
-
-
-TitleOrientation::Type AttributeWindow::title_orientation() const
-{
-    return TitleOrientation::Center::grab();
 }
 
 
