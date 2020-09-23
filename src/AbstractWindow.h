@@ -72,6 +72,7 @@ public:
     WINDOW * get_WINDOW() const { return w; }
 
     static void set_active_window(AbstractWindow * act_win);
+    static void set_active_window_to_previous();
     static AbstractWindow * get_active_window() { return active(); }
 
     bool is_active() { return nullptr != active() && active()->title() == title(); }
@@ -119,6 +120,7 @@ private:
     bool dirty{false};
     std::vector<AbstractWindow *> dirty_dependencies;
 
-    // static variable for storing the active window
+    // static variables for storing the active windows
     static AbstractWindow * & active() { static AbstractWindow * w{nullptr}; return w; }
+    static AbstractWindow * & prev_active() { static AbstractWindow * w{nullptr}; return w; }
 };

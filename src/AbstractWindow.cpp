@@ -141,12 +141,27 @@ void AbstractWindow::draw(bool clear_first)
 
 void AbstractWindow::set_active_window(AbstractWindow * act_win)
 {
-    if (active() != nullptr)
+    if (nullptr != active())
         active()->mark_dirty();
 
+    prev_active() = active();
     active() = act_win;
 
-    if (active() != nullptr)
+    if (nullptr != active())
+        active()->mark_dirty();
+}
+
+
+void AbstractWindow::set_active_window_to_previous()
+{
+    AbstractWindow * w = active();
+    active() = prev_active();
+    prev_active() = w;
+
+    if (nullptr != prev_active())
+        prev_active()->mark_dirty();
+
+    if (nullptr != active())
         active()->mark_dirty();
 }
 

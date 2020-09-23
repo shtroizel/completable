@@ -60,7 +60,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 static int const ESC{27};
 static int const TAB{9};
 
-static int const RET(10);
 static int const DEL{330};
 
 
@@ -98,14 +97,15 @@ int main(int argc, char ** argv)
 
     CompletionWindow completion_win{cs, ws, input_win};
     completion_win.enable();
+    AbstractWindow::set_active_window(&completion_win);
 
     LengthCompletionWindow len_completion_win{cs, ws, input_win, completion_win};
     len_completion_win.enable();
 
-    SynonymWindow syn_win{cs, ws, completion_win, wf};
+    SynonymWindow syn_win{cs, ws, input_win, completion_win, wf};
     syn_win.enable();
 
-    AntonymWindow ant_win{cs, ws, completion_win, len_completion_win, syn_win, wf};
+    AntonymWindow ant_win{cs, ws, input_win, completion_win, len_completion_win, syn_win, wf};
     ant_win.enable();
 
     AttributeWindow pos_win{cs, ws, completion_win, len_completion_win, syn_win, ant_win};
@@ -113,7 +113,7 @@ int main(int argc, char ** argv)
 
     FilterWindow filter_win{cs, ws, wf};
 
-    HelpWindow help_win{cs, ws};
+    HelpWindow help_win{cs, ws, input_win};
     help_win.enable();
     AbstractWindow::set_active_window(&help_win);
 
@@ -166,33 +166,6 @@ int main(int argc, char ** argv)
 
             reset_prog_mode();
             resized_draw = true;
-        }
-        else if (ch == RET)
-        {
-            if (help_win.is_enabled())
-            {
-                help_win.disable();
-                AbstractWindow::set_active_window(&completion_win);
-                input_win.mark_dirty();
-                completion_win.mark_dirty();
-                len_completion_win.mark_dirty();
-                pos_win.mark_dirty();
-                syn_win.mark_dirty();
-                ant_win.mark_dirty();
-            }
-            else if (filter_win.is_enabled())
-            {
-                filter_win.toggle_hovered();
-            }
-            else
-            {
-                AbstractWindow * w = AbstractWindow::get_active_window();
-                if (nullptr != w)
-                {
-                    w->on_RETURN();
-                    input_win.mark_dirty();
-                }
-            }
         }
         else if (ch == DEL)
         {
