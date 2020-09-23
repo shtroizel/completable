@@ -66,7 +66,7 @@ void HelpWindow::draw_hook()
     std::vector<std::string> content;
     content.push_back(std::string("             FEATURE    KEY(s)"));
     content.push_back(std::string("-------------------------------------------------------------"));
-    content.push_back(std::string("        update input    type letters"));
+    content.push_back(std::string("        update input    letters"));
     content.push_back(std::string("complete unambiguous    tab"));
     content.push_back(std::string(" change window focus    arrow left/right"));
     content.push_back(std::string("           scrolling    arrow up/down, page up/down, home/end"));
