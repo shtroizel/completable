@@ -63,9 +63,7 @@ LengthCompletionWindow::~LengthCompletionWindow()
 
 std::string LengthCompletionWindow::title()
 {
-    std::string t{"Length Completion ("};
-    t += std::to_string(cs.top().length_completion.size());
-    t += ")";
+    static std::string const t{"Length Completion"};
     return t;
 }
 
