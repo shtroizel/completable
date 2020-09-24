@@ -48,7 +48,7 @@ protected:
     void filtered_words(std::vector<int> & filtered);
 
 private:
-// resolved dependencies
+    // resolved dependencies
     void draw_hook() override;
     void on_KEY_UP() override;
     void on_KEY_DOWN() override;
@@ -58,14 +58,26 @@ private:
     void on_END() override;
     void on_RETURN() override;
 
-// new dependencies
+    // new dependencies
     virtual int & display_start() = 0;
     virtual std::vector<int> const & unfiltered_words(int) = 0;
 
-// new options
+    // new options
     virtual void on_post_RETURN() {}
 
-// same or longer lifetime as this and avoided during destruction
+    // cache
+    std::vector<int> words;
+    class CacheDirty
+    {
+    public:
+        void set_false() { dirty = false; }
+        bool is_dirty_and_set_true() { bool d = dirty; dirty = true; return d; }
+    private:
+        bool dirty{false};
+    };
+    CacheDirty cache_dirty;
+
+    // same or longer lifetime as this and avoided during destruction
     InputWindow & input_win;
     word_filter & wf;
 };

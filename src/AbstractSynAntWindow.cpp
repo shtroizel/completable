@@ -61,8 +61,8 @@ void AbstractSynAntWindow::draw_hook()
     if (c.standard_completion.size() == 0)
         return;
 
-    std::vector<int> words;
-    filtered_words(words);
+    if (cache_dirty.is_dirty_and_set_true())
+        filtered_words(words);
 
     // new filter could result in display_start out of bounds so clamp
     if (display_start() >= (int) words.size())
@@ -106,6 +106,7 @@ void AbstractSynAntWindow::on_KEY_UP()
     {
         --display_start();
         mark_dirty();
+        cache_dirty.set_false();
     }
 }
 
@@ -126,6 +127,7 @@ void AbstractSynAntWindow::on_KEY_DOWN()
             display_start() = end;
 
         mark_dirty();
+        cache_dirty.set_false();
     }
 }
 
@@ -140,6 +142,7 @@ void AbstractSynAntWindow::on_PAGE_UP()
             display_start() = 0;
 
         mark_dirty();
+        cache_dirty.set_false();
     }
 }
 
@@ -160,6 +163,7 @@ void AbstractSynAntWindow::on_PAGE_DOWN()
             display_start() = end;
 
         mark_dirty();
+        cache_dirty.set_false();
     }
 }
 
@@ -170,6 +174,7 @@ void AbstractSynAntWindow::on_HOME()
     {
         display_start() = 0;
         mark_dirty();
+        cache_dirty.set_false();
     }
 }
 
@@ -186,6 +191,7 @@ void AbstractSynAntWindow::on_END()
     {
         display_start() = end;
         mark_dirty();
+        cache_dirty.set_false();
     }
 }
 
