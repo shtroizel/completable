@@ -49,12 +49,10 @@ SynonymWindow::SynonymWindow(
     WordStack & ws,
     InputWindow & iw,
     CompletionWindow & cw,
-    word_filter & f
+    word_filter & wf
 )
-    : AbstractWindow(cs, ws)
-    , input_win(iw)
+    : AbstractSynAntWindow(cs, ws, iw, wf)
     , completion_win(cw)
-    , wf(f)
 {
     completion_win.add_dirty_dependency(this);
 }
@@ -65,7 +63,7 @@ std::string SynonymWindow::title()
     std::string t{"Synonyms ("};
 
     std::vector<int> syn;
-    get_synonyms(syn);
+    filtered_words(syn);
     t += std::to_string(syn.size());
 
     t += ")";
@@ -83,188 +81,13 @@ void SynonymWindow::resize_hook()
 }
 
 
-void SynonymWindow::draw_hook()
+int & SynonymWindow::display_start()
 {
-    auto & c = cs.top();
-    if (c.standard_completion.size() == 0)
-        return;
-
-    std::vector<int> synonyms;
-    get_synonyms(synonyms);
-
-    // new filter could result in syn_display_start out of bounds so clamp
-    if (c.syn_display_start >= (int) synonyms.size())
-        c.syn_display_start = (int) synonyms.size() - 1;
-    if (c.syn_display_start < 0)
-        c.syn_display_start = 0;
-
-    int display_count = (int) synonyms.size() - c.syn_display_start;
-
-    int i = 0;
-    for (; i < display_count && i < height - 2; ++i)
-    {
-        std::string const & syn = matchmaker::at(synonyms[c.syn_display_start + i]);
-
-        if (is_active() && i == 0)
-            wattron(w, A_REVERSE);
-
-        int j = 0;
-        for (; j < (int) syn.length() && j < width - 2; ++j)
-            mvwaddch(w, i + 1, j + 1, syn[j]);
-
-        if (is_active() && i == 0)
-            wattroff(w, A_REVERSE);
-
-        // blank out rest of line
-        for (; j < width - 2; ++j)
-            mvwaddch(w, i + 1, j + 1, ' ');
-    }
-
-    // blank out remaining lines
-    for (; i < height - 2; ++i)
-        for (int j = 0; j < width - 2; ++j)
-            mvwaddch(w, i + 1, j + 1, ' ');
+    return cs.top().syn_display_start;
 }
 
 
-void SynonymWindow::on_KEY_UP()
+std::vector<int> const & SynonymWindow::unfiltered_words(int word)
 {
-    auto & c = cs.top();
-
-    if (c.syn_display_start > 0)
-    {
-        --c.syn_display_start;
-        mark_dirty();
-    }
-}
-
-
-void SynonymWindow::on_KEY_DOWN()
-{
-    std::vector<int> syn;
-    get_synonyms(syn);
-    if (syn.size() == 0)
-        return;
-
-    int const end = (int) syn.size() - 1;
-    auto & c = cs.top();
-    if (c.syn_display_start != end)
-    {
-        ++c.syn_display_start;
-
-        if (c.syn_display_start > end)
-            c.syn_display_start = end;
-
-        mark_dirty();
-    }
-}
-
-
-void SynonymWindow::on_PAGE_UP()
-{
-    auto & c = cs.top();
-
-    if (c.syn_display_start != 0)
-    {
-        c.syn_display_start -= height - 3;
-        if (c.syn_display_start < 0)
-            c.syn_display_start = 0;
-        mark_dirty();
-    }
-}
-
-
-void SynonymWindow::on_PAGE_DOWN()
-{
-    std::vector<int> syn;
-    get_synonyms(syn);
-    if (syn.size() == 0)
-        return;
-
-    int const end = (int) syn.size() - 1;
-    auto & c = cs.top();
-    if (c.syn_display_start != end)
-    {
-        c.syn_display_start += height - 3;
-
-        if (c.syn_display_start > end)
-            c.syn_display_start = end;
-
-        mark_dirty();
-    }
-}
-
-
-void SynonymWindow::on_HOME()
-{
-    auto & c = cs.top();
-
-    if (c.syn_display_start != 0)
-    {
-        c.syn_display_start = 0;
-        mark_dirty();
-    }
-}
-
-
-void SynonymWindow::on_END()
-{
-    std::vector<int> syn;
-    get_synonyms(syn);
-    if (syn.size() == 0)
-        return;
-
-    int const end = (int) syn.size() - 1;
-    auto & c = cs.top();
-    if (c.syn_display_start != end)
-    {
-        c.syn_display_start = end;
-        mark_dirty();
-    }
-}
-
-
-void SynonymWindow::on_RETURN()
-{
-    std::vector<int> syn;
-    get_synonyms(syn);
-
-    if (syn.size() == 0)
-        return;
-
-    if (cs.top().syn_display_start >= (int) syn.size())
-        cs.top().syn_display_start = (int) syn.size() - 1;
-
-    std::string const & selected = matchmaker::at(syn[cs.top().syn_display_start]);
-
-    // save old prefix to word_stack
-    ws.push(std::make_pair(cs.top().prefix, AbstractWindow::get_active_window()));
-
-    // update completion stack
-    while (cs.count() > 1)
-        cs.pop();
-    for (auto ch : selected)
-        cs.push(ch);
-
-    input_win.mark_dirty();
-}
-
-
-void SynonymWindow::get_synonyms(std::vector<int> & synonyms)
-{
-    synonyms.clear();
-    auto & c = cs.top();
-
-    if (c.standard_completion.size() == 0)
-        return;
-
-    if (c.display_start >= (int) c.standard_completion.size())
-        c.display_start = (int) c.standard_completion.size() - 1;
-
-    auto const & unfiltered = matchmaker::synonyms(c.standard_completion[c.display_start]);
-
-    synonyms.reserve(unfiltered.size());
-    for (auto syn : unfiltered)
-        if (wf.passes(syn))
-            synonyms.push_back(syn);
+    return matchmaker::synonyms(word);
 }

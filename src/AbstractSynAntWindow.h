@@ -32,24 +32,40 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "AbstractSynAntWindow.h"
+#include "AbstractWindow.h"
 
 
-class CompletionWindow;
 
-class SynonymWindow : public AbstractSynAntWindow
+class InputWindow;
+struct word_filter;
+
+class AbstractSynAntWindow : public AbstractWindow
 {
 public:
-    SynonymWindow(CompletionStack &, WordStack &, InputWindow &, CompletionWindow &, word_filter &);
+    AbstractSynAntWindow(CompletionStack &, WordStack &, InputWindow &, word_filter &);
 
-private: // resolved AbstractWindow dependencies
-    std::string title() override;
-    void resize_hook() override;
-
-private: // resolved AbstractSynAntWindow dependencies
-    int & display_start() override;
-    std::vector<int> const & unfiltered_words(int) override;
+protected:
+    void filtered_words(std::vector<int> & filtered);
 
 private:
-    CompletionWindow & completion_win;
+// resolved dependencies
+    void draw_hook() override;
+    void on_KEY_UP() override;
+    void on_KEY_DOWN() override;
+    void on_PAGE_UP() override;
+    void on_PAGE_DOWN() override;
+    void on_HOME() override;
+    void on_END() override;
+    void on_RETURN() override;
+
+// new dependencies
+    virtual int & display_start() = 0;
+    virtual std::vector<int> const & unfiltered_words(int) = 0;
+
+// new options
+    virtual void on_post_RETURN() {}
+
+// same or longer lifetime as this and avoided during destruction
+    InputWindow & input_win;
+    word_filter & wf;
 };

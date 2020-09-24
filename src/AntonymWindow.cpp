@@ -37,11 +37,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <matchmaker/matchmaker.h>
 
 #include "CompletionStack.h"
-#include "CompletionWindow.h"
 #include "InputWindow.h"
+#include "CompletionWindow.h"
 #include "LengthCompletionWindow.h"
 #include "SynonymWindow.h"
-#include "word_filter.h"
 
 
 
@@ -54,11 +53,9 @@ AntonymWindow::AntonymWindow(
     SynonymWindow & sw,
     word_filter & f
 )
-    : AbstractWindow(cs, ws)
-    , input_win(iw)
+    : AbstractSynAntWindow(cs, ws, iw, f)
     , len_completion_win(lcw)
     , syn_win(sw)
-    , wf(f)
 {
     cw.add_dirty_dependency(this);
 }
@@ -69,7 +66,7 @@ std::string AntonymWindow::title()
     std::string t{"Antonyms ("};
 
     std::vector<int> ant;
-    get_antonyms(ant);
+    filtered_words(ant);
     t += std::to_string(ant.size());
 
     t += ")";
@@ -87,189 +84,19 @@ void AntonymWindow::resize_hook()
 }
 
 
-void AntonymWindow::draw_hook()
+int & AntonymWindow::display_start()
 {
-    auto & c = cs.top();
-    if (c.standard_completion.size() == 0)
-        return;
-
-    std::vector<int> antonyms;
-    get_antonyms(antonyms);
-
-    // new filter could result in syn_display_start out of bounds so clamp
-    if (c.ant_display_start >= (int) antonyms.size())
-        c.ant_display_start = (int) antonyms.size() - 1;
-    if (c.ant_display_start < 0)
-        c.ant_display_start = 0;
-
-    int display_count = (int) antonyms.size() - c.ant_display_start;
-
-    int i = 0;
-    for (; i < display_count && i < height - 2; ++i)
-    {
-        std::string const & ant = matchmaker::at(antonyms[c.ant_display_start + i]);
-
-        if (is_active() && i == 0)
-            wattron(w, A_REVERSE);
-
-        int j = 0;
-        for (; j < (int) ant.length() && j < width - 2; ++j)
-            mvwaddch(w, i + 1, j + 1, ant[j]);
-
-        if (is_active() && i == 0)
-            wattroff(w, A_REVERSE);
-
-        // blank out rest of line
-        for (; j < width - 2; ++j)
-            mvwaddch(w, i + 1, j + 1, ' ');
-    }
-
-    // blank out remaining lines
-    for (; i < height - 2; ++i)
-        for (int j = 0; j < width - 2; ++j)
-            mvwaddch(w, i + 1, j + 1, ' ');
+    return cs.top().ant_display_start;
 }
 
 
-void AntonymWindow::on_KEY_UP()
+void AntonymWindow::on_post_RETURN()
 {
-    auto & c = cs.top();
-    if (c.ant_display_start > 0)
-    {
-        --c.ant_display_start;
-        mark_dirty();
-    }
-}
-
-
-void AntonymWindow::on_KEY_DOWN()
-{
-    std::vector<int> ant;
-    get_antonyms(ant);
-    if (ant.size() == 0)
-        return;
-
-    int const end = (int) ant.size() - 1;
-    auto & c = cs.top();
-    if (c.ant_display_start != end)
-    {
-        ++c.ant_display_start;
-
-        if (c.ant_display_start > end)
-            c.ant_display_start = end;
-
-        mark_dirty();
-    }
-}
-
-
-void AntonymWindow::on_PAGE_UP()
-{
-    auto & c = cs.top();
-    if (c.ant_display_start != 0)
-    {
-        c.ant_display_start -= height - 3;
-        if (c.ant_display_start < 0)
-            c.ant_display_start = 0;
-
-        mark_dirty();
-    }
-}
-
-
-void AntonymWindow::on_PAGE_DOWN()
-{
-    std::vector<int> ant;
-    get_antonyms(ant);
-    if (ant.size() == 0)
-        return;
-
-    int const end = (int) ant.size() - 1;
-    auto & c = cs.top();
-    if (c.ant_display_start != end)
-    {
-        c.ant_display_start += height - 3;
-
-        if (c.ant_display_start > end)
-            c.ant_display_start = end;
-
-        mark_dirty();
-    }
-}
-
-
-void AntonymWindow::on_HOME()
-{
-    auto & c = cs.top();
-    if (c.ant_display_start != 0)
-    {
-        c.ant_display_start = 0;
-        mark_dirty();
-    }
-}
-
-
-void AntonymWindow::on_END()
-{
-    std::vector<int> ant;
-    get_antonyms(ant);
-    if (ant.size() == 0)
-        return;
-
-    int const end = (int) ant.size() - 1;
-    auto & c = cs.top();
-    if (c.ant_display_start != end)
-    {
-        c.ant_display_start = end;
-        mark_dirty();
-    }
-}
-
-
-void AntonymWindow::on_RETURN()
-{
-    std::vector<int> ant;
-    get_antonyms(ant);
-
-    if (ant.size() == 0)
-        return;
-
-    if (cs.top().ant_display_start >= (int) ant.size())
-        cs.top().ant_display_start = (int) ant.size() - 1;
-
-    std::string const & selected = matchmaker::at(ant[cs.top().ant_display_start]);
-
-    // save old prefix to word_stack
-    ws.push(std::make_pair(cs.top().prefix, AbstractWindow::get_active_window()));
-
-    // update completion stack
-    while (cs.count() > 1)
-        cs.pop();
-    for (auto ch : selected)
-        cs.push(ch);
-
     AbstractWindow::set_active_window(&syn_win);
-    input_win.mark_dirty();
 }
 
 
-void AntonymWindow::get_antonyms(std::vector<int> & antonyms)
+std::vector<int> const & AntonymWindow::unfiltered_words(int word)
 {
-    antonyms.clear();
-
-    auto & c = cs.top();
-
-    if (c.standard_completion.size() == 0)
-        return;
-
-    if (c.display_start >= (int) c.standard_completion.size())
-        c.display_start = (int) c.standard_completion.size() - 1;
-
-    auto const & unfiltered = matchmaker::antonyms(c.standard_completion[c.display_start]);
-
-    antonyms.reserve(unfiltered.size());
-    for (auto ant : unfiltered)
-        if (wf.passes(ant))
-            antonyms.push_back(ant);
+    return matchmaker::antonyms(word);
 }
-
