@@ -169,13 +169,7 @@ int main(int argc, char ** argv)
         }
         else if (ch == DEL)
         {
-            if (help_win.is_enabled())
-            {
-            }
-            else if (filter_win.is_enabled())
-            {
-            }
-            else
+            if (!help_win.is_enabled() && !filter_win.is_enabled())
             {
                 if (ws.size() == 0)
                     continue;
@@ -196,13 +190,7 @@ int main(int argc, char ** argv)
         }
         else if (ch == KEY_BACKSPACE || ch == 127 || ch == '\b')
         {
-            if (help_win.is_enabled())
-            {
-            }
-            else if (filter_win.is_enabled())
-            {
-            }
-            else
+            if (!help_win.is_enabled() && !filter_win.is_enabled())
             {
                 int old_count = cs.count();
                 cs.pop();
@@ -213,13 +201,7 @@ int main(int argc, char ** argv)
         }
         else if (ch == TAB)
         {
-            if (help_win.is_enabled())
-            {
-            }
-            else if (filter_win.is_enabled())
-            {
-            }
-            else
+            if (!help_win.is_enabled() && !filter_win.is_enabled())
             {
                 decltype(cs) const & ccs = cs;
 
@@ -267,13 +249,7 @@ int main(int argc, char ** argv)
         }
         else if (ch == KEY_LEFT)
         {
-            if (help_win.is_enabled())
-            {
-            }
-            else if (filter_win.is_enabled())
-            {
-            }
-            else
+            if (!help_win.is_enabled() && !filter_win.is_enabled())
             {
                 if (ant_win.is_active())
                     AbstractWindow::set_active_window(&len_completion_win);
@@ -292,13 +268,7 @@ int main(int argc, char ** argv)
         }
         else if (ch == KEY_RIGHT)
         {
-            if (help_win.is_enabled())
-            {
-            }
-            else if (filter_win.is_enabled())
-            {
-            }
-            else
+            if (!help_win.is_enabled() && !filter_win.is_enabled())
             {
                 if (completion_win.is_active())
                     AbstractWindow::set_active_window(&syn_win);
@@ -373,10 +343,7 @@ int main(int argc, char ** argv)
         }
         else if (ch > 31 && ch < 127) // printable ascii
         {
-            if (help_win.is_enabled())
-            {
-            }
-            if (filter_win.is_enabled())
+            if (!help_win.is_enabled() && filter_win.is_enabled())
             {
             }
             else
