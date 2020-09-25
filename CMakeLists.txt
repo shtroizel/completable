@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-project(completable VERSION 1.2.1)
+project(completable VERSION 1.2.2)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
