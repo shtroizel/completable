@@ -32,12 +32,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "AbstractSynAntWindow.h"
+#include "AbstractListWindow.h"
 
 
 class CompletionWindow;
 
-class SynonymWindow : public AbstractSynAntWindow
+class SynonymWindow : public AbstractListWindow
 {
 public:
     SynonymWindow(CompletionStack &, WordStack &, InputWindow &, CompletionWindow &, word_filter &);
@@ -46,7 +46,7 @@ private: // resolved AbstractWindow dependencies
     std::string title() override;
     void resize_hook() override;
 
-private: // resolved AbstractSynAntWindow dependencies
+private: // resolved AbstractListWindow dependencies
     int & display_start() override;
     std::vector<int> const & unfiltered_words(int) override;
 

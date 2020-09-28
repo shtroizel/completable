@@ -53,7 +53,7 @@ AntonymWindow::AntonymWindow(
     SynonymWindow & sw,
     word_filter & f
 )
-    : AbstractSynAntWindow(cs, ws, iw, f)
+    : AbstractListWindow(cs, ws, iw, f)
     , len_completion_win(lcw)
     , syn_win(sw)
 {

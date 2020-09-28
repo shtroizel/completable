@@ -51,7 +51,7 @@ SynonymWindow::SynonymWindow(
     CompletionWindow & cw,
     word_filter & wf
 )
-    : AbstractSynAntWindow(cs, ws, iw, wf)
+    : AbstractListWindow(cs, ws, iw, wf)
     , completion_win(cw)
 {
     completion_win.add_dirty_dependency(this);

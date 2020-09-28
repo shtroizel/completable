@@ -30,7 +30,7 @@ find_package(Curses REQUIRED)
 set(
     completable_srcs
     src/AbstractWindow.cpp
-    src/AbstractSynAntWindow.cpp
+    src/AbstractListWindow.cpp
     src/AntonymWindow.cpp
     src/AttributeWindow.cpp
     src/CompletionStack.cpp

@@ -39,6 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CompletionStack.h"
 #include "CompletionWindow.h"
 #include "InputWindow.h"
+#include "word_filter.h"
 
 
 
@@ -46,13 +47,12 @@ LengthCompletionWindow::LengthCompletionWindow(
     CompletionStack & cs,
     WordStack & ws,
     InputWindow & iw,
+    word_filter & wf,
     CompletionWindow const & cw
 )
-    : AbstractWindow(cs, ws)
-    , input_win(iw)
+    : AbstractListWindow(cs, ws, iw, wf)
     , completion_win(cw)
 {
-    input_win.add_dirty_dependency(this);
 }
 
 
@@ -77,142 +77,19 @@ void LengthCompletionWindow::resize_hook()
 }
 
 
-void LengthCompletionWindow::draw_hook()
+int & LengthCompletionWindow::display_start()
 {
-    auto const & cur_completion = cs.top();
-
-    int display_count = cur_completion.length_completion.size() - cur_completion.len_display_start;
-
-    int length_completion_index{0};
-    int long_index{0};
-
-    int i = 0;
-    for (; i < display_count && i < height - 2; ++i)
-    {
-        length_completion_index = i + cur_completion.len_display_start;
-
-        // make sure len_display_start set properly (should be impossible)
-        if (length_completion_index >= (int) cur_completion.length_completion.size())
-            break;
-
-        long_index = cur_completion.length_completion[length_completion_index];
-
-        std::string const & complete_entry = matchmaker::at(matchmaker::from_longest(long_index));
-
-        if (is_active() && i == 0)
-            wattron(w, A_REVERSE);
-
-        int j = 0;
-        for (; j < (int) complete_entry.size() && j < width - 2; ++j)
-            mvwaddch(w, i + 1, j + 1, complete_entry[j]);
-
-        if (is_active() && i == 0)
-            wattroff(w, A_REVERSE);
-
-        // blank out rest of line
-        for (; j < width - 2; ++j)
-            mvwaddch(w, i + 1, j + 1, ' ');
-    }
-
-    // blank out remaining lines
-    for (; i < height - 2; ++i)
-        for (int j = 0; j < width - 2; ++j)
-            mvwaddch(w, i + 1, j + 1, ' ');
+    return cs.top().len_display_start;
 }
 
 
-void LengthCompletionWindow::on_KEY_UP()
+std::vector<int> const & LengthCompletionWindow::unfiltered_words(int)
 {
-    auto & c = cs.top();
-    if (c.len_display_start > 0)
-    {
-        --c.len_display_start;
-        mark_dirty();
-    }
+    return cs.top().length_completion;
 }
 
 
-void LengthCompletionWindow::on_KEY_DOWN()
+std::string const & LengthCompletionWindow::string_from_index(int index)
 {
-    auto & c = cs.top();
-    if (c.len_display_start < (int) c.length_completion.size() - 1)
-    {
-        ++c.len_display_start;
-        mark_dirty();
-    }
-}
-
-
-void LengthCompletionWindow::on_PAGE_UP()
-{
-    auto & c = cs.top();
-    if (c.len_display_start != 0)
-    {
-        c.len_display_start -= height - 3;
-        if (c.len_display_start < 0)
-            c.len_display_start = 0;
-
-        mark_dirty();
-    }
-}
-
-
-void LengthCompletionWindow::on_PAGE_DOWN()
-{
-    auto & c = cs.top();
-    int const end = (int) c.length_completion.size() - 1;
-    if (c.len_display_start != end)
-    {
-        c.len_display_start += height - 3;
-        if (c.len_display_start > end)
-            c.len_display_start = end;
-
-        mark_dirty();
-    }
-}
-
-
-void LengthCompletionWindow::on_HOME()
-{
-    auto & c = cs.top();
-    if (c.len_display_start != 0)
-    {
-        c.len_display_start = 0;
-        mark_dirty();
-    }
-}
-
-
-void LengthCompletionWindow::on_END()
-{
-    auto & c = cs.top();
-    int const end = c.length_completion.size() - 1;
-    if (c.len_display_start != end)
-    {
-        c.len_display_start = end;
-        mark_dirty();
-    }
-}
-
-
-void LengthCompletionWindow::on_RETURN()
-{
-    auto & c = cs.top();
-
-    if (c.length_completion.size() == 0)
-        return;
-
-    int selected_index = matchmaker::from_longest(c.length_completion[c.len_display_start]);
-    std::string const & selected = matchmaker::at(selected_index);
-
-    // nothing to do?
-    if (c.prefix == selected)
-        return;
-
-    ws.push(std::make_pair(c.prefix, this));
-
-    for (auto i = c.prefix.length(); i < selected.length(); ++i)
-        cs.push(selected[i]);
-
-    input_win.mark_dirty();
+    return matchmaker::at(matchmaker::from_longest(index));
 }

@@ -99,7 +99,7 @@ int main(int argc, char ** argv)
     completion_win.enable();
     AbstractWindow::set_active_window(&completion_win);
 
-    LengthCompletionWindow len_completion_win{cs, ws, input_win, completion_win};
+    LengthCompletionWindow len_completion_win{cs, ws, input_win, wf, completion_win};
     len_completion_win.enable();
 
     SynonymWindow syn_win{cs, ws, input_win, completion_win, wf};

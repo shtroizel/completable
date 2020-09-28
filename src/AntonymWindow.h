@@ -32,7 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "AbstractSynAntWindow.h"
+#include "AbstractListWindow.h"
 
 
 class InputWindow;
@@ -41,7 +41,7 @@ class LengthCompletionWindow;
 class SynonymWindow;
 struct word_filter;
 
-class AntonymWindow : public AbstractSynAntWindow
+class AntonymWindow : public AbstractListWindow
 {
 public:
     AntonymWindow(
@@ -58,7 +58,7 @@ private: /// resolved AbstractWindow dependencies
     std::string title() override;
     void resize_hook() override;
 
-private: // resolved AbstractSynAntWindow dependencies
+private: // resolved AbstractListWindow dependencies
     int & display_start() override;
     void on_post_RETURN() override;
     std::vector<int> const & unfiltered_words(int) override;

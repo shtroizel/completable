@@ -30,7 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "AbstractSynAntWindow.h"
+#include "AbstractListWindow.h"
 
 #include <ncurses.h>
 
@@ -42,20 +42,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-AbstractSynAntWindow::AbstractSynAntWindow(
+AbstractListWindow::AbstractListWindow(
     CompletionStack & cs,
     WordStack & ws,
     InputWindow & iw,
     word_filter & f
 )
     : AbstractWindow(cs, ws)
-    , input_win(iw)
     , wf(f)
+    , input_win(iw)
 {
+    iw.add_dirty_dependency(this);
 }
 
 
-void AbstractSynAntWindow::draw_hook()
+void AbstractListWindow::draw_hook()
 {
     auto & c = cs.top();
     if (c.standard_completion.size() == 0)
@@ -75,7 +76,7 @@ void AbstractSynAntWindow::draw_hook()
     int i = 0;
     for (; i < display_count && i < height - 2; ++i) // 2 for borders (top, bottom)
     {
-        std::string const & word = matchmaker::at(words[display_start() + i]);
+        std::string const & word = string_from_index(words[display_start() + i]);
 
         // highlight first word
         if (is_active() && i == 0)
@@ -100,7 +101,7 @@ void AbstractSynAntWindow::draw_hook()
 }
 
 
-void AbstractSynAntWindow::on_KEY_UP()
+void AbstractListWindow::on_KEY_UP()
 {
     if (display_start() > 0)
     {
@@ -111,7 +112,7 @@ void AbstractSynAntWindow::on_KEY_UP()
 }
 
 
-void AbstractSynAntWindow::on_KEY_DOWN()
+void AbstractListWindow::on_KEY_DOWN()
 {
     std::vector<int> words;
     filtered_words(words);
@@ -132,7 +133,7 @@ void AbstractSynAntWindow::on_KEY_DOWN()
 }
 
 
-void AbstractSynAntWindow::on_PAGE_UP()
+void AbstractListWindow::on_PAGE_UP()
 {
     if (display_start() != 0)
     {
@@ -147,7 +148,7 @@ void AbstractSynAntWindow::on_PAGE_UP()
 }
 
 
-void AbstractSynAntWindow::on_PAGE_DOWN()
+void AbstractListWindow::on_PAGE_DOWN()
 {
     std::vector<int> words;
     filtered_words(words);
@@ -168,7 +169,7 @@ void AbstractSynAntWindow::on_PAGE_DOWN()
 }
 
 
-void AbstractSynAntWindow::on_HOME()
+void AbstractListWindow::on_HOME()
 {
     if (display_start() != 0)
     {
@@ -179,7 +180,7 @@ void AbstractSynAntWindow::on_HOME()
 }
 
 
-void AbstractSynAntWindow::on_END()
+void AbstractListWindow::on_END()
 {
     std::vector<int> words;
     filtered_words(words);
@@ -196,7 +197,7 @@ void AbstractSynAntWindow::on_END()
 }
 
 
-void AbstractSynAntWindow::on_RETURN()
+void AbstractListWindow::on_RETURN()
 {
     std::vector<int> words;
     filtered_words(words);
@@ -207,7 +208,7 @@ void AbstractSynAntWindow::on_RETURN()
     if (display_start() >= (int) words.size())
         display_start() = (int) words.size() - 1;
 
-    std::string const & selected = matchmaker::at(words[display_start()]);
+    std::string const & selected = string_from_index(words[display_start()]);
 
     // save old prefix to word_stack
     ws.push(std::make_pair(cs.top().prefix, this));
@@ -224,7 +225,7 @@ void AbstractSynAntWindow::on_RETURN()
 }
 
 
-void AbstractSynAntWindow::filtered_words(std::vector<int> & filtered)
+void AbstractListWindow::filtered_words(std::vector<int> & filtered)
 {
     filtered.clear();
 
@@ -242,4 +243,10 @@ void AbstractSynAntWindow::filtered_words(std::vector<int> & filtered)
     for (auto word : unfiltered)
         if (wf.passes(word))
             filtered.push_back(word);
+}
+
+
+std::string const & AbstractListWindow::string_from_index(int index)
+{
+    return matchmaker::at(index);
 }

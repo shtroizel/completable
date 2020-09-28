@@ -39,10 +39,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class InputWindow;
 struct word_filter;
 
-class AbstractSynAntWindow : public AbstractWindow
+class AbstractListWindow : public AbstractWindow
 {
 public:
-    AbstractSynAntWindow(CompletionStack &, WordStack &, InputWindow &, word_filter &);
+    AbstractListWindow(CompletionStack &, WordStack &, InputWindow &, word_filter &);
 
 protected:
     void filtered_words(std::vector<int> & filtered);
@@ -64,6 +64,7 @@ private:
 
     // new options
     virtual void on_post_RETURN() {}
+    virtual std::string const & string_from_index(int);
 
     // cache
     std::vector<int> words;
@@ -78,6 +79,7 @@ private:
     CacheDirty cache_dirty;
 
     // same or longer lifetime as this and avoided during destruction
-    InputWindow & input_win;
     word_filter & wf;
+protected: // TODO FIXME make private
+    InputWindow & input_win;
 };
