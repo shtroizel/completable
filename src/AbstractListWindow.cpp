@@ -211,7 +211,7 @@ void AbstractListWindow::on_RETURN()
     std::string const & selected = string_from_index(words[display_start()]);
 
     // save old prefix to word_stack
-    ws.push(std::make_pair(cs.top().prefix, this));
+    ws.push({cs.top().prefix, this, display_start()});
 
     // update completion stack
     while (cs.count() > 1)

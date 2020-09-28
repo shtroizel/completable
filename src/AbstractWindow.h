@@ -37,6 +37,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <matchable/matchable_fwd.h>
 
+#include "word_stack_element.h"
+
 
 // ncurses window
 typedef struct _win_st WINDOW;
@@ -51,7 +53,7 @@ static int const END{360};
 static int const RETURN(10);
 
 
-using WordStack = std::stack<std::pair<std::string, class AbstractWindow *>>;
+using WordStack = std::stack<word_stack_element>;
 
 
 class AbstractWindow

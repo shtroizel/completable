@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "LengthCompletionWindow.h"
 #include "SynonymWindow.h"
 #include "word_filter.h"
+#include "word_stack_element.h"
 
 
 
@@ -90,7 +91,7 @@ int main(int argc, char ** argv)
 
     word_filter wf;
     CompletionStack cs{wf};
-    std::stack<std::pair<std::string, AbstractWindow *>> ws; // for navigation with RET and DEL
+    std::stack<word_stack_element> ws; // for navigation with RET and DEL
 
     InputWindow input_win{cs, ws};
     input_win.enable();
@@ -184,7 +185,7 @@ int main(int argc, char ** argv)
                 if (ws.size() == 0)
                     continue;
 
-                auto & [s, w] = ws.top();
+                auto & [s, w, display_start] = ws.top();
 
                 while (cs.count() > 1)
                     cs.pop();

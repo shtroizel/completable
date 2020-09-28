@@ -197,7 +197,7 @@ void CompletionWindow::on_RETURN()
     if (selected == c.prefix)
         return;
 
-    ws.push(std::make_pair(c.prefix, this));
+    ws.push({c.prefix, this, c.display_start});
 
     for (auto i = c.prefix.length(); i < selected.length(); ++i)
         cs.push(selected[i]);
