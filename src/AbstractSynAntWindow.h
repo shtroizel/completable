@@ -49,14 +49,14 @@ protected:
 
 private:
     // resolved dependencies
-    void draw_hook() override;
-    void on_KEY_UP() override;
-    void on_KEY_DOWN() override;
-    void on_PAGE_UP() override;
-    void on_PAGE_DOWN() override;
-    void on_HOME() override;
-    void on_END() override;
-    void on_RETURN() override;
+    void draw_hook() override final;
+    void on_KEY_UP() override final;
+    void on_KEY_DOWN() override final;
+    void on_PAGE_UP() override final;
+    void on_PAGE_DOWN() override final;
+    void on_HOME() override final;
+    void on_END() override final;
+    void on_RETURN() override final;
 
     // new dependencies
     virtual int & display_start() = 0;
