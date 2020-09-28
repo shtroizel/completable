@@ -295,7 +295,7 @@ int main(int argc, char ** argv)
             if (filter_win.is_enabled())
             {
                 filter_win.disable();
-                AbstractWindow::set_active_window(&completion_win);
+                AbstractWindow::set_active_window_to_previous();
                 input_win.mark_dirty();
                 completion_win.mark_dirty();
                 len_completion_win.mark_dirty();
