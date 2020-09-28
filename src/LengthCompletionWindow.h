@@ -57,7 +57,7 @@ private:
 
     // resolved AbstractListWindow dependencies
     int & display_start() override final;
-    std::vector<int> const & unfiltered_words(int) override final;
+    std::vector<int> const & unfiltered_words(int) const override final;
 
     // specified AbstractListWindow options
     std::string const & string_from_index(int) override final;

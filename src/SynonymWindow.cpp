@@ -62,8 +62,7 @@ std::string SynonymWindow::title()
 {
     std::string t{"Synonyms ("};
 
-    std::vector<int> syn;
-    filtered_words(syn);
+    auto syn = filtered_words();
     t += std::to_string(syn.size());
 
     t += ")";
@@ -87,7 +86,7 @@ int & SynonymWindow::display_start()
 }
 
 
-std::vector<int> const & SynonymWindow::unfiltered_words(int word)
+std::vector<int> const & SynonymWindow::unfiltered_words(int word) const
 {
     return matchmaker::synonyms(word);
 }

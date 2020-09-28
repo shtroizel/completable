@@ -61,7 +61,7 @@ private: /// resolved AbstractWindow dependencies
 private: // resolved AbstractListWindow dependencies
     int & display_start() override;
     void on_post_RETURN() override;
-    std::vector<int> const & unfiltered_words(int) override;
+    std::vector<int> const & unfiltered_words(int) const override;
 
 private:
     LengthCompletionWindow & len_completion_win;

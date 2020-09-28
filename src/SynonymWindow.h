@@ -48,7 +48,7 @@ private: // resolved AbstractWindow dependencies
 
 private: // resolved AbstractListWindow dependencies
     int & display_start() override;
-    std::vector<int> const & unfiltered_words(int) override;
+    std::vector<int> const & unfiltered_words(int) const override;
 
 private:
     CompletionWindow & completion_win;

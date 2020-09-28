@@ -65,8 +65,7 @@ std::string AntonymWindow::title()
 {
     std::string t{"Antonyms ("};
 
-    std::vector<int> ant;
-    filtered_words(ant);
+    auto ant = filtered_words();
     t += std::to_string(ant.size());
 
     t += ")";
@@ -96,7 +95,7 @@ void AntonymWindow::on_post_RETURN()
 }
 
 
-std::vector<int> const & AntonymWindow::unfiltered_words(int word)
+std::vector<int> const & AntonymWindow::unfiltered_words(int word) const
 {
     return matchmaker::antonyms(word);
 }

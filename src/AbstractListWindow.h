@@ -45,7 +45,7 @@ public:
     AbstractListWindow(CompletionStack &, WordStack &, InputWindow &, word_filter &);
 
 protected:
-    void filtered_words(std::vector<int> & filtered);
+    std::vector<int> const & filtered_words() const;
 
 private:
     // resolved dependencies
@@ -60,7 +60,7 @@ private:
 
     // new dependencies
     virtual int & display_start() = 0;
-    virtual std::vector<int> const & unfiltered_words(int) = 0;
+    virtual std::vector<int> const & unfiltered_words(int) const = 0;
 
     // new options
     virtual void on_post_RETURN() {}
@@ -72,14 +72,16 @@ private:
     {
     public:
         void set_false() { dirty = false; }
-        bool is_dirty_and_set_true() { bool d = dirty; dirty = true; return d; }
+        bool is_dirty() const { prev_dirty = dirty; dirty = true; return prev_dirty; }
     private:
-        bool dirty{false};
+        mutable bool dirty{true};
+        mutable bool prev_dirty{true};
     };
     CacheDirty cache_dirty;
 
+    mutable std::vector<int> filtered_words_cache;
+
     // same or longer lifetime as this and avoided during destruction
-    word_filter & wf;
-protected: // TODO FIXME make private
     InputWindow & input_win;
+    word_filter & wf;
 };

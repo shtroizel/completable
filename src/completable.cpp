@@ -96,7 +96,7 @@ int main(int argc, char ** argv)
     InputWindow input_win{cs, ws};
     input_win.enable();
 
-    CompletionWindow completion_win{cs, ws, input_win};
+    CompletionWindow completion_win{cs, ws, input_win, wf};
     completion_win.enable();
     AbstractWindow::set_active_window(&completion_win);
 

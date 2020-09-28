@@ -32,30 +32,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "AbstractWindow.h"
+#include "AbstractListWindow.h"
 
 
 
-class InputWindow;
-
-class CompletionWindow : public AbstractWindow
+class CompletionWindow : public AbstractListWindow
 {
-public:
-    CompletionWindow(CompletionStack &, WordStack &, InputWindow &);
-    ~CompletionWindow() override;
+    using AbstractListWindow::AbstractListWindow;
 
-private:
+    // resolved AbstractWindow dependencies
     std::string title() override;
     void resize_hook() override;
-    void draw_hook() override;
-    void on_KEY_UP() override;
-    void on_KEY_DOWN() override;
-    void on_PAGE_UP() override;
-    void on_PAGE_DOWN() override;
-    void on_HOME() override;
-    void on_END() override;
-    void on_RETURN() override;
 
-private:
-    InputWindow & input_win;
+    // resolved AbstractListWindow dependencies
+    int & display_start() override final;
+    std::vector<int> const & unfiltered_words(int) const override final;
 };

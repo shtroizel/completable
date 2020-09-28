@@ -49,8 +49,8 @@ AbstractListWindow::AbstractListWindow(
     word_filter & f
 )
     : AbstractWindow(cs, ws)
-    , wf(f)
     , input_win(iw)
+    , wf(f)
 {
     iw.add_dirty_dependency(this);
 }
@@ -62,8 +62,7 @@ void AbstractListWindow::draw_hook()
     if (c.standard_completion.size() == 0)
         return;
 
-    if (cache_dirty.is_dirty_and_set_true())
-        filtered_words(words);
+    auto words = filtered_words();
 
     // new filter could result in display_start out of bounds so clamp
     if (display_start() >= (int) words.size())
@@ -103,9 +102,10 @@ void AbstractListWindow::draw_hook()
 
 void AbstractListWindow::on_KEY_UP()
 {
-    if (display_start() > 0)
+    int & ds = display_start();
+    if (ds > 0)
     {
-        --display_start();
+        --ds;
         mark_dirty();
         cache_dirty.set_false();
     }
@@ -114,18 +114,20 @@ void AbstractListWindow::on_KEY_UP()
 
 void AbstractListWindow::on_KEY_DOWN()
 {
-    std::vector<int> words;
-    filtered_words(words);
+    int & ds = display_start();
+
+    cache_dirty.set_false();
+    auto words = filtered_words();
     if (words.size() == 0)
         return;
 
     int const end = (int) words.size() - 1;
-    if (display_start() != end)
+    if (ds != end)
     {
-        ++display_start();
+        ++ds;
 
-        if (display_start() > end)
-            display_start() = end;
+        if (ds > end)
+            ds = end;
 
         mark_dirty();
         cache_dirty.set_false();
@@ -135,12 +137,13 @@ void AbstractListWindow::on_KEY_DOWN()
 
 void AbstractListWindow::on_PAGE_UP()
 {
-    if (display_start() != 0)
+    int & ds = display_start();
+    if (ds != 0)
     {
-        display_start() -= height - 3; // 2 for borders, 1 for context
+        ds -= height - 3; // 2 for borders, 1 for context
 
-        if (display_start() < 0)
-            display_start() = 0;
+        if (ds < 0)
+            ds = 0;
 
         mark_dirty();
         cache_dirty.set_false();
@@ -150,19 +153,24 @@ void AbstractListWindow::on_PAGE_UP()
 
 void AbstractListWindow::on_PAGE_DOWN()
 {
-    std::vector<int> words;
-    filtered_words(words);
+    int & ds = display_start();
+
+    cache_dirty.set_false();
+    auto words = filtered_words();
+
     if (words.size() == 0)
         return;
 
     int const end = (int) words.size() - 1;
-    if (display_start() != end)
+    if (ds != end)
     {
-        display_start() += height - 3;  // 2 for borders, 1 for context
+        ds += height - 3;  // 2 for borders, 1 for context
 
-        if (display_start() > end)
-            display_start() = end;
+        if (ds > end)
+            ds = end;
 
+        // redraw but keep data
+        // note that the filtered_words() call before will make the cache dirty again
         mark_dirty();
         cache_dirty.set_false();
     }
@@ -171,9 +179,10 @@ void AbstractListWindow::on_PAGE_DOWN()
 
 void AbstractListWindow::on_HOME()
 {
-    if (display_start() != 0)
+    int & ds = display_start();
+    if (ds != 0)
     {
-        display_start() = 0;
+        ds = 0;
         mark_dirty();
         cache_dirty.set_false();
     }
@@ -182,15 +191,17 @@ void AbstractListWindow::on_HOME()
 
 void AbstractListWindow::on_END()
 {
-    std::vector<int> words;
-    filtered_words(words);
+    int & ds = display_start();
+
+    cache_dirty.set_false();
+    auto words = filtered_words();
     if (words.size() == 0)
         return;
 
     int const end = (int) words.size() - 1;
-    if (display_start() != end)
+    if (ds != end)
     {
-        display_start() = end;
+        ds = end;
         mark_dirty();
         cache_dirty.set_false();
     }
@@ -199,19 +210,20 @@ void AbstractListWindow::on_END()
 
 void AbstractListWindow::on_RETURN()
 {
-    std::vector<int> words;
-    filtered_words(words);
+    int & ds = display_start();
+
+    auto words = filtered_words();
 
     if (words.size() == 0)
         return;
 
-    if (display_start() >= (int) words.size())
-        display_start() = (int) words.size() - 1;
+    if (ds >= (int) words.size())
+        ds = (int) words.size() - 1;
 
-    std::string const & selected = string_from_index(words[display_start()]);
+    std::string const & selected = string_from_index(words[ds]);
 
     // save old prefix to word_stack
-    ws.push({cs.top().prefix, this, display_start()});
+    ws.push({cs.top().prefix, this, ds});
 
     // update completion stack
     while (cs.count() > 1)
@@ -225,24 +237,29 @@ void AbstractListWindow::on_RETURN()
 }
 
 
-void AbstractListWindow::filtered_words(std::vector<int> & filtered)
+std::vector<int> const & AbstractListWindow::filtered_words() const
 {
-    filtered.clear();
+    if (cache_dirty.is_dirty())
+    {
+        filtered_words_cache.clear();
 
-    auto & c = cs.top();
+        auto & c = cs.top();
 
-    if (c.standard_completion.size() == 0)
-        return;
+        if (c.standard_completion.size() == 0)
+            return filtered_words_cache;
 
-    if (c.display_start >= (int) c.standard_completion.size())
-        c.display_start = (int) c.standard_completion.size() - 1;
+        if (c.display_start >= (int) c.standard_completion.size())
+            c.display_start = (int) c.standard_completion.size() - 1;
 
-    auto const & unfiltered = unfiltered_words(c.standard_completion[c.display_start]);
+        auto const & unfiltered = unfiltered_words(c.standard_completion[c.display_start]);
 
-    filtered.reserve(unfiltered.size());
-    for (auto word : unfiltered)
-        if (wf.passes(word))
-            filtered.push_back(word);
+        filtered_words_cache.reserve(unfiltered.size());
+        for (auto word : unfiltered)
+            if (wf.passes(word))
+                filtered_words_cache.push_back(word);
+    }
+
+    return filtered_words_cache;
 }
 
 

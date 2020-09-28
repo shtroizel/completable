@@ -41,19 +41,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-CompletionWindow::CompletionWindow(CompletionStack & cs, WordStack & ws, InputWindow & iw)
-    : AbstractWindow::AbstractWindow(cs, ws)
-    , input_win{iw}
-{
-    input_win.add_dirty_dependency(this);
-}
-
-
-CompletionWindow::~CompletionWindow()
-{
-}
-
-
 std::string CompletionWindow::title()
 {
     std::string t{"Completion ("};
@@ -73,134 +60,13 @@ void CompletionWindow::resize_hook()
 }
 
 
-void CompletionWindow::draw_hook()
+int & CompletionWindow::display_start()
 {
-    auto const & c = cs.top();
-
-    int display_count = c.standard_completion.size() - c.display_start;
-
-    int i = 0;
-    for (; i < display_count && i < height - 2; ++i)
-    {
-        std::string const & complete_entry = matchmaker::at(c.standard_completion[c.display_start + i]);
-
-        if (i == 0)
-        {
-            if (is_active())
-                wattron(w, A_REVERSE);
-            else
-                wattron(w, A_BOLD);
-        }
-
-        int j = 0;
-        for (; j < (int) complete_entry.size() && j < width - 2; ++j)
-            mvwaddch(w, i + 1, j + 1, complete_entry[j]);
-
-        if (i == 0)
-        {
-            if (is_active())
-                wattroff(w, A_REVERSE);
-            else
-                wattroff(w, A_BOLD);
-        }
-
-        // blank out rest of line
-        for (; j < width - 2; ++j)
-            mvwaddch(w, i + 1, j + 1, ' ');
-    }
-
-    // blank out remaining lines
-    for (; i < height - 2; ++i)
-        for (int j = 0; j < width - 2; ++j)
-            mvwaddch(w, i + 1, j + 1, ' ');
+    return cs.top().display_start;
 }
 
 
-void CompletionWindow::on_KEY_UP()
+std::vector<int> const & CompletionWindow::unfiltered_words(int) const
 {
-    auto & c = cs.top();
-    if (c.display_start > 0)
-    {
-        --c.display_start;
-        mark_dirty();
-    }
-}
-
-
-void CompletionWindow::on_KEY_DOWN()
-{
-    auto & c = cs.top();
-    if (c.display_start < (int) c.standard_completion.size() - 1)
-    {
-        ++c.display_start;
-        mark_dirty();
-    }
-}
-
-
-void CompletionWindow::on_PAGE_UP()
-{
-    auto & c = cs.top();
-    if (c.display_start != 0)
-    {
-        c.display_start -= height - 3;
-        if (c.display_start < 0)
-            c.display_start = 0;
-        mark_dirty();
-    }
-}
-
-
-void CompletionWindow::on_PAGE_DOWN()
-{
-    auto & c = cs.top();
-    int const end = (int) c.standard_completion.size() - 1;
-    if (c.display_start != end)
-    {
-        c.display_start += height - 3;
-        if (c.display_start > end)
-            c.display_start = end;
-        mark_dirty();
-    }
-}
-
-
-void CompletionWindow::on_HOME()
-{
-    auto & c = cs.top();
-    if (c.display_start != 0)
-    {
-        c.display_start = 0;
-        mark_dirty();
-    }
-}
-
-
-void CompletionWindow::on_END()
-{
-    auto & c = cs.top();
-    int const end = (int) c.standard_completion.size() - 1;
-    if (c.display_start != end)
-    {
-        c.display_start = end;
-        mark_dirty();
-    }
-}
-
-
-void CompletionWindow::on_RETURN()
-{
-    auto & c = cs.top();
-
-    std::string const & selected = matchmaker::at(c.standard_completion[c.display_start]);
-
-    if (selected == c.prefix)
-        return;
-
-    ws.push({c.prefix, this, c.display_start});
-
-    for (auto i = c.prefix.length(); i < selected.length(); ++i)
-        cs.push(selected[i]);
-
-    input_win.mark_dirty();
+    return cs.top().standard_completion;
 }

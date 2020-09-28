@@ -83,7 +83,7 @@ int & LengthCompletionWindow::display_start()
 }
 
 
-std::vector<int> const & LengthCompletionWindow::unfiltered_words(int)
+std::vector<int> const & LengthCompletionWindow::unfiltered_words(int) const
 {
     return cs.top().length_completion;
 }
