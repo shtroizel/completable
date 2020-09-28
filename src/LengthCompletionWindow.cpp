@@ -209,7 +209,7 @@ void LengthCompletionWindow::on_RETURN()
     if (c.prefix == selected)
         return;
 
-    ws.push(std::make_pair(c.prefix, AbstractWindow::get_active_window()));
+    ws.push(std::make_pair(c.prefix, this));
 
     for (auto i = c.prefix.length(); i < selected.length(); ++i)
         cs.push(selected[i]);
