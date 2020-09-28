@@ -108,8 +108,8 @@ int main(int argc, char ** argv)
     AntonymWindow ant_win{cs, ws, input_win, completion_win, len_completion_win, syn_win, wf};
     ant_win.enable();
 
-    AttributeWindow pos_win{cs, ws, completion_win, len_completion_win, syn_win, ant_win};
-    pos_win.enable();
+    AttributeWindow att_win{cs, ws, completion_win, len_completion_win, syn_win, ant_win};
+    att_win.enable();
 
     FilterWindow filter_win{cs, ws, wf};
 
@@ -141,7 +141,7 @@ int main(int argc, char ** argv)
             input_win.resize();
             completion_win.resize();
             len_completion_win.resize();
-            pos_win.resize();
+            att_win.resize();
             syn_win.resize();
             ant_win.resize();
             filter_win.resize();
@@ -154,7 +154,7 @@ int main(int argc, char ** argv)
         input_win.draw(resized_draw);
         completion_win.draw(resized_draw);
         len_completion_win.draw(resized_draw);
-        pos_win.draw(resized_draw);
+        att_win.draw(resized_draw);
         syn_win.draw(resized_draw);
         ant_win.draw(resized_draw);
         filter_win.draw(resized_draw);
@@ -264,7 +264,7 @@ int main(int argc, char ** argv)
                 input_win.mark_dirty();
                 completion_win.mark_dirty();
                 len_completion_win.mark_dirty();
-                pos_win.mark_dirty();
+                att_win.mark_dirty();
                 syn_win.mark_dirty();
                 ant_win.mark_dirty();
             }
@@ -278,7 +278,7 @@ int main(int argc, char ** argv)
                 input_win.mark_dirty();
                 completion_win.mark_dirty();
                 len_completion_win.mark_dirty();
-                pos_win.mark_dirty();
+                att_win.mark_dirty();
                 syn_win.mark_dirty();
                 ant_win.mark_dirty();
             }
