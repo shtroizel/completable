@@ -52,6 +52,7 @@ static int const HOME{262};
 static int const END{360};
 static int const RETURN(10);
 static int const DELETE{330};
+static int const TAB{9};
 
 
 using WordStack = std::stack<word_stack_element>;
@@ -113,6 +114,7 @@ private:
     virtual void on_END() {}
     virtual void on_RETURN() {}
     virtual void on_DELETE() {}
+    virtual void on_TAB() {}
 
     void on_KEY_LEFT();
     void on_KEY_RIGHT();

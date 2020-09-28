@@ -58,6 +58,7 @@ private:
     void on_END() override final;
     void on_RETURN() override final;
     void on_DELETE() override final;
+    void on_TAB() override final;
 
     // new dependencies
     virtual int & display_start() = 0;

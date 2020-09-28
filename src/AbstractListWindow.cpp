@@ -258,6 +258,53 @@ void AbstractListWindow::on_DELETE()
 }
 
 
+void AbstractListWindow::on_TAB()
+{
+    decltype(cs) const & ccs = cs;
+
+    auto const & c = ccs.top();
+    std::string const & prefix = c.prefix;
+
+    if (c.standard_completion.size() > 0)
+    {
+        std::string const & first_entry = matchmaker::at(c.standard_completion[0]);
+
+        // find out the "target_completion_count" or the completion count after skipping
+        // by common characters
+        int target_completion_count = ccs.count() - 1;
+        bool ok = first_entry.size() > prefix.size();
+        while (ok)
+        {
+            for (auto i : c.standard_completion)
+            {
+                std::string const & entry = matchmaker::at(i);
+
+                if ((int) entry.size() < target_completion_count)
+                    ok = false;
+                else if ((int) first_entry.size() < target_completion_count)
+                    ok = false;
+                else if (entry[target_completion_count] != first_entry[target_completion_count])
+                    ok = false;
+            }
+
+            if (ok)
+                ++target_completion_count;
+        }
+
+        bool cs_modified{false};
+        // grow up to the target completion count
+        for (int i = (int) prefix.size(); i < target_completion_count; ++i)
+        {
+            cs.push(first_entry[i]);
+            cs_modified = true;
+        }
+
+        if (cs_modified)
+            input_win.mark_dirty();
+    }
+}
+
+
 std::vector<int> const & AbstractListWindow::filtered_words() const
 {
     if (cache_dirty.is_dirty())

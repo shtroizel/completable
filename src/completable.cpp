@@ -59,7 +59,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 static int const ESC{27};
-static int const TAB{9};
 
 
 
@@ -186,54 +185,6 @@ int main(int argc, char ** argv)
                 int new_count = cs.count();
                 if (new_count != old_count)
                     input_win.mark_dirty();
-            }
-        }
-        else if (ch == TAB)
-        {
-            if (!help_win.is_enabled() && !filter_win.is_enabled())
-            {
-                decltype(cs) const & ccs = cs;
-
-                auto const & c = ccs.top();
-                std::string const & prefix = c.prefix;
-
-                if (c.standard_completion.size() > 0)
-                {
-                    std::string const & first_entry = matchmaker::at(c.standard_completion[0]);
-
-                    // find out the "target_completion_count" or the completion count after skipping
-                    // by common characters
-                    int target_completion_count = ccs.count() - 1;
-                    bool ok = first_entry.size() > prefix.size();
-                    while (ok)
-                    {
-                        for (auto i : c.standard_completion)
-                        {
-                            std::string const & entry = matchmaker::at(i);
-
-                            if ((int) entry.size() < target_completion_count)
-                                ok = false;
-                            else if ((int) first_entry.size() < target_completion_count)
-                                ok = false;
-                            else if (entry[target_completion_count] != first_entry[target_completion_count])
-                                ok = false;
-                        }
-
-                        if (ok)
-                            ++target_completion_count;
-                    }
-
-                    bool cs_modified{false};
-                    // grow up to the target completion count
-                    for (int i = (int) prefix.size(); i < target_completion_count; ++i)
-                    {
-                        cs.push(first_entry[i]);
-                        cs_modified = true;
-                    }
-
-                    if (cs_modified)
-                        input_win.mark_dirty();
-                }
             }
         }
         else if (ch == KEY_F(1)  ||

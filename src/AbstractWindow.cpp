@@ -176,6 +176,8 @@ void AbstractWindow::on_KEY(int key)
 
     switch (key)
     {
+        case KEY_LEFT  : on_KEY_LEFT();  return;
+        case KEY_RIGHT : on_KEY_RIGHT(); return;
         case KEY_UP    : on_KEY_UP();    return;
         case KEY_DOWN  : on_KEY_DOWN();  return;
         case PAGE_UP   : on_PAGE_UP();   return;
@@ -184,8 +186,7 @@ void AbstractWindow::on_KEY(int key)
         case END       : on_END();       return;
         case RETURN    : on_RETURN();    return;
         case DELETE    : on_DELETE();    return;
-        case KEY_LEFT  : on_KEY_LEFT();  return;
-        case KEY_RIGHT : on_KEY_RIGHT(); return;
+        case TAB       : on_TAB();       return;
     }
 }
 
