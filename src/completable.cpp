@@ -117,6 +117,16 @@ int main(int argc, char ** argv)
     help_win.enable();
     AbstractWindow::set_active_window(&help_win);
 
+    // define neighbors for left/right arrow key switching
+    completion_win.set_left_neighbor(&ant_win);
+    completion_win.set_right_neighbor(&syn_win);
+    len_completion_win.set_left_neighbor(&syn_win);
+    len_completion_win.set_right_neighbor(&ant_win);
+    syn_win.set_left_neighbor(&completion_win);
+    syn_win.set_right_neighbor(&len_completion_win);
+    ant_win.set_left_neighbor(&len_completion_win);
+    ant_win.set_right_neighbor(&completion_win);
+
     bool resized_draw{true};
     int ch{0};
 
@@ -245,44 +255,6 @@ int main(int argc, char ** argv)
                     if (cs_modified)
                         input_win.mark_dirty();
                 }
-            }
-        }
-        else if (ch == KEY_LEFT)
-        {
-            if (!help_win.is_enabled() && !filter_win.is_enabled())
-            {
-                if (ant_win.is_active())
-                    AbstractWindow::set_active_window(&len_completion_win);
-                else
-                    if (len_completion_win.is_active())
-                        AbstractWindow::set_active_window(&syn_win);
-                    else
-                        if (syn_win.is_active())
-                            AbstractWindow::set_active_window(&completion_win);
-                        else
-                            if (completion_win.is_active())
-                                AbstractWindow::set_active_window(&ant_win);
-                            else
-                                AbstractWindow::set_active_window(&completion_win);
-            }
-        }
-        else if (ch == KEY_RIGHT)
-        {
-            if (!help_win.is_enabled() && !filter_win.is_enabled())
-            {
-                if (completion_win.is_active())
-                    AbstractWindow::set_active_window(&syn_win);
-                else
-                    if (syn_win.is_active())
-                        AbstractWindow::set_active_window(&len_completion_win);
-                    else
-                        if (len_completion_win.is_active())
-                            AbstractWindow::set_active_window(&ant_win);
-                        else
-                            if (ant_win.is_active())
-                                AbstractWindow::set_active_window(&completion_win);
-                            else
-                                AbstractWindow::set_active_window(&ant_win);
             }
         }
         else if (ch == KEY_F(1)  ||

@@ -72,7 +72,10 @@ public:
     int get_x() const { return x; }
     WINDOW * get_WINDOW() const { return w; }
 
-    static void set_active_window(AbstractWindow * act_win);
+    void set_left_neighbor(AbstractWindow * neighbor) { left_neighbor = neighbor; }
+    void set_right_neighbor(AbstractWindow * neighbor) { right_neighbor = neighbor; }
+
+    static void set_active_window(AbstractWindow *);
     static void set_active_window_to_previous();
     static AbstractWindow * get_active_window() { return active(); }
 
@@ -91,10 +94,13 @@ public:
     void disable();
 
 private:
+    // dependencies
     virtual std::string title() = 0;
     virtual void resize_hook() = 0;
-    virtual void post_resize_hook() {};
     virtual void draw_hook() = 0;
+
+    // options
+    virtual void post_resize_hook() {};
     virtual void pre_disable_hook() {}
     virtual void on_KEY_UP() {}
     virtual void on_KEY_DOWN() {}
@@ -103,6 +109,10 @@ private:
     virtual void on_HOME() {}
     virtual void on_END() {}
     virtual void on_RETURN() {}
+
+    void on_KEY_LEFT();
+    void on_KEY_RIGHT();
+
 
 protected:
     CompletionStack & cs;
@@ -119,8 +129,10 @@ private:
     bool enabled{false};
     bool dirty{false};
     std::vector<AbstractWindow *> dirty_dependencies;
+    AbstractWindow * left_neighbor{nullptr};
+    AbstractWindow * right_neighbor{nullptr};
 
-    // static variables for storing the active windows
+    // static variables that look like functions
     static AbstractWindow * & active() { static AbstractWindow * w{nullptr}; return w; }
     static AbstractWindow * & prev_active() { static AbstractWindow * w{nullptr}; return w; }
 };

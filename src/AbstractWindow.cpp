@@ -183,6 +183,8 @@ void AbstractWindow::on_KEY(int key)
         case HOME      : on_HOME();      return;
         case END       : on_END();       return;
         case RETURN    : on_RETURN();    return;
+        case KEY_LEFT  : on_KEY_LEFT();  return;
+        case KEY_RIGHT : on_KEY_RIGHT(); return;
     }
 }
 
@@ -220,4 +222,18 @@ void AbstractWindow::disable()
     }
 
     enabled = false;
+}
+
+
+void AbstractWindow::on_KEY_LEFT()
+{
+    if (nullptr != left_neighbor)
+        AbstractWindow::set_active_window(left_neighbor);
+}
+
+
+void AbstractWindow::on_KEY_RIGHT()
+{
+    if (nullptr != right_neighbor)
+        AbstractWindow::set_active_window(right_neighbor);
 }
