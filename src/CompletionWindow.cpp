@@ -192,7 +192,7 @@ void CompletionWindow::on_RETURN()
 {
     auto & c = cs.top();
 
-    std::string const & selected = matchmaker::at(c.display_start);
+    std::string const & selected = matchmaker::at(c.standard_completion[c.display_start]);
 
     if (selected == c.prefix)
         return;
