@@ -237,6 +237,27 @@ void AbstractListWindow::on_RETURN()
 }
 
 
+void AbstractListWindow::on_DELETE()
+{
+    if (ws.size() == 0)
+        return;
+
+    auto & [s, w, ds] = ws.top();
+
+    while (cs.count() > 1)
+        cs.pop();
+
+    for (auto ch : s)
+        cs.push(ch);
+
+    ws.pop();
+
+    AbstractWindow::set_active_window(w);
+    input_win.mark_dirty();
+    display_start() = ds;
+}
+
+
 std::vector<int> const & AbstractListWindow::filtered_words() const
 {
     if (cache_dirty.is_dirty())

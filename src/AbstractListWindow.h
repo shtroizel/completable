@@ -57,6 +57,7 @@ private:
     void on_HOME() override final;
     void on_END() override final;
     void on_RETURN() override final;
+    void on_DELETE() override final;
 
     // new dependencies
     virtual int & display_start() = 0;
@@ -78,7 +79,6 @@ private:
         mutable bool prev_dirty{true};
     };
     CacheDirty cache_dirty;
-
     mutable std::vector<int> filtered_words_cache;
 
     // same or longer lifetime as this and avoided during destruction

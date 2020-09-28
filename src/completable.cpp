@@ -61,7 +61,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 static int const ESC{27};
 static int const TAB{9};
 
-static int const DEL{330};
 
 
 void shell();
@@ -177,27 +176,6 @@ int main(int argc, char ** argv)
 
             reset_prog_mode();
             resized_draw = true;
-        }
-        else if (ch == DEL)
-        {
-            if (!help_win.is_enabled() && !filter_win.is_enabled())
-            {
-                if (ws.size() == 0)
-                    continue;
-
-                auto & [s, w, display_start] = ws.top();
-
-                while (cs.count() > 1)
-                    cs.pop();
-
-                for (auto ch : s)
-                    cs.push(ch);
-
-                ws.pop();
-
-                AbstractWindow::set_active_window(w);
-                input_win.mark_dirty();
-            }
         }
         else if (ch == KEY_BACKSPACE || ch == 127 || ch == '\b')
         {
