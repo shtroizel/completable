@@ -81,6 +81,9 @@ void AttributeWindow::resize_hook()
 void AttributeWindow::draw_hook()
 {
     auto const & c = cs.top();
+    if (c.standard_completion.size() == 0)
+        return;
+
     int selection = c.standard_completion[c.display_start];
     int line = 1;
 
