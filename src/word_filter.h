@@ -35,7 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <matchable/matchable.h>
 
-#include <matchmaker/matchmaker.h>
+#include "matchmaker.h"
 
 
 using filter_func = std::function<bool (int)>;

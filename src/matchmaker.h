@@ -1,3 +1,5 @@
+#pragma once
+
 /*
 Copyright (c) 2020, Eric Hyer
 All rights reserved.
@@ -29,72 +31,33 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-
-#include "AntonymWindow.h"
-
-#include <ncurses.h>
-
-#include "CompletionStack.h"
-#include "InputWindow.h"
-#include "CompletionWindow.h"
-#include "LengthCompletionWindow.h"
-#include "SynonymWindow.h"
-#include "matchmaker.h"
+#include <string>
+#include <vector>
 
 
-
-AntonymWindow::AntonymWindow(
-    CompletionStack & cs,
-    WordStack & ws,
-    InputWindow & iw,
-    CompletionWindow & cw,
-    LengthCompletionWindow & lcw,
-    SynonymWindow & sw,
-    word_filter & f
-)
-    : AbstractListWindow(cs, ws, iw, f)
-    , len_completion_win(lcw)
-    , syn_win(sw)
+namespace matchmaker
 {
-    cw.add_dirty_dependency(this);
-}
+    char * set_library(char const * so_filename);
+    void unset_library();
 
-
-std::string AntonymWindow::title()
-{
-    std::string t{"Antonyms ("};
-
-    auto ant = filtered_words();
-    t += std::to_string(ant.size());
-
-    t += ")";
-
-    return t;
-}
-
-
-void AntonymWindow::resize_hook()
-{
-    height = len_completion_win.get_height();
-    width = len_completion_win.get_width() + root_x % 2;
-    y = len_completion_win.get_y();
-    x = len_completion_win.get_width();
-}
-
-
-int & AntonymWindow::display_start()
-{
-    return cs.top().ant_display_start;
-}
-
-
-void AntonymWindow::on_post_RETURN()
-{
-    AbstractWindow::set_active_window(&syn_win);
-}
-
-
-std::vector<int> const & AntonymWindow::unfiltered_words(int word) const
-{
-    return matchmaker::antonyms(word);
+    // matchmaker interface
+    int size();
+    std::string const & at(int index);
+    int lookup(std::string const & word, bool * found);
+    int as_longest(int index);
+    int from_longest(int length_index);
+    std::vector<std::size_t> const & lengths();
+    bool length_location(std::size_t length, int & length_index, int & count);
+    std::vector<std::string> const & all_parts_of_speech();
+    std::vector<int8_t> const & flagged_parts_of_speech(int index);
+    void parts_of_speech(int index, std::vector<std::string const *> & pos);
+    bool is_name(int index);
+    bool is_male_name(int index);
+    bool is_female_name(int index);
+    bool is_place(int index);
+    bool is_compound(int index);
+    bool is_acronym(int index);
+    std::vector<int> const & synonyms(int index);
+    std::vector<int> const & antonyms(int index);
+    void complete(std::string const & prefix, int & start, int & length);
 }

@@ -34,8 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <queue>
 
-#include <matchmaker/matchmaker.h>
-
+#include "matchmaker.h"
 #include "word_filter.h"
 
 

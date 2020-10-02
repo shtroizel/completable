@@ -34,10 +34,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <ncurses.h>
 
-#include <matchmaker/matchmaker.h>
-
 #include "CompletionStack.h"
 #include "InputWindow.h"
+#include "matchmaker.h"
 #include "word_filter.h"
 
 

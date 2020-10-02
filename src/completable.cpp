@@ -41,8 +41,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <ncurses.h>
 
-#include <matchmaker/matchmaker.h>
-
 #include "AbstractWindow.h"
 #include "AntonymWindow.h"
 #include "AttributeWindow.h"
@@ -53,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "InputWindow.h"
 #include "LengthCompletionWindow.h"
 #include "SynonymWindow.h"
+#include "matchmaker.h"
 #include "word_filter.h"
 #include "word_stack_element.h"
 
@@ -73,6 +72,10 @@ int main(int argc, char ** argv)
         if (a1 == "no_borders")
             AbstractWindow::borders() = false;
     }
+
+#ifndef MM_DL
+    matchmaker::set_library(nullptr); // disable dynamic loading, use linking instead
+#endif
 
     initscr();
     noecho();
@@ -265,6 +268,9 @@ int main(int argc, char ** argv)
     }
 
     endwin();
+
+
+    matchmaker::unset_library();
 
     return 0;
 }
@@ -474,11 +480,11 @@ void shell()
 
             if (words[0] == ":itl")
             {
-                for (int i = start; i < (int) matchmaker::by_longest().size() && i < start + count; ++i)
-                    std::cout << "       [" << std::setw(MAX_INDEX_DIGITS) << matchmaker::by_longest()[i]
+                for (int i = start; i < (int) matchmaker::size() && i < start + count; ++i)
+                    std::cout << "       [" << std::setw(MAX_INDEX_DIGITS) << matchmaker::from_longest(i)
                               << "], length[" << std::setw(MAX_INDEX_DIGITS) << i << "]  "
-                              << matchmaker::at(matchmaker::by_longest()[i]) << " has "
-                              << matchmaker::at(matchmaker::by_longest()[i]).size()
+                              << matchmaker::at(matchmaker::from_longest(i)) << " has "
+                              << matchmaker::at(matchmaker::from_longest(i)).length()
                               << " characters" << std::endl;
             }
             else if (words[0] == ":it")

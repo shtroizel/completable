@@ -20,10 +20,13 @@ if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif()
 
 
-get_filename_component(rpath_dir "${matchmaker_DIR}/.." REALPATH)
-set(CMAKE_INSTALL_RPATH "${rpath_dir}")
-
-find_package(matchmaker 1.6 REQUIRED)
+if(matchmaker_DL STREQUAL "ON")
+    add_definitions(-DMM_DL)
+else()
+    get_filename_component(rpath_dir "${matchmaker_DIR}/.." REALPATH)
+    set(CMAKE_INSTALL_RPATH "${rpath_dir}")
+    find_package(matchmaker 2.0.0 REQUIRED)
+endif()
 
 find_package(Curses REQUIRED)
 
@@ -41,10 +44,17 @@ set(
     src/LengthCompletionWindow.cpp
     src/SynonymWindow.cpp
     src/completable.cpp
+    src/matchmaker.cpp
 )
 
 add_executable(completable ${completable_srcs})
-target_link_libraries(completable matchmaker ${CURSES_LIBRARIES})
+
+if(matchmaker_DL STREQUAL "ON")
+    target_link_libraries(completable ${CURSES_LIBRARIES} dl)
+else()
+    target_link_libraries(completable matchmaker ${CURSES_LIBRARIES})
+endif()
+
 target_include_directories(
     completable
     PRIVATE

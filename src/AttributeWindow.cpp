@@ -36,13 +36,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <ncurses.h>
 
-#include <matchmaker/matchmaker.h>
-
 #include "AntonymWindow.h"
 #include "CompletionStack.h"
 #include "CompletionWindow.h"
 #include "LengthCompletionWindow.h"
 #include "SynonymWindow.h"
+#include "matchmaker.h"
 
 
 
