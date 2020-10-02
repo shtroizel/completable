@@ -259,9 +259,7 @@ void AbstractListWindow::on_DELETE()
 
 void AbstractListWindow::on_TAB()
 {
-    decltype(cs) const & ccs = cs;
-
-    auto const & c = ccs.top();
+    auto const & c = cs.top();
     std::string const & prefix = c.prefix;
 
     if (c.standard_completion.size() > 0)
@@ -270,7 +268,7 @@ void AbstractListWindow::on_TAB()
 
         // find out the "target_completion_count" or the completion count after skipping
         // by common characters
-        int target_completion_count = ccs.count() - 1;
+        int target_completion_count = cs.count() - 1;
         bool ok = first_entry.size() > prefix.size();
         while (ok)
         {
