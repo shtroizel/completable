@@ -21,16 +21,19 @@ def usage():
     print('                                * relative paths are relative to build_dir\n')
     print('    -m  --matchmaker_dir      matchmaker install directory')
     print('                                * defaults to <completable root>/matchmaker/install')
-    print('                                * relative paths are relative to <completable root>\n')
+    print('                                * relative paths are relative to <completable root>')
+    print('                                * ignored if dynamic_loading (\'-l\')\n')
     print('    -q  --q                   adds \'_q\' suffix to:')
     print('                                * build_dir')
     print('                                * install_dir')
     print('                                * matchmaker_dir\n')
     print('    -c  --clang               force use of clang compiler (defaults to system compiler)\n')
     print('    -d  --debug               debug build (default is release)\n')
+    print('    -l  --dynamic_loading     load matchmaker at runtime')
+    print('                                * avoids linking to matchmaker\n')
 
 
-def build_and_install(build_dir, install_dir, matchmaker_dir, use_clang, q, debug):
+def build_and_install(build_dir, install_dir, matchmaker_dir, use_clang, q, debug, dynamic_loading):
     start_dir = os.getcwd()
 
     completable_root = os.path.dirname(os.path.realpath(__file__)) + '/../'
@@ -68,7 +71,6 @@ def build_and_install(build_dir, install_dir, matchmaker_dir, use_clang, q, debu
     os.makedirs(install_dir)
 
     cmake_cmd = ['cmake', '-DCMAKE_INSTALL_PREFIX=' + install_dir]
-    cmake_cmd.append('-Dmatchmaker_DIR=' + matchmaker_dir + '/lib/matchmaker/cmake')
     if use_clang:
         cmake_cmd.append('-DCMAKE_C_COMPILER=/usr/bin/clang')
         cmake_cmd.append('-DCMAKE_CXX_COMPILER=/usr/bin/clang++')
@@ -77,6 +79,12 @@ def build_and_install(build_dir, install_dir, matchmaker_dir, use_clang, q, debu
         cmake_cmd.append('-DCMAKE_BUILD_TYPE=Debug')
     else:
         cmake_cmd.append('-DCMAKE_BUILD_TYPE=Release')
+
+    if dynamic_loading:
+        cmake_cmd.append('-Dmatchmaker_DL=ON')
+    else:
+        cmake_cmd.append('-Dmatchmaker_DL=OFF')
+        cmake_cmd.append('-Dmatchmaker_DIR=' + matchmaker_dir + '/lib/matchmaker/cmake')
 
     cmake_cmd.append(completable_root)
 
@@ -96,8 +104,9 @@ def build_and_install(build_dir, install_dir, matchmaker_dir, use_clang, q, debu
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hcb:i:m:qd',
-                ['help', 'clang', 'build_dir', 'install_dir', 'matchmaker_dir', 'q', 'debug'])
+        opts, args = getopt.getopt(sys.argv[1:], 'hcb:i:m:qdl',
+                ['help', 'clang', 'build_dir', 'install_dir', 'matchmaker_dir', 'q', 'debug',
+                 'dynamic_loading'])
     except getopt.GetoptError as err:
         print(err)
         usage()
@@ -109,6 +118,7 @@ def main():
     matchmaker_dir = ''
     q = False
     debug = False
+    dynamic_loading = False
 
     for o, a in opts:
         if o in ('-h', '--help'):
@@ -126,11 +136,13 @@ def main():
             q = True
         elif o in ('-d', '--debug'):
             debug = True
+        elif o in ('-l', '--dynamic_loading'):
+            dynamic_loading = True
         else:
             assert False, "unhandled option"
 
 
-    build_and_install(build_dir, install_dir, matchmaker_dir, use_clang, q, debug)
+    build_and_install(build_dir, install_dir, matchmaker_dir, use_clang, q, debug, dynamic_loading)
 
     exit(0)
 
