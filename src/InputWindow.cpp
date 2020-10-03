@@ -54,12 +54,6 @@ void InputWindow::resize_hook()
 }
 
 
-void InputWindow::post_resize_hook()
-{
-    keypad(w, true);
-}
-
-
 void InputWindow::draw_hook()
 {
     std::string const & prefix = cs.top().prefix;

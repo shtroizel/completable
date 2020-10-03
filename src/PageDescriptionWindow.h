@@ -35,11 +35,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractWindow.h"
 
 
-class InputWindow : public AbstractWindow
+
+class PageDescriptionWindow : public AbstractWindow
 {
     using AbstractWindow::AbstractWindow;
 
-    std::string title() override;
-    void resize_hook() override;
-    void draw_hook() override;
+    // resolved AbstractWindow dependencies
+    std::string title() override final;
+    void resize_hook() override final;
+    void draw_hook() override final;
+
+    // AbstractWindow options
+    void post_resize_hook() override;
+    bool borders_enabled() const override { return false; }
 };

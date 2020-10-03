@@ -32,14 +32,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "AbstractWindow.h"
+// :)
+static int const TAB{9};
+static int const ESC{27};
+// alles gute 107
 
-
-class InputWindow : public AbstractWindow
-{
-    using AbstractWindow::AbstractWindow;
-
-    std::string title() override;
-    void resize_hook() override;
-    void draw_hook() override;
-};
+static int const PAGE_UP{339};
+static int const PAGE_DOWN{338};
+static int const HOME{262};
+static int const END{360};
+static int const RETURN(10);
+static int const DELETE{330};
+static const int SHIFT_LEFT{393};
+static const int SHIFT_RIGHT{402};
+static const int BACKSPACE_127{127};
+static const int BACKSPACE_BKSLSH_B{'\b'};

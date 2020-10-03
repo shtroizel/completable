@@ -31,15 +31,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
+#include <matchable/matchable.h>
 
-#include "AbstractWindow.h"
 
 
-class InputWindow : public AbstractWindow
-{
-    using AbstractWindow::AbstractWindow;
-
-    std::string title() override;
-    void resize_hook() override;
-    void draw_hook() override;
-};
+MATCHABLE(VisibilityAspect, PageVisibility, WindowVisibility);

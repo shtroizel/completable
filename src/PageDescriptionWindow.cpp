@@ -1,5 +1,3 @@
-#pragma once
-
 /*
 Copyright (c) 2020, Eric Hyer
 All rights reserved.
@@ -32,14 +30,42 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "AbstractWindow.h"
+#include "PageDescriptionWindow.h"
+
+#include <ncurses.h>
+
+#include "AbstractPage.h"
 
 
-class InputWindow : public AbstractWindow
+
+std::string PageDescriptionWindow::title()
 {
-    using AbstractWindow::AbstractWindow;
+    static std::string const t;
+    return t;
+}
 
-    std::string title() override;
-    void resize_hook() override;
-    void draw_hook() override;
-};
+
+void PageDescriptionWindow::resize_hook()
+{
+    height = 3;
+    width = 17;
+    y = 0;
+    x = 1;
+}
+
+
+void PageDescriptionWindow::draw_hook()
+{
+    auto page = AbstractPage::get_active_page();
+    if (nullptr == page)
+        return;
+
+    for (int i = 0; i < (int) page->get_description().size(); ++i)
+        mvwaddch(w, 1, i, page->get_description()[i]);
+}
+
+
+void PageDescriptionWindow::post_resize_hook()
+{
+    keypad(w, true);
+}

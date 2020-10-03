@@ -1,5 +1,3 @@
-#pragma once
-
 /*
 Copyright (c) 2020, Eric Hyer
 All rights reserved.
@@ -32,14 +30,33 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "AbstractWindow.h"
+#include "SettingsPage.h"
 
 
-class InputWindow : public AbstractWindow
+
+std::array<char, 17> const & SettingsPage::description() const
 {
-    using AbstractWindow::AbstractWindow;
-
-    std::string title() override;
-    void resize_hook() override;
-    void draw_hook() override;
-};
+    static std::array<char, 17> desc = []()
+                                       {
+                                           std::array<char, 17> d;
+                                           d[0]  = 's';
+                                           d[1]  = 'e';
+                                           d[2]  = 't';
+                                           d[3]  = 't';
+                                           d[4]  = 'i';
+                                           d[5]  = 'n';
+                                           d[6]  = 'g';
+                                           d[7]  = 's';
+                                           d[8]  = ' ';
+                                           d[9]  = ' ';
+                                           d[10] = ' ';
+                                           d[11] = ' ';
+                                           d[12] = ' ';
+                                           d[13] = ' ';
+                                           d[14] = ' ';
+                                           d[15] = ' ';
+                                           d[16] = ' ';
+                                           return d;
+                                       }();
+    return desc;
+}

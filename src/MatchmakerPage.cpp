@@ -1,5 +1,3 @@
-#pragma once
-
 /*
 Copyright (c) 2020, Eric Hyer
 All rights reserved.
@@ -32,14 +30,33 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "AbstractWindow.h"
+#include "MatchmakerPage.h"
 
 
-class InputWindow : public AbstractWindow
+
+std::array<char, 17> const & MatchmakerPage::description() const
 {
-    using AbstractWindow::AbstractWindow;
-
-    std::string title() override;
-    void resize_hook() override;
-    void draw_hook() override;
-};
+    static std::array<char, 17> desc = []()
+                                       {
+                                           std::array<char, 17> d;
+                                           d[0]  = 'm';
+                                           d[1]  = 'a';
+                                           d[2]  = 't';
+                                           d[3]  = 'c';
+                                           d[4]  = 'h';
+                                           d[5]  = 'm';
+                                           d[6]  = 'a';
+                                           d[7]  = 'k';
+                                           d[8]  = 'e';
+                                           d[9]  = 'r';
+                                           d[10] = ' ';
+                                           d[11] = ' ';
+                                           d[12] = ' ';
+                                           d[13] = ' ';
+                                           d[14] = ' ';
+                                           d[15] = ' ';
+                                           d[16] = ' ';
+                                           return d;
+                                       }();
+    return desc;
+}

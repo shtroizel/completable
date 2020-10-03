@@ -1,5 +1,3 @@
-#pragma once
-
 /*
 Copyright (c) 2020, Eric Hyer
 All rights reserved.
@@ -32,14 +30,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "AbstractWindow.h"
+#include "AbstractIndicatorWindow.h"
+
+#include <ncurses.h>
 
 
-class InputWindow : public AbstractWindow
+
+void AbstractIndicatorWindow::draw_hook()
 {
-    using AbstractWindow::AbstractWindow;
+    if (page_is_active())
+    {
+        if (global_borders_enabled())
+            box(w, 0, 0);
+        else
+            wattron(w, A_REVERSE);
+    }
 
-    std::string title() override;
-    void resize_hook() override;
-    void draw_hook() override;
-};
+    mvwaddch(w, 1, 2, abbreviation());
+    wattroff(w, A_REVERSE);
+}

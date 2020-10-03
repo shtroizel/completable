@@ -35,11 +35,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractWindow.h"
 
 
-class InputWindow : public AbstractWindow
+
+class IndicatorWindow : public AbstractWindow
 {
     using AbstractWindow::AbstractWindow;
 
+    // resolved dependencies
     std::string title() override;
     void resize_hook() override;
     void draw_hook() override;
+
+    // options
+    bool borders_enabled() const override final { return false; }
 };

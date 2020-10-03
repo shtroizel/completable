@@ -41,23 +41,25 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <ncurses.h>
 
-#include "AbstractWindow.h"
 #include "AntonymWindow.h"
 #include "AttributeWindow.h"
+#include "CompletablePage.h"
 #include "CompletionStack.h"
 #include "CompletionWindow.h"
 #include "FilterWindow.h"
 #include "HelpWindow.h"
+#include "IndicatorWindow.h"
 #include "InputWindow.h"
+#include "MatchmakerPage.h"
 #include "LengthCompletionWindow.h"
+#include "PageDescriptionWindow.h"
+#include "SettingsPage.h"
 #include "SynonymWindow.h"
+#include "VisibilityAspect.h"
+#include "key_codes.h"
 #include "matchmaker.h"
 #include "word_filter.h"
 #include "word_stack_element.h"
-
-
-
-static int const ESC{27};
 
 
 
@@ -70,7 +72,7 @@ int main(int argc, char ** argv)
     {
         std::string const a1{argv[1]};
         if (a1 == "no_borders")
-            AbstractWindow::borders() = false;
+            AbstractWindow::global_borders_enabled() = false;
     }
 
 #ifndef MM_DL
@@ -95,31 +97,42 @@ int main(int argc, char ** argv)
     std::stack<word_stack_element> ws; // for navigation with RET and DEL
 
     InputWindow input_win{cs, ws};
-    input_win.enable();
-
     CompletionWindow completion_win{cs, ws, input_win, wf};
-    completion_win.enable();
-    AbstractWindow::set_active_window(&completion_win);
-
     LengthCompletionWindow len_completion_win{cs, ws, input_win, wf, completion_win};
-    len_completion_win.enable();
-
     SynonymWindow syn_win{cs, ws, input_win, completion_win, wf};
-    syn_win.enable();
-
     AntonymWindow ant_win{cs, ws, input_win, completion_win, len_completion_win, syn_win, wf};
-    ant_win.enable();
-
     AttributeWindow att_win{cs, ws, completion_win, len_completion_win, syn_win, ant_win};
-    att_win.enable();
 
     FilterWindow filter_win{cs, ws, wf};
+    filter_win.disable(VisibilityAspect::WindowVisibility::grab());
 
     HelpWindow help_win{cs, ws, input_win};
-    help_win.enable();
-    AbstractWindow::set_active_window(&help_win);
+    PageDescriptionWindow page_desc_win{cs, ws};
+    IndicatorWindow indicator_win{cs, ws};
 
-    // define neighbors for left/right arrow key switching
+    CompletablePage page_c{{&page_desc_win, &indicator_win, &input_win, &completion_win,
+                            &len_completion_win, &att_win, &syn_win, &ant_win, &filter_win, &help_win}};
+    page_c.set_active_window(&completion_win);
+    page_c.set_active_window(&help_win);
+
+
+//     SettingsPage page_s{{&page_desc_win, &indicator_win}};
+//
+//     page_c.set_left_neighbor(&page_s);
+//     page_s.set_right_neighbor(&page_c);
+//
+// #ifdef MM_DL
+//     MatchmakerPage page_m{{&page_desc_win, &indicator_win}};
+//     page_s.set_left_neighbor(&page_m);
+//     page_m.set_right_neighbor(&page_s);
+//     AbstractPage::set_active_page(&page_m);
+// #else
+//     AbstractPage::set_active_page(&page_c);
+// #endif
+    AbstractPage::set_active_page(&page_c);
+
+
+    // define neighbors for left/right arrow key switching of windows within completable page
     completion_win.set_left_neighbor(&ant_win);
     completion_win.set_right_neighbor(&syn_win);
     len_completion_win.set_left_neighbor(&syn_win);
@@ -131,43 +144,34 @@ int main(int argc, char ** argv)
 
     bool resized_draw{true};
     int ch{0};
+    AbstractPage * active_page{nullptr};
 
     while (true)
     {
+        active_page = AbstractPage::get_active_page();
+        if (nullptr == active_page)
+            break;
+
         // *** terminal resized? *************
         prev_root_y = root_y;
         prev_root_x = root_x;
         getmaxyx(stdscr, root_y, root_x);
         if (root_y != prev_root_y || root_x != prev_root_x)
         {
-            input_win.resize();
-            completion_win.resize();
-            len_completion_win.resize();
-            att_win.resize();
-            syn_win.resize();
-            ant_win.resize();
-            filter_win.resize();
-            help_win.resize();
-
+            active_page->resize();
             resized_draw = true;
         }
         // ***********************************
 
-        input_win.draw(resized_draw);
-        completion_win.draw(resized_draw);
-        len_completion_win.draw(resized_draw);
-        att_win.draw(resized_draw);
-        syn_win.draw(resized_draw);
-        ant_win.draw(resized_draw);
-        filter_win.draw(resized_draw);
-        help_win.draw(resized_draw);
-
+        active_page->draw(resized_draw);
         resized_draw = false;
 
-        if (input_win.is_enabled())
-            ch = wgetch(input_win.get_WINDOW());
-        else if (filter_win.is_enabled())
-            ch = wgetch(filter_win.get_WINDOW());
+        if (!page_desc_win.is_enabled())
+            break;
+
+        ch = wgetch(page_desc_win.get_WINDOW());
+
+
 
         if (ch == '$' || ch == '~' || ch == '`')
         {
@@ -179,7 +183,7 @@ int main(int argc, char ** argv)
             reset_prog_mode();
             resized_draw = true;
         }
-        else if (ch == KEY_BACKSPACE || ch == 127 || ch == '\b')
+        else if (ch == KEY_BACKSPACE || ch == BACKSPACE_127 || ch == BACKSPACE_BKSLSH_B)
         {
             if (!help_win.is_enabled() && !filter_win.is_enabled())
             {
@@ -206,15 +210,15 @@ int main(int argc, char ** argv)
             if (help_win.is_enabled())
                 continue;
 
-            filter_win.set_enabled(!filter_win.is_enabled());
+            filter_win.toggle_enabled(VisibilityAspect::WindowVisibility::grab());
 
             if (filter_win.is_enabled())
             {
-                AbstractWindow::set_active_window(&filter_win);
+                page_c.set_active_window(&filter_win);
             }
             else
             {
-                AbstractWindow::set_active_window_to_previous();
+                page_c.set_active_window_to_previous();
                 input_win.mark_dirty();
                 completion_win.mark_dirty();
                 len_completion_win.mark_dirty();
@@ -227,8 +231,8 @@ int main(int argc, char ** argv)
         {
             if (filter_win.is_enabled())
             {
-                filter_win.disable();
-                AbstractWindow::set_active_window_to_previous();
+                filter_win.disable(VisibilityAspect::WindowVisibility::grab());
+                active_page->set_active_window_to_previous();
                 input_win.mark_dirty();
                 completion_win.mark_dirty();
                 len_completion_win.mark_dirty();
@@ -261,9 +265,7 @@ int main(int argc, char ** argv)
         }
         else
         {
-            AbstractWindow * w = AbstractWindow::get_active_window();
-            if (nullptr != w)
-                w->on_KEY(ch);
+            active_page->on_KEY(ch);
         }
     }
 

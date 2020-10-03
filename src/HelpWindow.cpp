@@ -35,6 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ncurses.h>
 
 #include "InputWindow.h"
+#include "VisibilityAspect.h"
 
 
 
@@ -105,7 +106,7 @@ void HelpWindow::draw_hook()
 
 void HelpWindow::on_RETURN()
 {
-    disable();
+    disable(VisibilityAspect::WindowVisibility::grab());
     AbstractWindow::set_active_window_to_previous();
     input_win.mark_dirty();
 }

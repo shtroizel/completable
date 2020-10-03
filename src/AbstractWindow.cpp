@@ -37,6 +37,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ncurses.h>
 
 #include "CompletionStack.h"
+#include "AbstractPage.h"
+#include "VisibilityAspect.h"
+#include "key_codes.h"
 
 
 
@@ -47,15 +50,15 @@ static int const MIN_ROOT_Y{30};
 static int const MIN_ROOT_X{80};
 
 
+
 AbstractWindow::AbstractWindow(CompletionStack & completion_stack, WordStack & word_stack)
-    : cs{completion_stack}, ws{word_stack}
+    : cs{completion_stack}, ws{word_stack}, disabled{std::make_shared<VisibilityAspect::Flags>()}
 {
 }
 
 
 AbstractWindow::~AbstractWindow()
 {
-    set_active_window(nullptr);
     delwin(w);
     w = nullptr;
 }
@@ -73,7 +76,7 @@ void AbstractWindow::clear()
 
 void AbstractWindow::resize()
 {
-    if (!enabled)
+    if (!is_enabled())
         return;
 
     if (nullptr != w)
@@ -93,7 +96,7 @@ void AbstractWindow::resize()
 
 void AbstractWindow::draw(bool clear_first)
 {
-    if (!enabled)
+    if (!is_enabled())
         return;
 
     // check terminal for minimum size requirement
@@ -112,7 +115,7 @@ void AbstractWindow::draw(bool clear_first)
         wclear(w);
 
     // border
-    if (borders())
+    if (global_borders_enabled() && borders_enabled())
         box(w, 0, 0);
 
     // title
@@ -139,36 +142,44 @@ void AbstractWindow::draw(bool clear_first)
 }
 
 
-void AbstractWindow::set_active_window(AbstractWindow * act_win)
+bool AbstractWindow::is_active()
 {
-    if (nullptr != active())
-        active()->mark_dirty();
+    if (!belongs_to_active_page())
+        return false;
 
-    prev_active() = active();
-    active() = act_win;
+    auto active_page = AbstractPage::get_active_page();
 
-    if (nullptr != active())
-        active()->mark_dirty();
+    auto act_win = active_page->get_active_window();
+    if (nullptr == act_win)
+        return false;
+
+    return act_win->title() == title();
 }
 
 
-void AbstractWindow::set_active_window_to_previous()
+bool AbstractWindow::belongs_to_active_page()
 {
-    AbstractWindow * w = active();
-    active() = prev_active();
-    prev_active() = w;
+    auto active_page = AbstractPage::get_active_page();
+    if (nullptr == active_page)
+        return false;
 
-    if (nullptr != prev_active())
-        prev_active()->mark_dirty();
+    for (auto pg : pages)
+        if (pg == active_page)
+            return true;
 
-    if (nullptr != active())
-        active()->mark_dirty();
+    return false;
+}
+
+
+void AbstractWindow::add_page(AbstractPage * page)
+{
+    pages.push_back(page);
 }
 
 
 void AbstractWindow::on_KEY(int key)
 {
-    if (!enabled)
+    if (!is_enabled())
         return;
 
     if (!is_active())
@@ -205,37 +216,76 @@ void AbstractWindow::add_dirty_dependency(AbstractWindow * dep)
 }
 
 
-void AbstractWindow::enable()
+void AbstractWindow::set_enabled(bool state, VisibilityAspect::Type aspect)
 {
-    enabled = true;
-    resize();
+    if (state)
+        enable(aspect);
+    else
+        disable(aspect);
 }
 
 
-void AbstractWindow::disable()
+void AbstractWindow::toggle_enabled(VisibilityAspect::Type aspect)
 {
-    pre_disable_hook();
+    set_enabled(disabled->is_set(aspect), aspect);
+}
 
-    if (nullptr != w)
+
+bool AbstractWindow::is_enabled() const
+{
+    return 0 == disabled->currently_set().size();
+}
+
+
+void AbstractWindow::enable(VisibilityAspect::Type aspect)
+{
+    disabled->unset(aspect);
+    if (is_enabled())
+        resize();
+}
+
+
+void AbstractWindow::disable(VisibilityAspect::Type aspect)
+{
+    if (is_enabled())
     {
-        clear();
-        delwin(w);
-        w = nullptr;
+        pre_disable_hook();
+
+        if (nullptr != w)
+        {
+            clear();
+            delwin(w);
+            w = nullptr;
+        }
     }
 
-    enabled = false;
+    disabled->set(aspect);
+}
+
+
+void AbstractWindow::set_active_window(AbstractWindow * win)
+{
+    if (belongs_to_active_page())
+        AbstractPage::get_active_page()->set_active_window(win);
+}
+
+
+void AbstractWindow::set_active_window_to_previous()
+{
+    if (belongs_to_active_page())
+        AbstractPage::get_active_page()->set_active_window_to_previous();
 }
 
 
 void AbstractWindow::on_KEY_LEFT()
 {
     if (nullptr != left_neighbor)
-        AbstractWindow::set_active_window(left_neighbor);
+        set_active_window(left_neighbor);
 }
 
 
 void AbstractWindow::on_KEY_RIGHT()
 {
     if (nullptr != right_neighbor)
-        AbstractWindow::set_active_window(right_neighbor);
+        set_active_window(right_neighbor);
 }

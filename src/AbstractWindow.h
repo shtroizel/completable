@@ -31,6 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
+#include <memory>
 #include <string>
 #include <stack>
 #include <vector>
@@ -43,20 +44,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ncurses window
 typedef struct _win_st WINDOW;
 
+class AbstractPage;
 class CompletionStack;
-
-
-static int const PAGE_UP{339};
-static int const PAGE_DOWN{338};
-static int const HOME{262};
-static int const END{360};
-static int const RETURN(10);
-static int const DELETE{330};
-static int const TAB{9};
-
-
 using WordStack = std::stack<word_stack_element>;
-
+MATCHABLE_FWD(VisibilityAspect);
 
 class AbstractWindow
 {
@@ -75,27 +66,32 @@ public:
     int get_y() const { return y; }
     int get_x() const { return x; }
     WINDOW * get_WINDOW() const { return w; }
+    std::string get_title() { return title(); }
 
     void set_left_neighbor(AbstractWindow * neighbor) { left_neighbor = neighbor; }
     void set_right_neighbor(AbstractWindow * neighbor) { right_neighbor = neighbor; }
 
-    static void set_active_window(AbstractWindow *);
-    static void set_active_window_to_previous();
-    static AbstractWindow * get_active_window() { return active(); }
+    bool is_active();
 
-    bool is_active() { return nullptr != active() && active()->title() == title(); }
+    bool belongs_to_active_page();
+    void add_page(AbstractPage *);
 
     void on_KEY(int key);
 
     void mark_dirty();
     void add_dirty_dependency(AbstractWindow * win);
 
-    static bool & borders(){ static bool sb{true}; return sb; }
+    static bool & global_borders_enabled(){ static bool sb{true}; return sb; }
 
-    void set_enabled(bool state) { if (state) enable(); else disable(); }
-    bool is_enabled() const { return enabled; }
-    void enable();
-    void disable();
+    void set_enabled(bool, VisibilityAspect::Type);
+    void toggle_enabled(VisibilityAspect::Type);
+    bool is_enabled() const;
+    void enable(VisibilityAspect::Type);
+    void disable(VisibilityAspect::Type);
+
+protected:
+    void set_active_window(AbstractWindow *);
+    void set_active_window_to_previous();
 
 private:
     // dependencies
@@ -104,6 +100,7 @@ private:
     virtual void draw_hook() = 0;
 
     // options
+    virtual bool borders_enabled() const { return true; }
     virtual void post_resize_hook() {};
     virtual void pre_disable_hook() {}
     virtual void on_KEY_UP() {}
@@ -119,7 +116,6 @@ private:
     void on_KEY_LEFT();
     void on_KEY_RIGHT();
 
-
 protected:
     CompletionStack & cs;
     WordStack & ws;
@@ -130,15 +126,12 @@ protected:
     int width{0};
     int y{0};
     int x{0};
+    std::vector<AbstractPage *> pages;
 
 private:
-    bool enabled{false};
+    std::shared_ptr<VisibilityAspect::Flags> disabled;
     bool dirty{false};
     std::vector<AbstractWindow *> dirty_dependencies;
     AbstractWindow * left_neighbor{nullptr};
     AbstractWindow * right_neighbor{nullptr};
-
-    // static variables that look like functions
-    static AbstractWindow * & active() { static AbstractWindow * w{nullptr}; return w; }
-    static AbstractWindow * & prev_active() { static AbstractWindow * w{nullptr}; return w; }
 };

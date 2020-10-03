@@ -1,5 +1,3 @@
-#pragma once
-
 /*
 Copyright (c) 2020, Eric Hyer
 All rights reserved.
@@ -32,14 +30,44 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
+#include "CompletablePage.h"
+
 #include "AbstractWindow.h"
 
 
-class InputWindow : public AbstractWindow
-{
-    using AbstractWindow::AbstractWindow;
 
-    std::string title() override;
-    void resize_hook() override;
-    void draw_hook() override;
-};
+std::array<char, 17> const & CompletablePage::description() const
+{
+    static std::array<char, 17> desc = []()
+                                       {
+                                           std::array<char, 17> d;
+                                           d[0]  = 'c';
+                                           d[1]  = 'o';
+                                           d[2]  = 'm';
+                                           d[3]  = 'p';
+                                           d[4]  = 'l';
+                                           d[5]  = 'e';
+                                           d[6]  = 't';
+                                           d[7]  = 'a';
+                                           d[8]  = 'b';
+                                           d[9]  = 'l';
+                                           d[10] = 'e';
+                                           d[11] = ' ';
+                                           d[12] = ' ';
+                                           d[13] = ' ';
+                                           d[14] = ' ';
+                                           d[15] = ' ';
+                                           d[16] = ' ';
+                                           return d;
+                                       }();
+    return desc;
+}
+
+
+void CompletablePage::on_KEY_hook(int key)
+{
+    auto active_win = get_active_window();
+
+    if (nullptr != active_win)
+        active_win->on_KEY(key);
+}

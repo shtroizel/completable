@@ -32,14 +32,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "AbstractWindow.h"
+#include "AbstractPage.h"
 
 
-class InputWindow : public AbstractWindow
+
+class SettingsPage : public AbstractPage
 {
-    using AbstractWindow::AbstractWindow;
+    using AbstractPage::AbstractPage;
 
-    std::string title() override;
-    void resize_hook() override;
-    void draw_hook() override;
+    // resolved dependencies
+    std::array<char, 17> const & description() const override;
+    char abbreviation() const override { return 'S'; }
+    int indicator_position() const override { return 1; }
 };

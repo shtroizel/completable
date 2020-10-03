@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-project(completable VERSION 1.2.3)
+project(completable VERSION 2.0.0)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -32,16 +32,22 @@ find_package(Curses REQUIRED)
 
 set(
     completable_srcs
-    src/AbstractWindow.cpp
+    src/AbstractPage.cpp
     src/AbstractListWindow.cpp
+    src/AbstractWindow.cpp
     src/AntonymWindow.cpp
     src/AttributeWindow.cpp
+    src/CompletablePage.cpp
     src/CompletionStack.cpp
     src/CompletionWindow.cpp
     src/FilterWindow.cpp
     src/HelpWindow.cpp
+    src/IndicatorWindow.cpp
     src/InputWindow.cpp
     src/LengthCompletionWindow.cpp
+    src/MatchmakerPage.cpp
+    src/PageDescriptionWindow.cpp
+    src/SettingsPage.cpp
     src/SynonymWindow.cpp
     src/completable.cpp
     src/matchmaker.cpp

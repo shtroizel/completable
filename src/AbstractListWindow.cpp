@@ -34,6 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <ncurses.h>
 
+#include "AbstractPage.h"
 #include "CompletionStack.h"
 #include "InputWindow.h"
 #include "matchmaker.h"
@@ -57,10 +58,6 @@ AbstractListWindow::AbstractListWindow(
 
 void AbstractListWindow::draw_hook()
 {
-    auto & c = cs.top();
-    if (c.standard_completion.size() == 0)
-        return;
-
     auto words = filtered_words();
 
     // new filter could result in display_start out of bounds so clamp
@@ -241,6 +238,9 @@ void AbstractListWindow::on_DELETE()
     if (ws.size() == 0)
         return;
 
+    if (!belongs_to_active_page())
+        return;
+
     auto & [s, w, ds] = ws.top();
 
     while (cs.count() > 1)
@@ -251,7 +251,8 @@ void AbstractListWindow::on_DELETE()
 
     ws.pop();
 
-    AbstractWindow::set_active_window(w);
+    auto active_page = AbstractPage::get_active_page();
+    active_page->set_active_window(w);
     input_win.mark_dirty();
     display_start() = ds;
 }
