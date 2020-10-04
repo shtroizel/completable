@@ -96,7 +96,7 @@ private:
     // dependencies
     virtual std::string title() = 0;
     virtual void resize_hook() = 0;
-    virtual void draw_hook() = 0;
+    virtual void draw_hook(bool dirty) = 0;
     virtual Layer::Type layer() const = 0;
 
     // options

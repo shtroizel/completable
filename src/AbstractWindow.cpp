@@ -138,8 +138,7 @@ void AbstractWindow::draw(bool clear_first)
     }
 
     // window specific drawing
-    if (dirty)
-        draw_hook();
+    draw_hook(dirty);
 
     dirty = false;
     title_dirty = false;

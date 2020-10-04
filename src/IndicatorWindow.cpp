@@ -55,7 +55,7 @@ void IndicatorWindow::resize_hook()
 }
 
 
-void IndicatorWindow::draw_hook()
+void IndicatorWindow::draw_hook(bool)
 {
     auto active_page = AbstractPage::get_active_page();
     if (nullptr == active_page)

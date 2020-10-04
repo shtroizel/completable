@@ -55,7 +55,7 @@ void InputWindow::resize_hook()
 }
 
 
-void InputWindow::draw_hook()
+void InputWindow::draw_hook(bool)
 {
     std::string const & prefix = cs.top().prefix;
 

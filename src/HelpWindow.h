@@ -42,6 +42,6 @@ class HelpWindow : public AbstractWindow
 
     std::string title() override;
     void resize_hook() override;
-    void draw_hook() override;
+    void draw_hook(bool) override;
     Layer::Type layer() const override;
 };

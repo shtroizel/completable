@@ -55,7 +55,7 @@ void PageDescriptionWindow::resize_hook()
 }
 
 
-void PageDescriptionWindow::draw_hook()
+void PageDescriptionWindow::draw_hook(bool)
 {
     auto page = AbstractPage::get_active_page();
     if (nullptr == page)
