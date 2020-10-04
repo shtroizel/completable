@@ -61,7 +61,7 @@ std::string SynonymWindow::title()
 {
     std::string t{"Synonyms ("};
 
-    auto syn = filtered_words();
+    auto syn = get_words();
     t += std::to_string(syn.size());
 
     t += ")";

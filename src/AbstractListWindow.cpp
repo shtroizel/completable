@@ -59,7 +59,7 @@ AbstractListWindow::AbstractListWindow(
 
 void AbstractListWindow::draw_hook()
 {
-    auto words = filtered_words();
+    auto words = get_words();
 
     // new filter could result in display_start out of bounds so clamp
     if (display_start() >= (int) words.size())
@@ -120,7 +120,7 @@ void AbstractListWindow::on_KEY_DOWN()
     int & ds = display_start();
 
     cache_dirty.set_false();
-    auto words = filtered_words();
+    auto words = get_words();
     if (words.size() == 0)
         return;
 
@@ -159,7 +159,7 @@ void AbstractListWindow::on_PAGE_DOWN()
     int & ds = display_start();
 
     cache_dirty.set_false();
-    auto words = filtered_words();
+    auto words = get_words();
 
     if (words.size() == 0)
         return;
@@ -173,7 +173,7 @@ void AbstractListWindow::on_PAGE_DOWN()
             ds = end;
 
         // redraw but keep data
-        // note that the filtered_words() call before will make the cache dirty again
+        // note that the get_words() call before will make the cache dirty again
         mark_dirty();
         cache_dirty.set_false();
     }
@@ -197,7 +197,7 @@ void AbstractListWindow::on_END()
     int & ds = display_start();
 
     cache_dirty.set_false();
-    auto words = filtered_words();
+    auto words = get_words();
     if (words.size() == 0)
         return;
 
@@ -215,7 +215,7 @@ void AbstractListWindow::on_RETURN()
 {
     int & ds = display_start();
 
-    auto words = filtered_words();
+    auto words = get_words();
 
     if (words.size() == 0)
         return;
@@ -329,29 +329,34 @@ void AbstractListWindow::on_printable_ascii(int key)
 }
 
 
-std::vector<int> const & AbstractListWindow::filtered_words() const
+std::vector<int> const & AbstractListWindow::get_words() const
 {
     if (cache_dirty.is_dirty())
     {
-        filtered_words_cache.clear();
+        words_cache.clear();
 
         auto & c = cs.top();
 
         if (c.standard_completion.size() == 0)
-            return filtered_words_cache;
+            return words_cache;
 
         if (c.display_start >= (int) c.standard_completion.size())
             c.display_start = (int) c.standard_completion.size() - 1;
 
         auto const & unfiltered = unfiltered_words(c.standard_completion[c.display_start]);
 
-        filtered_words_cache.reserve(unfiltered.size());
-        for (auto word : unfiltered)
-            if (wf.passes(word))
-                filtered_words_cache.push_back(word);
+        words_cache.reserve(unfiltered.size());
+
+        if (!apply_filter())
+            words_cache = unfiltered;
+        else
+            for (auto word : unfiltered)
+                if (wf.passes(word))
+                    words_cache.push_back(word);
+
     }
 
-    return filtered_words_cache;
+    return words_cache;
 }
 
 

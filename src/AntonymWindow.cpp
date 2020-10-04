@@ -65,7 +65,7 @@ std::string AntonymWindow::title()
 {
     std::string t{"Antonyms ("};
 
-    auto ant = filtered_words();
+    auto ant = get_words();
     t += std::to_string(ant.size());
 
     t += ")";

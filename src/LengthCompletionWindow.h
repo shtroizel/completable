@@ -52,16 +52,17 @@ public:
     ~LengthCompletionWindow() override;
 
 private:
+    // resolved AbstractWindow dependencies
     std::string title() override final;
     void resize_hook() override final;
 
     // resolved AbstractListWindow dependencies
     int & display_start() override final;
     std::vector<int> const & unfiltered_words(int) const override final;
+    bool apply_filter() const override final { return false; }
 
-    // specified AbstractListWindow options
+    // AbstractListWindow options
     std::string const & string_from_index(int) override final;
 
-private:
     CompletionWindow const & completion_win;
 };

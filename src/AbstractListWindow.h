@@ -45,7 +45,7 @@ public:
     AbstractListWindow(CompletionStack &, WordStack &, InputWindow &, word_filter &);
 
 protected:
-    std::vector<int> const & filtered_words() const;
+    std::vector<int> const & get_words() const;
 
 private:
     // resolved dependencies
@@ -68,6 +68,7 @@ private:
     // new dependencies
     virtual int & display_start() = 0;
     virtual std::vector<int> const & unfiltered_words(int) const = 0;
+    virtual bool apply_filter() const = 0;
 
     // new options
     virtual void on_post_RETURN() {}
@@ -85,7 +86,7 @@ private:
         mutable bool prev_dirty{true};
     };
     CacheDirty cache_dirty;
-    mutable std::vector<int> filtered_words_cache;
+    mutable std::vector<int> words_cache;
 
     // same or longer lifetime as this and avoided during destruction
     InputWindow & input_win;

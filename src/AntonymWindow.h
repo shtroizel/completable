@@ -54,16 +54,19 @@ public:
         word_filter &
     );
 
-private: /// resolved AbstractWindow dependencies
-    std::string title() override;
-    void resize_hook() override;
-
-private: // resolved AbstractListWindow dependencies
-    int & display_start() override;
-    void on_post_RETURN() override;
-    std::vector<int> const & unfiltered_words(int) const override;
-
 private:
+    // resolved AbstractWindow dependencies
+    std::string title() override final;
+    void resize_hook() override final;
+
+    // resolved AbstractListWindow dependencies
+    int & display_start() override final;
+    std::vector<int> const & unfiltered_words(int) const override final;
+    bool apply_filter() const override final { return true; }
+
+    // AbstractListWindow options
+    void on_post_RETURN() override final;
+
     LengthCompletionWindow & len_completion_win;
     SynonymWindow & syn_win;
 };
