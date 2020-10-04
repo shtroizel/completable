@@ -189,7 +189,7 @@ bool AbstractWindow::is_active()
     if (nullptr == act_win)
         return false;
 
-    return act_win->title() == title();
+    return act_win == this;
 }
 
 
