@@ -108,11 +108,8 @@ void AbstractWindow::draw(bool clear_first)
         return;
     }
 
-    if (dirty)
-        title_dirty = true;
-
     // always draw when clear_first
-    if (!title_dirty && !clear_first)
+    if (!dirty && !clear_first)
         return;
 
     if (clear_first)
@@ -138,11 +135,9 @@ void AbstractWindow::draw(bool clear_first)
     }
 
     // window specific drawing
-    if (dirty)
-        draw_hook();
+    draw_hook();
 
     dirty = false;
-    title_dirty = false;
 
     wrefresh(w);
 }
@@ -249,12 +244,6 @@ void AbstractWindow::mark_dirty()
     dirty = true;
     for (auto dep : dirty_dependencies)
         dep->mark_dirty();
-}
-
-
-void AbstractWindow::mark_title_dirty()
-{
-    title_dirty = true;
 }
 
 

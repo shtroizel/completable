@@ -143,9 +143,9 @@ void AbstractPage::set_active_window(AbstractWindow * win)
             return;
     }
 
-    // need to redraw both old and new active window titles
-    content->mut_at(win->get_layer()).second->mark_title_dirty();
-    win->mark_title_dirty();
+    // need to redraw both old and new active windows
+    content->mut_at(win->get_layer()).second->mark_dirty();
+    win->mark_dirty();
 
     content->mut_at(win->get_layer()).second = win;
 }
