@@ -81,6 +81,7 @@ public:
     void on_KEY(int key);
 
     void mark_dirty();
+    void mark_title_dirty();
     void add_dirty_dependency(AbstractWindow * win);
 
     static bool & global_borders_enabled(){ static bool sb{true}; return sb; }
@@ -132,6 +133,7 @@ protected:
 private:
     std::shared_ptr<VisibilityAspect::Flags> disabled;
     bool dirty{false};
+    bool title_dirty{false};
     std::vector<AbstractWindow *> dirty_dependencies;
     AbstractWindow * left_neighbor{nullptr};
     AbstractWindow * right_neighbor{nullptr};
