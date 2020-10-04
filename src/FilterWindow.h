@@ -37,11 +37,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 struct word_filter;
+class InputWindow;
 
 class FilterWindow : public AbstractWindow
 {
 public:
-    FilterWindow(CompletionStack &, WordStack &, word_filter &);
+    FilterWindow(CompletionStack &, WordStack &, InputWindow &, word_filter &);
     ~FilterWindow() override;
 
 private:
@@ -57,5 +58,6 @@ private:
 
 private:
     int hover{-1};
+    InputWindow & input_win;
     word_filter & wf;
 };

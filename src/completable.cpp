@@ -104,7 +104,7 @@ int main(int argc, char ** argv)
     AntonymWindow ant_win{cs, ws, input_win, completion_win, len_completion_win, syn_win, wf};
     AttributeWindow att_win{cs, ws, completion_win, len_completion_win, syn_win, ant_win};
 
-    FilterWindow filter_win{cs, ws, wf};
+    FilterWindow filter_win{cs, ws, input_win, wf};
     filter_win.disable(VisibilityAspect::WindowVisibility::grab());
 
     HelpWindow help_win{cs, ws};

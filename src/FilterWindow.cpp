@@ -44,8 +44,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-FilterWindow::FilterWindow(CompletionStack & cs, WordStack & ws, word_filter & f)
+FilterWindow::FilterWindow(CompletionStack & cs, WordStack & ws, InputWindow & iw, word_filter & f)
     : AbstractWindow(cs, ws)
+    , input_win(iw)
     , wf(f)
 {
 }
@@ -80,13 +81,16 @@ void FilterWindow::post_resize_hook()
 
 void FilterWindow::pre_disable_hook()
 {
-    // rebuild completion stack with new filter
-    std::string prefix = cs.top().prefix;
+    // clear out the word stack
+    while (!ws.empty())
+        ws.pop();
+
+    // clear out completion stack
     while (cs.count() > 1)
         cs.pop();
     cs.clear_top();
-    for (auto ch : prefix)
-        cs.push(ch);
+
+    input_win.mark_dirty();
 }
 
 
