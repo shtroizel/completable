@@ -94,7 +94,7 @@ void FilterWindow::pre_disable_hook()
 }
 
 
-void FilterWindow::draw_hook(bool)
+void FilterWindow::draw_hook()
 {
     int top_margin = height - (int) ((height / 1.618 + word_attribute::variants().size() / 2.0) + 0.5);
     int indent = width - (int) (width / 1.618 + 0.5);

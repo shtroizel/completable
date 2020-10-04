@@ -43,7 +43,7 @@ class PageDescriptionWindow : public AbstractWindow
     // resolved AbstractWindow dependencies
     std::string title() override final;
     void resize_hook() override final;
-    void draw_hook(bool) override final;
+    void draw_hook() override final;
     Layer::Type layer() const override final;
 
     // AbstractWindow options

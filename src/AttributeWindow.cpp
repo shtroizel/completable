@@ -79,7 +79,7 @@ void AttributeWindow::resize_hook()
 }
 
 
-void AttributeWindow::draw_hook(bool)
+void AttributeWindow::draw_hook()
 {
     auto const & c = cs.top();
     if (c.standard_completion.size() == 0)

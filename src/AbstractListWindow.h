@@ -49,7 +49,7 @@ protected:
 
 private:
     // resolved dependencies
-    void draw_hook(bool dirty) override final;
+    void draw_hook() override final;
     Layer::Type layer() const override final;
 
     // options

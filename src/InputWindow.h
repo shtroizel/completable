@@ -41,6 +41,6 @@ class InputWindow : public AbstractWindow
 
     std::string title() override;
     void resize_hook() override;
-    void draw_hook(bool) override;
+    void draw_hook() override;
     Layer::Type layer() const override;
 };

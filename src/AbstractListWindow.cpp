@@ -57,7 +57,7 @@ AbstractListWindow::AbstractListWindow(
 }
 
 
-void AbstractListWindow::draw_hook(bool dirty)
+void AbstractListWindow::draw_hook()
 {
     auto words = get_words();
 
@@ -84,11 +84,6 @@ void AbstractListWindow::draw_hook(bool dirty)
 
         if (is_active() && i == 0)
             wattroff(w, A_REVERSE);
-
-        // when not dirty we still want to redraw the first entry no matter what
-        // the data hasn't changed, but is_active() might have so we need to update highlighting
-        if (!dirty)
-            return;
 
         // blank out rest of line
         for (; j < width - 2; ++j)

@@ -50,7 +50,7 @@ private:
     void resize_hook() override;
     void post_resize_hook() override;
     void pre_disable_hook() override;
-    void draw_hook(bool) override;
+    void draw_hook() override;
     void on_KEY_UP() override;
     void on_KEY_DOWN() override;
     void on_RETURN() override;

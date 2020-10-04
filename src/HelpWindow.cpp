@@ -94,7 +94,7 @@ void HelpWindow::resize_hook()
 }
 
 
-void HelpWindow::draw_hook(bool)
+void HelpWindow::draw_hook()
 {
     int i = 0;
     for (; i < (int) content.size() && i < height; ++i)
