@@ -47,7 +47,4 @@ class CompletablePage : public AbstractPage
     std::array<char, 17> const & description() const override;
     char abbreviation() const override { return 'C'; }
     int indicator_position() const override { return 0; }
-
-    // options
-    void on_KEY_hook(int) override;
 };

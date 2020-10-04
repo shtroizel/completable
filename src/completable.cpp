@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "IndicatorWindow.h"
 #include "InputWindow.h"
 #include "MatchmakerPage.h"
+#include "Layer.h"
 #include "LengthCompletionWindow.h"
 #include "PageDescriptionWindow.h"
 #include "SettingsPage.h"
@@ -106,12 +107,22 @@ int main(int argc, char ** argv)
     FilterWindow filter_win{cs, ws, wf};
     filter_win.disable(VisibilityAspect::WindowVisibility::grab());
 
-    HelpWindow help_win{cs, ws, input_win};
+    HelpWindow help_win{cs, ws};
     PageDescriptionWindow page_desc_win{cs, ws};
     IndicatorWindow indicator_win{cs, ws};
 
-    CompletablePage page_c{{&page_desc_win, &indicator_win, &input_win, &completion_win,
-                            &len_completion_win, &att_win, &syn_win, &ant_win, &filter_win, &help_win}};
+    CompletablePage page_c;
+    page_c.add_window(&page_desc_win);
+    page_c.add_window(&indicator_win);
+    page_c.add_window(&input_win);
+    page_c.add_window(&completion_win);
+    page_c.add_window(&len_completion_win);
+    page_c.add_window(&att_win);
+    page_c.add_window(&syn_win);
+    page_c.add_window(&ant_win);
+    page_c.add_window(&filter_win);
+    page_c.add_window(&help_win);
+
     page_c.set_active_window(&completion_win);
     page_c.set_active_window(&help_win);
 
@@ -183,85 +194,14 @@ int main(int argc, char ** argv)
             reset_prog_mode();
             resized_draw = true;
         }
-        else if (ch == KEY_BACKSPACE || ch == BACKSPACE_127 || ch == BACKSPACE_BKSLSH_B)
-        {
-            if (!help_win.is_enabled() && !filter_win.is_enabled())
-            {
-                int old_count = cs.count();
-                cs.pop();
-                int new_count = cs.count();
-                if (new_count != old_count)
-                    input_win.mark_dirty();
-            }
-        }
-        else if (ch == KEY_F(1)  ||
-                 ch == KEY_F(2)  ||
-                 ch == KEY_F(3)  ||
-                 ch == KEY_F(4)  ||
-                 ch == KEY_F(5)  ||
-                 ch == KEY_F(6)  ||
-                 ch == KEY_F(7)  ||
-                 ch == KEY_F(8)  ||
-                 ch == KEY_F(9)  ||
-                 ch == KEY_F(10) ||
-                 ch == KEY_F(11) ||
-                 ch == KEY_F(12))
-        {
-            if (help_win.is_enabled())
-                continue;
-
-            filter_win.toggle_enabled(VisibilityAspect::WindowVisibility::grab());
-
-            if (filter_win.is_enabled())
-            {
-                page_c.set_active_window(&filter_win);
-            }
-            else
-            {
-                page_c.set_active_window_to_previous();
-                input_win.mark_dirty();
-                completion_win.mark_dirty();
-                len_completion_win.mark_dirty();
-                att_win.mark_dirty();
-                syn_win.mark_dirty();
-                ant_win.mark_dirty();
-            }
-        }
         else if (ch == ESC)
         {
-            if (filter_win.is_enabled())
-            {
-                filter_win.disable(VisibilityAspect::WindowVisibility::grab());
-                active_page->set_active_window_to_previous();
-                input_win.mark_dirty();
-                completion_win.mark_dirty();
-                len_completion_win.mark_dirty();
-                att_win.mark_dirty();
-                syn_win.mark_dirty();
-                ant_win.mark_dirty();
-            }
-            else
-            {
-                nodelay(input_win.get_WINDOW(), true);
-                ch = wgetch(input_win.get_WINDOW());
-                nodelay(input_win.get_WINDOW(), false);
+            nodelay(input_win.get_WINDOW(), true);
+            ch = wgetch(input_win.get_WINDOW());
+            nodelay(input_win.get_WINDOW(), false);
 
-                if (ch == ERR)
-                    break;
-            }
-        }
-        else if (ch > 31 && ch < 127) // printable ascii
-        {
-            if (!help_win.is_enabled() && filter_win.is_enabled())
-            {
-            }
-            else
-            {
-                bool old_count = cs.count();
-                cs.push(ch);
-                if (cs.count() != old_count)
-                    input_win.mark_dirty();
-            }
+            if (ch == ERR)
+                break;
         }
         else
         {

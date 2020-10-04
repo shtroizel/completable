@@ -35,6 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ncurses.h>
 
 #include "AbstractPage.h"
+#include "Layer.h"
 
 
 
@@ -106,4 +107,10 @@ void IndicatorWindow::draw_hook()
         mvwaddch(w, 1, abbreviation_x, pg->get_abbreviation());
         wattroff(w, A_REVERSE);
     }
+}
+
+
+Layer::Type IndicatorWindow::layer() const
+{
+    return Layer::Bottom::grab();
 }

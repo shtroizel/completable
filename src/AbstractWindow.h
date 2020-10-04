@@ -32,8 +32,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include <memory>
-#include <string>
 #include <stack>
+#include <string>
 #include <vector>
 
 #include <matchable/matchable_fwd.h>
@@ -48,6 +48,7 @@ class AbstractPage;
 class CompletionStack;
 using WordStack = std::stack<word_stack_element>;
 MATCHABLE_FWD(VisibilityAspect);
+MATCHABLE_FWD(Layer);
 
 class AbstractWindow
 {
@@ -61,6 +62,7 @@ public:
     void clear();
     void resize();
     void draw(bool clear_first);
+    Layer::Type get_layer() const;
     int get_height() const { return height; }
     int get_width() const { return width; }
     int get_y() const { return y; }
@@ -68,8 +70,8 @@ public:
     WINDOW * get_WINDOW() const { return w; }
     std::string get_title() { return title(); }
 
-    void set_left_neighbor(AbstractWindow * neighbor) { left_neighbor = neighbor; }
-    void set_right_neighbor(AbstractWindow * neighbor) { right_neighbor = neighbor; }
+    void set_left_neighbor(AbstractWindow * neighbor);
+    void set_right_neighbor(AbstractWindow * neighbor);
 
     bool is_active();
 
@@ -89,15 +91,12 @@ public:
     void enable(VisibilityAspect::Type);
     void disable(VisibilityAspect::Type);
 
-protected:
-    void set_active_window(AbstractWindow *);
-    void set_active_window_to_previous();
-
 private:
     // dependencies
     virtual std::string title() = 0;
     virtual void resize_hook() = 0;
     virtual void draw_hook() = 0;
+    virtual Layer::Type layer() const = 0;
 
     // options
     virtual bool borders_enabled() const { return true; }
@@ -112,6 +111,8 @@ private:
     virtual void on_RETURN() {}
     virtual void on_DELETE() {}
     virtual void on_TAB() {}
+    virtual void on_BACKSPACE() {}
+    virtual void on_printable_ascii(int) {}
 
     void on_KEY_LEFT();
     void on_KEY_RIGHT();

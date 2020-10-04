@@ -32,22 +32,38 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "HelpWindow.h"
 
+#include <string>
+#include <vector>
+
 #include <ncurses.h>
 
 #include "InputWindow.h"
+#include "Layer.h"
 #include "VisibilityAspect.h"
 
 
 
-HelpWindow::HelpWindow(
-    CompletionStack & cs,
-    WordStack & ws,
-    InputWindow & iw
-)
-    : AbstractWindow(cs, ws)
-    , input_win(iw)
-{
-}
+static std::vector<std::string> const content =
+    []()
+    {
+        std::vector<std::string> content;
+        content.push_back(std::string(""));
+        content.push_back(std::string("                FEATURE   KEY(s)"));
+        content.push_back(std::string("   ------------------------------------------------------------   "));
+        content.push_back(std::string("            toggle help   ','"));
+        content.push_back(std::string("           update input   letters"));
+        content.push_back(std::string("   complete unambiguous   tab"));
+        content.push_back(std::string("    change window focus   arrow left/right"));
+        content.push_back(std::string("              scrolling   arrow up/down, page up/down, home/end"));
+        content.push_back(std::string("       push input stack   Return"));
+        content.push_back(std::string("        pop input stack   Del"));
+        content.push_back(std::string("   toggle filter window   any F key (F1..F12)"));
+        content.push_back(std::string("       enter shell mode   any of '$', '~', '`'"));
+        content.push_back(std::string("                   quit   Esc, ctrl + c"));
+        content.push_back(std::string(""));
+        return content;
+    }();
+
 
 
 std::string HelpWindow::title()
@@ -59,8 +75,20 @@ std::string HelpWindow::title()
 
 void HelpWindow::resize_hook()
 {
-    height = (int) (root_y / 1.618 + 0.5);
-    width = 63;
+    height = (int) content.size() + 2; // 2 for top/bottom borders
+
+    static int const content_width =
+        []()
+        {
+            int content_width = 0;
+            for (auto line : content)
+                if ((int) line.length() > content_width)
+                    content_width = line.length();
+            return content_width;
+        }();
+    width = content_width + 2; // 2 for left/right borders
+
+    // center window
     y = (root_y - height) / 2;
     x = (root_x - width) / 2;
 }
@@ -68,21 +96,6 @@ void HelpWindow::resize_hook()
 
 void HelpWindow::draw_hook()
 {
-    std::vector<std::string> content;
-    content.push_back(std::string("             FEATURE    KEY(s)"));
-    content.push_back(std::string("-------------------------------------------------------------"));
-    content.push_back(std::string("        update input    letters"));
-    content.push_back(std::string("complete unambiguous    tab"));
-    content.push_back(std::string(" change window focus    arrow left/right"));
-    content.push_back(std::string("           scrolling    arrow up/down, page up/down, home/end"));
-    content.push_back(std::string("    push input stack    Return"));
-    content.push_back(std::string("     pop input stack    Del"));
-    content.push_back(std::string("toggle filter window    any F key (F1..F12)"));
-    content.push_back(std::string("    enter shell mode    any of '$', '~', '`'"));
-    content.push_back(std::string("                quit    Esc, ctrl + c"));
-    content.push_back(std::string("          close help    Return"));
-
-    int top_margin = 2;
     int i = 0;
     for (; i < (int) content.size() && i < height; ++i)
     {
@@ -90,23 +103,21 @@ void HelpWindow::draw_hook()
 
         int j = 0;
         for (; j < (int) line.size() && j < width - 2; ++j)
-            mvwaddch(w, i + 1 + top_margin, j + 1, line[j]);
+            mvwaddch(w, i + 1, j + 1, line[j]);
 
         // blank out rest of line
         for (; j < width - 2; ++j)
-            mvwaddch(w, i + 1 + top_margin, j + 1, ' ');
+            mvwaddch(w, i + 1, j + 1, ' ');
     }
 
     // blank out remaining lines
-    for (; i < height - 2 - top_margin; ++i)
+    for (; i < height - 2; ++i)
         for (int j = 0; j < width - 2; ++j)
-            mvwaddch(w, i + 1 + top_margin, j + 1, ' ');
+            mvwaddch(w, i + 1, j + 1, ' ');
 }
 
 
-void HelpWindow::on_RETURN()
+Layer::Type HelpWindow::layer() const
 {
-    disable(VisibilityAspect::WindowVisibility::grab());
-    AbstractWindow::set_active_window_to_previous();
-    input_win.mark_dirty();
+    return Layer::Help::grab();
 }

@@ -35,6 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ncurses.h>
 
 #include "AbstractPage.h"
+#include "Layer.h"
 
 
 
@@ -68,4 +69,10 @@ void PageDescriptionWindow::draw_hook()
 void PageDescriptionWindow::post_resize_hook()
 {
     keypad(w, true);
+}
+
+
+Layer::Type PageDescriptionWindow::layer() const
+{
+    return Layer::Bottom::grab();
 }

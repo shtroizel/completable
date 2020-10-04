@@ -38,6 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "CompletionStack.h"
 #include "AbstractPage.h"
+#include "Layer.h"
 #include "VisibilityAspect.h"
 #include "key_codes.h"
 
@@ -142,6 +143,36 @@ void AbstractWindow::draw(bool clear_first)
 }
 
 
+Layer::Type AbstractWindow::get_layer() const
+{
+    return layer();
+}
+
+
+void AbstractWindow::set_left_neighbor(AbstractWindow * n)
+{
+    if (nullptr == n)
+        return;
+
+    if (layer() != n->layer())
+        return;
+
+    left_neighbor = n;
+}
+
+
+void AbstractWindow::set_right_neighbor(AbstractWindow * n)
+{
+    if (nullptr == n)
+        return;
+
+    if (layer() != n->layer())
+        return;
+
+    right_neighbor = n;
+}
+
+
 bool AbstractWindow::is_active()
 {
     if (!belongs_to_active_page())
@@ -187,18 +218,24 @@ void AbstractWindow::on_KEY(int key)
 
     switch (key)
     {
-        case KEY_LEFT  : on_KEY_LEFT();  return;
-        case KEY_RIGHT : on_KEY_RIGHT(); return;
-        case KEY_UP    : on_KEY_UP();    return;
-        case KEY_DOWN  : on_KEY_DOWN();  return;
-        case PAGE_UP   : on_PAGE_UP();   return;
-        case PAGE_DOWN : on_PAGE_DOWN(); return;
-        case HOME      : on_HOME();      return;
-        case END       : on_END();       return;
-        case RETURN    : on_RETURN();    return;
-        case DELETE    : on_DELETE();    return;
-        case TAB       : on_TAB();       return;
+        case KEY_LEFT           : on_KEY_LEFT();  return;
+        case KEY_RIGHT          : on_KEY_RIGHT(); return;
+        case KEY_UP             : on_KEY_UP();    return;
+        case KEY_DOWN           : on_KEY_DOWN();  return;
+        case PAGE_UP            : on_PAGE_UP();   return;
+        case PAGE_DOWN          : on_PAGE_DOWN(); return;
+        case HOME               : on_HOME();      return;
+        case END                : on_END();       return;
+        case RETURN             : on_RETURN();    return;
+        case DELETE             : on_DELETE();    return;
+        case TAB                : on_TAB();       return;
+        case KEY_BACKSPACE      :
+        case BACKSPACE_127      :
+        case BACKSPACE_BKSLSH_B : on_BACKSPACE(); return;
     }
+
+    if (key > 31 && key < 127) // printable ascii
+        on_printable_ascii(key);
 }
 
 
@@ -263,29 +300,27 @@ void AbstractWindow::disable(VisibilityAspect::Type aspect)
 }
 
 
-void AbstractWindow::set_active_window(AbstractWindow * win)
-{
-    if (belongs_to_active_page())
-        AbstractPage::get_active_page()->set_active_window(win);
-}
-
-
-void AbstractWindow::set_active_window_to_previous()
-{
-    if (belongs_to_active_page())
-        AbstractPage::get_active_page()->set_active_window_to_previous();
-}
-
-
 void AbstractWindow::on_KEY_LEFT()
 {
-    if (nullptr != left_neighbor)
-        set_active_window(left_neighbor);
+    if (nullptr == left_neighbor)
+        return;
+
+    auto active_page = AbstractPage::get_active_page();
+    if (nullptr == active_page)
+        return;
+
+    active_page->set_active_window(left_neighbor);
 }
 
 
 void AbstractWindow::on_KEY_RIGHT()
 {
-    if (nullptr != right_neighbor)
-        set_active_window(right_neighbor);
+    if (nullptr == left_neighbor)
+        return;
+
+    auto active_page = AbstractPage::get_active_page();
+    if (nullptr == active_page)
+        return;
+
+    active_page->set_active_window(right_neighbor);
 }

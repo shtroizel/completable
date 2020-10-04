@@ -32,9 +32,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include <array>
+#include <memory>
 #include <vector>
 
+#include <matchable/matchable_fwd.h>
 
+
+
+MATCHABLE_FWD(Layer)
 
 class AbstractWindow;
 
@@ -44,8 +49,10 @@ public:
     AbstractPage(AbstractPage const &) = delete;
     AbstractPage & operator=(AbstractPage const &) = delete;
 
-    explicit AbstractPage(std::vector<AbstractWindow *>);
+    AbstractPage();
     virtual ~AbstractPage();
+
+    void add_window(AbstractWindow *);
 
     void resize();
     void draw(bool clear_first);
@@ -58,8 +65,7 @@ public:
     bool is_active() { return nullptr != active_page() && active_page()->description() == description(); }
 
     void set_active_window(AbstractWindow *);
-    void set_active_window_to_previous();
-    AbstractWindow * get_active_window() { return active_win; }
+    AbstractWindow * get_active_window();
 
     void on_KEY(int key);
 
@@ -74,9 +80,9 @@ private:
     virtual char abbreviation() const = 0;
     virtual int indicator_position() const = 0;
 
-    // options
-    virtual void on_KEY_hook(int) {};
-
+    void on_ANY_F();
+    void on_COMMA();
+    void toggle_layer(Layer::Type, bool &);
     void on_SHIFT_LEFT();
     void on_SHIFT_RIGHT();
 
@@ -85,9 +91,14 @@ private:
     AbstractPage * left_neighbor{nullptr};
     AbstractPage * right_neighbor{nullptr};
 
-    std::vector<AbstractWindow *> wins;
-    AbstractWindow * active_win{nullptr};
-    AbstractWindow * prev_active_win{nullptr};
+    std::shared_ptr<
+        matchable::MatchBox<
+            Layer::Type,
+            std::pair<std::vector<AbstractWindow *>, AbstractWindow *>
+        >
+    > content;
+    bool layer_F_enabled{false};
+    bool layer_Help_enabled{false};
 
     // static variables that look like functions
     static AbstractPage * & active_page() { static AbstractPage * w{nullptr}; return w; }

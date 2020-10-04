@@ -44,6 +44,7 @@ class IndicatorWindow : public AbstractWindow
     std::string title() override;
     void resize_hook() override;
     void draw_hook() override;
+    Layer::Type layer() const override;
 
     // options
     bool borders_enabled() const override final { return false; }

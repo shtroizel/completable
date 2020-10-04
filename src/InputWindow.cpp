@@ -35,12 +35,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ncurses.h>
 
 #include "CompletionStack.h"
+#include "Layer.h"
 
 
 
 std::string InputWindow::title()
 {
-    static std::string const t{"Input"};
+    static std::string const t{"enter , for help"};
     return t;
 }
 
@@ -65,4 +66,10 @@ void InputWindow::draw_hook()
     // blank out rest of line
     for (; x < width - 2; ++x)
         mvwaddch(w, 1, x + 1, ' ');
+}
+
+
+Layer::Type InputWindow::layer() const
+{
+    return Layer::Bottom::grab();
 }

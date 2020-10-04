@@ -37,6 +37,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractPage.h"
 #include "CompletionStack.h"
 #include "InputWindow.h"
+#include "Layer.h"
 #include "matchmaker.h"
 #include "word_filter.h"
 
@@ -93,6 +94,12 @@ void AbstractListWindow::draw_hook()
     for (; i < height - 2; ++i)
         for (int j = 0; j < width - 2; ++j)
             mvwaddch(w, i + 1, j + 1, ' ');
+}
+
+
+Layer::Type AbstractListWindow::layer() const
+{
+    return Layer::Bottom::grab();
 }
 
 
@@ -300,6 +307,25 @@ void AbstractListWindow::on_TAB()
         if (cs_modified)
             input_win.mark_dirty();
     }
+}
+
+
+void AbstractListWindow::on_BACKSPACE()
+{
+    int old_count = cs.count();
+    cs.pop();
+    int new_count = cs.count();
+    if (new_count != old_count)
+        input_win.mark_dirty();
+}
+
+
+void AbstractListWindow::on_printable_ascii(int key)
+{
+    bool old_count = cs.count();
+    cs.push(key);
+    if (cs.count() != old_count)
+        input_win.mark_dirty();
 }
 
 

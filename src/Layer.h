@@ -31,31 +31,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-
-#include "AbstractWindow.h"
-
+#include <matchable/matchable.h>
 
 
-class CompletionWindow;
-class LengthCompletionWindow;
-class SynonymWindow;
-class AntonymWindow;
 
-class AttributeWindow : public AbstractWindow
-{
-public:
-    AttributeWindow(
-        CompletionStack &,
-        WordStack &,
-        CompletionWindow &,
-        LengthCompletionWindow &,
-        SynonymWindow &,
-        AntonymWindow &
-    );
-
-private:
-    std::string title() override;
-    void resize_hook() override;
-    void draw_hook() override;
-    Layer::Type layer() const override;
-};
+MATCHABLE(Layer, Bottom, F, Help);

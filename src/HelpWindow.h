@@ -35,19 +35,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractWindow.h"
 
 
-class InputWindow;
 
 class HelpWindow : public AbstractWindow
 {
-public:
-    HelpWindow(CompletionStack &, WordStack &, InputWindow &);
+    using AbstractWindow::AbstractWindow;
 
-private:
     std::string title() override;
     void resize_hook() override;
     void draw_hook() override;
-    virtual void on_RETURN() override;
-
-private:
-    InputWindow & input_win;
+    Layer::Type layer() const override;
 };

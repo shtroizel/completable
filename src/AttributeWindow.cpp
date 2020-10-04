@@ -39,6 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AntonymWindow.h"
 #include "CompletionStack.h"
 #include "CompletionWindow.h"
+#include "Layer.h"
 #include "LengthCompletionWindow.h"
 #include "SynonymWindow.h"
 #include "matchmaker.h"
@@ -160,4 +161,10 @@ void AttributeWindow::draw_hook()
             indent = pos_label.size() + 1;
         }
     }
+}
+
+
+Layer::Type AttributeWindow::layer() const
+{
+    return Layer::Bottom::grab();
 }

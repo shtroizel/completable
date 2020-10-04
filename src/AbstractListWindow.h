@@ -50,6 +50,9 @@ protected:
 private:
     // resolved dependencies
     void draw_hook() override final;
+    Layer::Type layer() const override final;
+
+    // options
     void on_KEY_UP() override final;
     void on_KEY_DOWN() override final;
     void on_PAGE_UP() override final;
@@ -59,6 +62,8 @@ private:
     void on_RETURN() override final;
     void on_DELETE() override final;
     void on_TAB() override final;
+    void on_BACKSPACE() override final;
+    void on_printable_ascii(int) override final;
 
     // new dependencies
     virtual int & display_start() = 0;

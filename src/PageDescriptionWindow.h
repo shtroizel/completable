@@ -44,6 +44,7 @@ class PageDescriptionWindow : public AbstractWindow
     std::string title() override final;
     void resize_hook() override final;
     void draw_hook() override final;
+    Layer::Type layer() const override final;
 
     // AbstractWindow options
     void post_resize_hook() override;

@@ -62,12 +62,3 @@ std::array<char, 17> const & CompletablePage::description() const
                                        }();
     return desc;
 }
-
-
-void CompletablePage::on_KEY_hook(int key)
-{
-    auto active_win = get_active_window();
-
-    if (nullptr != active_win)
-        active_win->on_KEY(key);
-}

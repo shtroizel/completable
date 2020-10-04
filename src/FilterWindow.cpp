@@ -37,8 +37,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ncurses.h>
 
 #include "CompletionStack.h"
-#include "word_filter.h"
 #include "InputWindow.h"
+#include "Layer.h"
+#include "word_filter.h"
 
 
 
@@ -179,4 +180,10 @@ void FilterWindow::on_RETURN()
     }
 
     mark_dirty();
+}
+
+
+Layer::Type FilterWindow::layer() const
+{
+    return Layer::F::grab();
 }

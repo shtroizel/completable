@@ -53,6 +53,7 @@ private:
     void on_KEY_UP() override;
     void on_KEY_DOWN() override;
     void on_RETURN() override;
+    Layer::Type layer() const override;
 
 private:
     int hover{-1};

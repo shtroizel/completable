@@ -32,87 +32,134 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AbstractPage.h"
 
+#include <ncurses.h>
+
 #include "AbstractWindow.h"
+#include "Layer.h"
 #include "VisibilityAspect.h"
 #include "key_codes.h"
 
 
 
-AbstractPage::AbstractPage(std::vector<AbstractWindow *> w)
-    : wins{w}
+AbstractPage::AbstractPage()
+    : content{
+        std::make_shared<
+            matchable::MatchBox<
+                Layer::Type,
+                std::pair<std::vector<AbstractWindow *>, AbstractWindow *>
+            >
+        >()
+      }
 {
-    for (auto win : wins)
-        win->add_page(this);
+    for (auto l : Layer::variants())
+        content->mut_at(l).second = nullptr;
 }
 
 
 AbstractPage::~AbstractPage()
 {
-    wins.clear();
+    content.reset();
     active_page() = nullptr;
     left_neighbor = nullptr;
     right_neighbor = nullptr;
-    active_win = nullptr;
-    prev_active_win = nullptr;
+}
+
+
+void AbstractPage::add_window(AbstractWindow * win)
+{
+    if (nullptr == win)
+        return;
+
+    content->mut_at(win->get_layer()).first.push_back(win);
+    win->add_page(this);
+
+    // guarantee active window by setting first window active
+    if (content->at(win->get_layer()).first.size() == 1)
+        content->mut_at(win->get_layer()).second = win;
 }
 
 
 void AbstractPage::resize()
 {
     if (is_active())
-        for (auto w : wins)
-            w->resize();
+        for (auto l : Layer::variants())
+            for (auto w : content->mut_at(l).first)
+                w->resize();
 }
 
 
 void AbstractPage::draw(bool clear_first)
 {
     if (is_active())
-        for (auto w : wins)
+    {
+        for (auto w : content->mut_at(Layer::Bottom::grab()).first)
             w->draw(clear_first);
+
+        if (layer_F_enabled)
+            for (auto w : content->mut_at(Layer::F::grab()).first)
+                w->draw(clear_first);
+
+        if (layer_Help_enabled)
+            for (auto w : content->mut_at(Layer::Help::grab()).first)
+                w->draw(clear_first);
+    }
 }
+
 
 
 void AbstractPage::set_active_page(AbstractPage * pg)
 {
     if (nullptr != active_page())
-        for (auto w : active_page()->wins)
-            w->disable(VisibilityAspect::PageVisibility::grab());
+        for (auto l : Layer::variants())
+            for (auto w : active_page()->content->mut_at(l).first)
+                w->disable(VisibilityAspect::PageVisibility::grab());
 
     active_page() = pg;
 
     if (nullptr != active_page())
-        for (auto w : active_page()->wins)
-            w->enable(VisibilityAspect::PageVisibility::grab());
+        for (auto l : Layer::variants())
+            for (auto w : active_page()->content->mut_at(l).first)
+                w->enable(VisibilityAspect::PageVisibility::grab());
 }
 
 
-void AbstractPage::set_active_window(AbstractWindow * act_win)
+void AbstractPage::set_active_window(AbstractWindow * win)
 {
-    if (nullptr != active_win)
-        active_win->mark_dirty();
+    if (nullptr == win)
+        return;
 
-    prev_active_win = active_win;
-    active_win = act_win;
-
-    if (nullptr != active_win)
-        active_win->mark_dirty();
-}
-
-
-void AbstractPage::set_active_window_to_previous()
-{
+    // verify given window exists in the given layer
     {
-        AbstractWindow * w = active_win;
-        active_win = prev_active_win;
-        prev_active_win = w;
+        bool found = false;
+        for (auto w : content->at(win->get_layer()).first)
+        {
+            if (w == win)
+            {
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+            return;
     }
 
-    if (nullptr != prev_active_win)
-        prev_active_win->mark_dirty();
+    // need to redraw both old and new active windows
+    content->mut_at(win->get_layer()).second->mark_dirty();
+    win->mark_dirty();
 
-    if (nullptr != active_win)
-        active_win->mark_dirty();
+    content->mut_at(win->get_layer()).second = win;
+}
+
+
+AbstractWindow * AbstractPage::get_active_window()
+{
+    if (layer_Help_enabled)
+        return content->mut_at(Layer::Help::grab()).second;
+
+    if (layer_F_enabled)
+        return content->mut_at(Layer::F::grab()).second;
+
+    return content->mut_at(Layer::Bottom::grab()).second;
 }
 
 
@@ -123,11 +170,66 @@ void AbstractPage::on_KEY(int key)
 
     switch (key)
     {
+        case KEY_F(1)    :
+        case KEY_F(2)    :
+        case KEY_F(3)    :
+        case KEY_F(4)    :
+        case KEY_F(5)    :
+        case KEY_F(6)    :
+        case KEY_F(7)    :
+        case KEY_F(8)    :
+        case KEY_F(9)    :
+        case KEY_F(10)   :
+        case KEY_F(11)   :
+        case KEY_F(12)   : on_ANY_F();       return;
+        case ','         : on_COMMA();       return;
         case SHIFT_LEFT  : on_SHIFT_LEFT();  return;
         case SHIFT_RIGHT : on_SHIFT_RIGHT(); return;
     }
 
-    on_KEY_hook(key);
+    auto active_win = get_active_window();
+    if (nullptr != active_win)
+        active_win->on_KEY(key);
+}
+
+
+void AbstractPage::on_ANY_F()
+{
+    if (layer_Help_enabled)
+        return;
+
+    toggle_layer(Layer::F::grab(), layer_F_enabled);
+}
+
+
+void AbstractPage::on_COMMA()
+{
+    toggle_layer(Layer::Help::grab(), layer_Help_enabled);
+}
+
+
+void AbstractPage::toggle_layer(Layer::Type layer, bool & layer_enabled)
+{
+    if (layer_enabled)
+    {
+        // disable layer
+        layer_enabled = false;
+        for (auto w : content->mut_at(layer).first)
+            w->disable(VisibilityAspect::WindowVisibility::grab());
+
+        // redraw other layers
+        for (auto l : Layer::variants())
+            if (l != layer)
+                for (auto w : content->mut_at(l).first)
+                    w->mark_dirty();
+    }
+    else
+    {
+        // enable layer
+        layer_enabled = true;
+        for (auto w : content->mut_at(layer).first)
+            w->enable(VisibilityAspect::WindowVisibility::grab());
+    }
 }
 
 
