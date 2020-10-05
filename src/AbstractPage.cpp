@@ -217,7 +217,7 @@ void AbstractPage::toggle_layer(Layer::Type layer, bool & layer_enabled)
         for (auto w : content->mut_at(layer).first)
             w->disable(VisibilityAspect::WindowVisibility::grab());
 
-        // redraw other layers
+        // mark other layers dirty
         for (auto l : Layer::variants())
             if (l != layer)
                 for (auto w : content->mut_at(l).first)
