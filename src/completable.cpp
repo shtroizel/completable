@@ -33,34 +33,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <chrono>
 #include <iomanip>
 #include <iostream>
-#include <queue>
-#include <random>
-#include <sstream>
+#include <memory>
 #include <string>
 #include <vector>
 
 #include <ncurses.h>
 
-#include "AntonymWindow.h"
-#include "AttributeWindow.h"
-#include "CompletablePage.h"
-#include "CompletionStack.h"
-#include "CompletionWindow.h"
-#include "FilterWindow.h"
-#include "CompletableHelpWindow.h"
+#include "CompletablePageAgent.h"
 #include "IndicatorWindow.h"
-#include "InputWindow.h"
 #include "MatchmakerPage.h"
-#include "Layer.h"
-#include "LengthCompletionWindow.h"
 #include "PageDescriptionWindow.h"
-#include "SettingsPage.h"
-#include "SynonymWindow.h"
-#include "VisibilityAspect.h"
 #include "key_codes.h"
 #include "matchmaker.h"
-#include "word_filter.h"
-#include "word_stack_element.h"
 
 
 
@@ -93,38 +77,10 @@ int main(int argc, char ** argv)
     int prev_root_y{root_y};
     int prev_root_x{root_x};
 
-    word_filter wf;
-    CompletionStack cs{wf};
-    std::stack<word_stack_element> ws; // for navigation with RET and DEL
+    auto page_desc_win = std::make_shared<PageDescriptionWindow>();
+    auto indicator_win = std::make_shared<IndicatorWindow>();
 
-    InputWindow input_win{cs, ws};
-    CompletionWindow completion_win{cs, ws, input_win, wf};
-    LengthCompletionWindow len_completion_win{cs, ws, input_win, wf, completion_win};
-    SynonymWindow syn_win{cs, ws, input_win, completion_win, wf};
-    AntonymWindow ant_win{cs, ws, input_win, completion_win, len_completion_win, syn_win, wf};
-    AttributeWindow att_win{cs, ws, completion_win, len_completion_win, syn_win, ant_win};
-
-    FilterWindow filter_win{cs, ws, input_win, wf};
-    filter_win.disable(VisibilityAspect::WindowVisibility::grab());
-
-    CompletableHelpWindow completable_help_win;
-    PageDescriptionWindow page_desc_win;
-    IndicatorWindow indicator_win;
-
-    CompletablePage page_c;
-    page_c.add_window(&page_desc_win);
-    page_c.add_window(&indicator_win);
-    page_c.add_window(&input_win);
-    page_c.add_window(&completion_win);
-    page_c.add_window(&len_completion_win);
-    page_c.add_window(&att_win);
-    page_c.add_window(&syn_win);
-    page_c.add_window(&ant_win);
-    page_c.add_window(&filter_win);
-    page_c.add_window(&completable_help_win);
-
-    page_c.set_active_window(&completion_win);
-    page_c.set_active_window(&completable_help_win);
+    CompletablePageAgent cpa{page_desc_win, indicator_win};
 
 
 //     SettingsPage page_s{{&page_desc_win, &indicator_win}};
@@ -140,18 +96,8 @@ int main(int argc, char ** argv)
 // #else
 //     AbstractPage::set_active_page(&page_c);
 // #endif
-    AbstractPage::set_active_page(&page_c);
+    AbstractPage::set_active_page((AbstractPage *) cpa().get());
 
-
-    // define neighbors for left/right arrow key switching of windows within completable page
-    completion_win.set_left_neighbor(&ant_win);
-    completion_win.set_right_neighbor(&syn_win);
-    len_completion_win.set_left_neighbor(&syn_win);
-    len_completion_win.set_right_neighbor(&ant_win);
-    syn_win.set_left_neighbor(&completion_win);
-    syn_win.set_right_neighbor(&len_completion_win);
-    ant_win.set_left_neighbor(&len_completion_win);
-    ant_win.set_right_neighbor(&completion_win);
 
     bool resized_draw{true};
     int ch{0};
@@ -177,12 +123,9 @@ int main(int argc, char ** argv)
         active_page->draw(resized_draw);
         resized_draw = false;
 
-        if (!page_desc_win.is_enabled())
-            break;
-
-        ch = wgetch(page_desc_win.get_WINDOW());
-
-
+        // a window is needed for keyboard input
+        // page_desc_win is on all pages and is always enabled so it is the chosen one
+        ch = wgetch(page_desc_win->get_WINDOW());
 
         if (ch == '$' || ch == '~' || ch == '`')
         {
@@ -196,9 +139,9 @@ int main(int argc, char ** argv)
         }
         else if (ch == ESC)
         {
-            nodelay(page_desc_win.get_WINDOW(), true);
-            ch = wgetch(page_desc_win.get_WINDOW());
-            nodelay(page_desc_win.get_WINDOW(), false);
+            nodelay(page_desc_win->get_WINDOW(), true);
+            ch = wgetch(page_desc_win->get_WINDOW());
+            nodelay(page_desc_win->get_WINDOW(), false);
 
             if (ch == ERR)
                 break;

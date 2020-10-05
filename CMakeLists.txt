@@ -40,6 +40,7 @@ set(
     src/AttributeWindow.cpp
     src/CompletableHelpWindow.cpp
     src/CompletablePage.cpp
+    src/CompletablePageAgent.cpp
     src/CompletionStack.cpp
     src/CompletionWindow.cpp
     src/FilterWindow.cpp
