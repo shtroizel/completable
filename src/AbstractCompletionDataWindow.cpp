@@ -1,5 +1,3 @@
-#pragma once
-
 /*
 Copyright (c) 2020, Eric Hyer
 All rights reserved.
@@ -34,13 +32,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AbstractCompletionDataWindow.h"
 
+#include "CompletionStack.h"
 
-class InputWindow : public AbstractCompletionDataWindow
+
+
+AbstractCompletionDataWindow::AbstractCompletionDataWindow(
+    CompletionStack & completion_stack,
+    WordStack & word_stack
+)
+    : AbstractWindow()
+    , cs{completion_stack}, ws{word_stack}
 {
-    using AbstractCompletionDataWindow::AbstractCompletionDataWindow;
-
-    std::string title() override;
-    void resize_hook() override;
-    void draw_hook() override;
-    Layer::Type layer() const override;
-};
+}

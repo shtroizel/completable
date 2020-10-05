@@ -107,9 +107,9 @@ int main(int argc, char ** argv)
     FilterWindow filter_win{cs, ws, input_win, wf};
     filter_win.disable(VisibilityAspect::WindowVisibility::grab());
 
-    HelpWindow help_win{cs, ws};
-    PageDescriptionWindow page_desc_win{cs, ws};
-    IndicatorWindow indicator_win{cs, ws};
+    HelpWindow help_win;
+    PageDescriptionWindow page_desc_win;
+    IndicatorWindow indicator_win;
 
     CompletablePage page_c;
     page_c.add_window(&page_desc_win);

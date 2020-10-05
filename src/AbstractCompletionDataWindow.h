@@ -31,16 +31,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
+#include "AbstractWindow.h"
 
-#include "AbstractCompletionDataWindow.h"
+#include <stack>
+
+#include "word_stack_element.h"
 
 
-class InputWindow : public AbstractCompletionDataWindow
+class CompletionStack;
+using WordStack = std::stack<word_stack_element>;
+
+class AbstractCompletionDataWindow : public AbstractWindow
 {
-    using AbstractCompletionDataWindow::AbstractCompletionDataWindow;
+public:
+    AbstractCompletionDataWindow(CompletionStack &, WordStack &);
 
-    std::string title() override;
-    void resize_hook() override;
-    void draw_hook() override;
-    Layer::Type layer() const override;
+protected:
+    CompletionStack & cs;
+    WordStack & ws;
 };

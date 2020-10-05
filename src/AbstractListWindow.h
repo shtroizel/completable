@@ -32,14 +32,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "AbstractWindow.h"
+#include "AbstractCompletionDataWindow.h"
 
 
 
 class InputWindow;
 struct word_filter;
 
-class AbstractListWindow : public AbstractWindow
+class AbstractListWindow : public AbstractCompletionDataWindow
 {
 public:
     AbstractListWindow(CompletionStack &, WordStack &, InputWindow &, word_filter &);

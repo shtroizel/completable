@@ -32,7 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "AbstractWindow.h"
+#include "AbstractCompletionDataWindow.h"
 
 
 
@@ -41,7 +41,7 @@ class LengthCompletionWindow;
 class SynonymWindow;
 class AntonymWindow;
 
-class AttributeWindow : public AbstractWindow
+class AttributeWindow : public AbstractCompletionDataWindow
 {
 public:
     AttributeWindow(

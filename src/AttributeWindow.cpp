@@ -54,7 +54,7 @@ AttributeWindow::AttributeWindow(
     SynonymWindow & sw,
     AntonymWindow & aw
 )
-    : AbstractWindow(cs, ws)
+    : AbstractCompletionDataWindow(cs, ws)
 {
     cw.add_dirty_dependency(this);
     lcw.add_dirty_dependency(this);

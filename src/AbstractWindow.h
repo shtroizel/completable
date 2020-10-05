@@ -56,7 +56,7 @@ public:
     AbstractWindow(AbstractWindow const &) = delete;
     AbstractWindow & operator=(AbstractWindow const &) = delete;
 
-    AbstractWindow(CompletionStack &, WordStack &);
+    AbstractWindow();
     virtual ~AbstractWindow();
 
     void clear();
@@ -118,8 +118,6 @@ private:
     void on_KEY_RIGHT();
 
 protected:
-    CompletionStack & cs;
-    WordStack & ws;
     WINDOW * w{nullptr};
     int root_y{0};
     int root_x{0};

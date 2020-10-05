@@ -49,7 +49,7 @@ AbstractListWindow::AbstractListWindow(
     InputWindow & iw,
     word_filter & f
 )
-    : AbstractWindow(cs, ws)
+    : AbstractCompletionDataWindow(cs, ws)
     , input_win(iw)
     , wf(f)
 {

@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 FilterWindow::FilterWindow(CompletionStack & cs, WordStack & ws, InputWindow & iw, word_filter & f)
-    : AbstractWindow(cs, ws)
+    : AbstractCompletionDataWindow(cs, ws)
     , input_win(iw)
     , wf(f)
 {

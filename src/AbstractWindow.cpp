@@ -52,8 +52,7 @@ static int const MIN_ROOT_X{80};
 
 
 
-AbstractWindow::AbstractWindow(CompletionStack & completion_stack, WordStack & word_stack)
-    : cs{completion_stack}, ws{word_stack}, disabled{std::make_shared<VisibilityAspect::Flags>()}
+AbstractWindow::AbstractWindow() : disabled{std::make_shared<VisibilityAspect::Flags>()}
 {
 }
 
