@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CompletionStack.h"
 #include "CompletionWindow.h"
 #include "FilterWindow.h"
-#include "HelpWindow.h"
+#include "CompletableHelpWindow.h"
 #include "IndicatorWindow.h"
 #include "InputWindow.h"
 #include "MatchmakerPage.h"
@@ -107,7 +107,7 @@ int main(int argc, char ** argv)
     FilterWindow filter_win{cs, ws, input_win, wf};
     filter_win.disable(VisibilityAspect::WindowVisibility::grab());
 
-    HelpWindow help_win;
+    CompletableHelpWindow completable_help_win;
     PageDescriptionWindow page_desc_win;
     IndicatorWindow indicator_win;
 
@@ -121,10 +121,10 @@ int main(int argc, char ** argv)
     page_c.add_window(&syn_win);
     page_c.add_window(&ant_win);
     page_c.add_window(&filter_win);
-    page_c.add_window(&help_win);
+    page_c.add_window(&completable_help_win);
 
     page_c.set_active_window(&completion_win);
-    page_c.set_active_window(&help_win);
+    page_c.set_active_window(&completable_help_win);
 
 
 //     SettingsPage page_s{{&page_desc_win, &indicator_win}};

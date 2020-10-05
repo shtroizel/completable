@@ -36,7 +36,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-class HelpWindow : public AbstractWindow
+class CompletableHelpWindow : public AbstractWindow
 {
     using AbstractWindow::AbstractWindow;
 

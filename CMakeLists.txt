@@ -38,11 +38,11 @@ set(
     src/AbstractWindow.cpp
     src/AntonymWindow.cpp
     src/AttributeWindow.cpp
+    src/CompletableHelpWindow.cpp
     src/CompletablePage.cpp
     src/CompletionStack.cpp
     src/CompletionWindow.cpp
     src/FilterWindow.cpp
-    src/HelpWindow.cpp
     src/IndicatorWindow.cpp
     src/InputWindow.cpp
     src/LengthCompletionWindow.cpp

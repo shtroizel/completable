@@ -30,7 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "HelpWindow.h"
+#include "CompletableHelpWindow.h"
 
 #include <string>
 #include <vector>
@@ -66,14 +66,14 @@ static std::vector<std::string> const content =
 
 
 
-std::string HelpWindow::title()
+std::string CompletableHelpWindow::title()
 {
     static std::string const t{"Help"};
     return t;
 }
 
 
-void HelpWindow::resize_hook()
+void CompletableHelpWindow::resize_hook()
 {
     height = (int) content.size() + 2; // 2 for top/bottom borders
 
@@ -94,7 +94,7 @@ void HelpWindow::resize_hook()
 }
 
 
-void HelpWindow::draw_hook()
+void CompletableHelpWindow::draw_hook()
 {
     int i = 0;
     for (; i < (int) content.size() && i < height; ++i)
@@ -117,7 +117,7 @@ void HelpWindow::draw_hook()
 }
 
 
-Layer::Type HelpWindow::layer() const
+Layer::Type CompletableHelpWindow::layer() const
 {
     return Layer::Help::grab();
 }
