@@ -52,6 +52,7 @@ set(
     src/SettingsPage.cpp
     src/SynonymWindow.cpp
     src/completable.cpp
+    src/completable_shell.cpp
     src/matchmaker.cpp
 )
 
