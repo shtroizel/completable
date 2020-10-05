@@ -93,6 +93,19 @@ void completable_shell()
             std::cout << std::endl;
             break;
         }
+        else if (words[0].length() && words[0][0] == '!')
+        {
+            int completion_start{0};
+            int completion_length{0};
+            auto start = std::chrono::high_resolution_clock::now();
+            matchmaker::complete(line.substr(1), completion_start, completion_length);
+            auto stop = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+            std::cout << "completion (" << completion_length << ") : ";
+            for (int i = completion_start; i < completion_start + completion_length; ++i)
+                std::cout << " " << matchmaker::at(i);
+            std::cout << "\ncompletion done in " << duration.count() << " microseconds" << std::endl;
+        }
         else if (words.size() == 1 && words[0].size() > 0)
         {
             if (words[0] == ":q")
@@ -118,19 +131,6 @@ void completable_shell()
             else if (words[0] == ":help")
             {
                 help = !help;
-            }
-            else if (words[0][0] == '!')
-            {
-                int completion_start{0};
-                int completion_length{0};
-                auto start = std::chrono::high_resolution_clock::now();
-                matchmaker::complete(words[0].substr(1), completion_start, completion_length);
-                auto stop = std::chrono::high_resolution_clock::now();
-                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-                std::cout << "completion (" << completion_length << ") : ";
-                for (int i = completion_start; i < completion_start + completion_length; ++i)
-                    std::cout << " " << matchmaker::at(i);
-                std::cout << "\ncompletion done in " << duration.count() << " microseconds" << std::endl;
             }
             else
             {
