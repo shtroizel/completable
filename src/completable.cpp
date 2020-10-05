@@ -196,9 +196,9 @@ int main(int argc, char ** argv)
         }
         else if (ch == ESC)
         {
-            nodelay(input_win.get_WINDOW(), true);
-            ch = wgetch(input_win.get_WINDOW());
-            nodelay(input_win.get_WINDOW(), false);
+            nodelay(page_desc_win.get_WINDOW(), true);
+            ch = wgetch(page_desc_win.get_WINDOW());
+            nodelay(page_desc_win.get_WINDOW(), false);
 
             if (ch == ERR)
                 break;
