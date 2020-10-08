@@ -1,3 +1,5 @@
+#pragma once
+
 /*
 Copyright (c) 2020, Eric Hyer
 All rights reserved.
@@ -29,48 +31,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-
-#include "CompletionWindow.h"
-
-#include <ncurses.h>
-
-#include "CompletionStack.h"
-#include "InputWindow.h"
-#include "Settings.h"
+#include <matchable/matchable.h>
 
 
 
-std::string CompletionWindow::title()
-{
-    std::string t{"Completion ("};
-    t += std::to_string(cs.top().standard_completion.size());
-    t += ")";
-    return t;
-}
+MATCHABLE(Enabledness, Enabled, Disabled);
 
+PROPERTYx1_MATCHABLE(
+    // properties
+    Enabledness::Type, enabledness,
 
-void CompletionWindow::resize_hook()
-{
-    y = 3;
-    x = 0;
+    // matchable name
+    Settings,
 
-    int combined_height = root_y - 5 - y;
-    if (Settings::LengthCompletion::grab().as_enabledness() == Enabledness::Enabled::grab())
-        height = combined_height / 1.618;
-    else
-        height = combined_height;
+    // variants
+    LengthCompletion
+);
 
-    width = root_x / 2;
-}
-
-
-int & CompletionWindow::display_start()
-{
-    return cs.top().display_start;
-}
-
-
-std::vector<int> const & CompletionWindow::unfiltered_words(int) const
-{
-    return cs.top().standard_completion;
-}
+SET_PROPERTY(Settings, LengthCompletion, enabledness, Enabledness::Enabled::grab());
