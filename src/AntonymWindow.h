@@ -37,7 +37,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class InputWindow;
 class CompletionWindow;
-class LengthCompletionWindow;
 class SynonymWindow;
 struct word_filter;
 
@@ -49,7 +48,6 @@ public:
         WordStack &,
         InputWindow &,
         CompletionWindow &,
-        LengthCompletionWindow &,
         SynonymWindow &,
         word_filter &
     );
@@ -67,6 +65,5 @@ private:
     // AbstractListWindow options
     void on_post_RETURN() override final;
 
-    LengthCompletionWindow & len_completion_win;
     SynonymWindow & syn_win;
 };

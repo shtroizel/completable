@@ -49,12 +49,10 @@ AntonymWindow::AntonymWindow(
     WordStack & ws,
     InputWindow & iw,
     CompletionWindow & cw,
-    LengthCompletionWindow & lcw,
     SynonymWindow & sw,
     word_filter & f
 )
     : AbstractListWindow(cs, ws, iw, f)
-    , len_completion_win(lcw)
     , syn_win(sw)
 {
     cw.add_dirty_dependency(this);
@@ -76,10 +74,10 @@ std::string AntonymWindow::title()
 
 void AntonymWindow::resize_hook()
 {
-    height = len_completion_win.get_height();
-    width = len_completion_win.get_width() + root_x % 2;
-    y = len_completion_win.get_y();
-    x = len_completion_win.get_width();
+    y = syn_win.get_y() + syn_win.get_height();
+    x = syn_win.get_width();
+    height = root_y - y - 5;
+    width = syn_win.get_width();
 }
 
 

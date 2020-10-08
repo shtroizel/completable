@@ -62,7 +62,7 @@ CompletablePageAgent::CompletablePageAgent(
     , completion_win{std::make_shared<CompletionWindow>(*cs, ws, *input_win, *wf)}
     , len_completion_win{std::make_shared<LengthCompletionWindow>(*cs, ws, *input_win, *wf, *completion_win)}
     , syn_win{std::make_shared<SynonymWindow>(*cs, ws, *input_win, *completion_win, *wf)}
-    , ant_win{std::make_shared<AntonymWindow>(*cs, ws, *input_win, *completion_win, *len_completion_win, *syn_win, *wf)}
+    , ant_win{std::make_shared<AntonymWindow>(*cs, ws, *input_win, *completion_win, *syn_win, *wf)}
     , att_win{std::make_shared<AttributeWindow>(*cs, ws, *completion_win, *len_completion_win, *syn_win, *ant_win)}
     , filter_win{std::make_shared<FilterWindow>(*cs, ws, *input_win, *wf)}
     , completable_help_win{std::make_shared<CompletableHelpWindow>()}
