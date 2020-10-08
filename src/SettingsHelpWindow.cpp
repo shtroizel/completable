@@ -30,7 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "CompletableHelpWindow.h"
+#include "SettingsHelpWindow.h"
 
 #include <string>
 #include <vector>
@@ -48,35 +48,30 @@ static std::vector<std::string> const content =
     {
         std::vector<std::string> content;
         content.push_back("");
-        content.push_back("                FEATURE   KEY(s)");
-        content.push_back("   -------------------------------------------------"
-                                                     "--------------------------------   ");
-        content.push_back("            toggle help   ','");
-        content.push_back("             switch tab   shift + arrow left/right, "
-                                                     "arrow left/right when help shown");
-        content.push_back("           update input   letters");
-        content.push_back("   complete unambiguous   tab");
-        content.push_back("    change window focus   arrow left/right");
-        content.push_back("              scrolling   arrow up/down, page up/down, home/end");
-        content.push_back("       push input stack   Return");
-        content.push_back("        pop input stack   Del");
-        content.push_back("   toggle filter window   any F key (F1..F12)");
-        content.push_back("       enter shell mode   any of '$', '~', '`'");
-        content.push_back("                   quit   Esc, ctrl + c");
+        content.push_back("            FEATURE   KEY(s)");
+        content.push_back("   ---------------------------------------------"
+                                                 "--------------------------------   ");
+        content.push_back("        toggle help   ','");
+        content.push_back("         switch tab   shift + arrow left/right, "
+                                                 "arrow left/right when help shown");
+        content.push_back("     change setting   Return");
+//         content.push_back("          scrolling   arrow up/down, page up/down, home/end");
+        content.push_back("   enter shell mode   any of '$', '~', '`'");
+        content.push_back("               quit   Esc, ctrl + c");
         content.push_back("");
         return content;
     }();
 
 
 
-std::string CompletableHelpWindow::title()
+std::string SettingsHelpWindow::title()
 {
     static std::string const t{"Help"};
     return t;
 }
 
 
-void CompletableHelpWindow::resize_hook()
+void SettingsHelpWindow::resize_hook()
 {
     height = (int) content.size() + 2; // 2 for top/bottom borders
 
@@ -97,7 +92,7 @@ void CompletableHelpWindow::resize_hook()
 }
 
 
-void CompletableHelpWindow::draw_hook()
+void SettingsHelpWindow::draw_hook()
 {
     int i = 0;
     for (; i < (int) content.size() && i < height; ++i)
@@ -120,7 +115,7 @@ void CompletableHelpWindow::draw_hook()
 }
 
 
-Layer::Type CompletableHelpWindow::layer() const
+Layer::Type SettingsHelpWindow::layer() const
 {
     return Layer::Help::grab();
 }

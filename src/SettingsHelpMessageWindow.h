@@ -1,3 +1,5 @@
+#pragma once
+
 /*
 Copyright (c) 2020, Eric Hyer
 All rights reserved.
@@ -30,32 +32,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "SettingsPageAgent.h"
-
-#include "IndicatorWindow.h"
-#include "PageDescriptionWindow.h"
-#include "SettingsHelpMessageWindow.h"
-#include "SettingsHelpWindow.h"
-#include "SettingsPage.h"
-#include "SettingsWindow.h"
+#include "AbstractWindow.h"
 
 
-SettingsPageAgent::SettingsPageAgent(
-    std::shared_ptr<PageDescriptionWindow> pdw,
-    std::shared_ptr<IndicatorWindow> iw
-)
-    : page_desc_win{pdw}
-    , indicator_win{iw}
-    , help_message_win{std::make_shared<SettingsHelpMessageWindow>()}
-    , help_win{std::make_shared<SettingsHelpWindow>()}
-    , settings_win{std::make_shared<SettingsWindow>()}
-    , settings_page{std::make_shared<SettingsPage>()}
+class SettingsHelpMessageWindow : public AbstractWindow
 {
-    settings_page->add_window(page_desc_win.get());
-    settings_page->add_window(indicator_win.get());
+    using AbstractWindow::AbstractWindow;
 
-    settings_page->add_window(help_message_win.get());
-    settings_page->add_window(help_win.get());
-    settings_page->add_window(settings_win.get());
-    settings_page->set_active_window(settings_win.get());
-}
+    // resolved dependencies
+    std::string title() override final;
+    void resize_hook() override final;
+    void draw_hook() override final {}
+    Layer::Type layer() const override final;
+
+    // options
+    bool borders_enabled() const override final { return false; }
+};

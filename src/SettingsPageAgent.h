@@ -41,6 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class IndicatorWindow;
 class PageDescriptionWindow;
+class SettingsHelpMessageWindow;
+class SettingsHelpWindow;
 class SettingsWindow;
 
 class SettingsPageAgent
@@ -56,6 +58,8 @@ private:
     std::shared_ptr<PageDescriptionWindow> page_desc_win;
     std::shared_ptr<IndicatorWindow> indicator_win;
 
+    std::shared_ptr<SettingsHelpMessageWindow> help_message_win;
+    std::shared_ptr<SettingsHelpWindow> help_win;
     std::shared_ptr<SettingsWindow> settings_win;
     std::shared_ptr<SettingsPage> settings_page;
 };

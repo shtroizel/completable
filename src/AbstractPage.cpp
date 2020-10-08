@@ -109,10 +109,32 @@ void AbstractPage::draw(bool clear_first)
 
 void AbstractPage::set_active_page(AbstractPage * pg)
 {
+    if (nullptr == pg)
+        return;
+
     if (nullptr != active_page())
         for (auto l : Layer::variants())
             for (auto w : active_page()->content->mut_at(l).first)
                 w->disable(VisibilityAspect::PageVisibility::grab());
+
+    // synce WindowVisibility aspect for Help layer, specifically:
+    //
+    // if help enabled for old page then enable help for new page if not already
+    // and...
+    // if help disabled for old page then disable help for new page if not already
+    if (nullptr != active_page())
+    {
+        if (active_page()->get_active_window()->get_layer() == Layer::Help::grab())
+        {
+            if (pg->get_active_window()->get_layer() != Layer::Help::grab())
+                pg->on_COMMA();
+        }
+        else
+        {
+            if (pg->get_active_window()->get_layer() == Layer::Help::grab())
+                pg->on_COMMA();
+        }
+    }
 
     active_page() = pg;
 

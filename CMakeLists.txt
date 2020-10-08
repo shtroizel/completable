@@ -49,6 +49,8 @@ set(
     src/LengthCompletionWindow.cpp
     src/MatchmakerPage.cpp
     src/PageDescriptionWindow.cpp
+    src/SettingsHelpMessageWindow.cpp
+    src/SettingsHelpWindow.cpp
     src/SettingsPage.cpp
     src/SettingsPageAgent.cpp
     src/SettingsWindow.cpp

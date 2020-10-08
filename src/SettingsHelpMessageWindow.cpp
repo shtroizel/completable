@@ -30,32 +30,32 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "SettingsPageAgent.h"
-
-#include "IndicatorWindow.h"
-#include "PageDescriptionWindow.h"
 #include "SettingsHelpMessageWindow.h"
-#include "SettingsHelpWindow.h"
-#include "SettingsPage.h"
-#include "SettingsWindow.h"
+
+#include <ncurses.h>
+
+#include "CompletionStack.h"
+#include "Layer.h"
 
 
-SettingsPageAgent::SettingsPageAgent(
-    std::shared_ptr<PageDescriptionWindow> pdw,
-    std::shared_ptr<IndicatorWindow> iw
-)
-    : page_desc_win{pdw}
-    , indicator_win{iw}
-    , help_message_win{std::make_shared<SettingsHelpMessageWindow>()}
-    , help_win{std::make_shared<SettingsHelpWindow>()}
-    , settings_win{std::make_shared<SettingsWindow>()}
-    , settings_page{std::make_shared<SettingsPage>()}
+
+std::string SettingsHelpMessageWindow::title()
 {
-    settings_page->add_window(page_desc_win.get());
-    settings_page->add_window(indicator_win.get());
+    static std::string const t{"enter , for help"};
+    return t;
+}
 
-    settings_page->add_window(help_message_win.get());
-    settings_page->add_window(help_win.get());
-    settings_page->add_window(settings_win.get());
-    settings_page->set_active_window(settings_win.get());
+
+void SettingsHelpMessageWindow::resize_hook()
+{
+    height = 3;
+    width = root_x / 2;
+    y = 0;
+    x = root_x / 2 - width / 2;
+}
+
+
+Layer::Type SettingsHelpMessageWindow::layer() const
+{
+    return Layer::Bottom::grab();
 }
