@@ -90,7 +90,8 @@ int main(int argc, char ** argv)
 // #else
 //     AbstractPage::set_active_page(&page_c);
 // #endif
-    AbstractPage::set_active_page((AbstractPage *) cpa().get());
+
+    AbstractPage::set_active_page(cpa());
 
 
     bool resized_draw{true};

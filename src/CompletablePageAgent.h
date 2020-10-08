@@ -35,11 +35,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 #include <stack>
 
+#include "CompletablePage.h"
+
 
 
 class AntonymWindow;
 class AttributeWindow;
-class CompletablePage;
 class CompletionStack;
 class CompletionWindow;
 class FilterWindow;
@@ -61,7 +62,7 @@ public:
     CompletablePageAgent & operator=(CompletablePageAgent const &) = delete;
 
     CompletablePageAgent(std::shared_ptr<PageDescriptionWindow>, std::shared_ptr<IndicatorWindow>);
-    std::shared_ptr<CompletablePage> operator()() { return completable_page; }
+    CompletablePage * operator()() { return completable_page.get(); }
 
 private:
     std::shared_ptr<PageDescriptionWindow> page_desc_win;
