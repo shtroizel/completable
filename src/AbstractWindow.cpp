@@ -45,7 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 // minimum required terminal height
-static int const MIN_ROOT_Y{30};
+static int const MIN_ROOT_Y{27};
 
 // minimum required terminal width
 static int const MIN_ROOT_X{80};
