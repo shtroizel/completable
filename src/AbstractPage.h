@@ -66,6 +66,7 @@ public:
 
     void set_active_window(AbstractWindow *);
     AbstractWindow * get_active_window();
+    AbstractWindow * get_active_window(Layer::Type);
 
     void on_KEY(int key);
 

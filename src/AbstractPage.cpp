@@ -163,6 +163,12 @@ AbstractWindow * AbstractPage::get_active_window()
 }
 
 
+AbstractWindow * AbstractPage::get_active_window(Layer::Type layer)
+{
+    return content->mut_at(layer).second;
+}
+
+
 void AbstractPage::on_KEY(int key)
 {
     if (!is_active())
