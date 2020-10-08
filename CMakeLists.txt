@@ -68,6 +68,6 @@ target_include_directories(
     completable
     PRIVATE
     include
-    matchmaker/matchable/include
+    matchable/include
 )
 install(TARGETS completable DESTINATION bin)
