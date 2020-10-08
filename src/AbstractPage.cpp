@@ -195,7 +195,18 @@ void AbstractPage::on_KEY(int key)
 
     auto active_win = get_active_window();
     if (nullptr != active_win)
+    {
+        if (active_win->get_layer() == Layer::Help::grab())
+        {
+            switch (key)
+            {
+                case KEY_LEFT  : on_SHIFT_LEFT();  return;
+                case KEY_RIGHT : on_SHIFT_RIGHT(); return;
+            }
+        }
+
         active_win->on_KEY(key);
+    }
 }
 
 
