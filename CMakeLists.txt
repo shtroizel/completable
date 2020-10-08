@@ -50,6 +50,8 @@ set(
     src/MatchmakerPage.cpp
     src/PageDescriptionWindow.cpp
     src/SettingsPage.cpp
+    src/SettingsPageAgent.cpp
+    src/SettingsWindow.cpp
     src/SynonymWindow.cpp
     src/completable.cpp
     src/completable_shell.cpp

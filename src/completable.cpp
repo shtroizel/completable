@@ -39,6 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "IndicatorWindow.h"
 #include "MatchmakerPage.h"
 #include "PageDescriptionWindow.h"
+#include "SettingsPageAgent.h"
 #include "key_codes.h"
 #include "matchmaker.h"
 #include "completable_shell.h"
@@ -76,12 +77,11 @@ int main(int argc, char ** argv)
 
     CompletablePageAgent cpa{page_desc_win, indicator_win};
 
+    SettingsPageAgent spa{page_desc_win, indicator_win};
 
-//     SettingsPage page_s{{&page_desc_win, &indicator_win}};
-//
-//     page_c.set_left_neighbor(&page_s);
-//     page_s.set_right_neighbor(&page_c);
-//
+    cpa()->set_left_neighbor(spa());
+    spa()->set_right_neighbor(cpa());
+
 // #ifdef MM_DL
 //     MatchmakerPage page_m{{&page_desc_win, &indicator_win}};
 //     page_s.set_left_neighbor(&page_m);

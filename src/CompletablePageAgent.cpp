@@ -41,8 +41,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CompletableHelpWindow.h"
 #include "IndicatorWindow.h"
 #include "InputWindow.h"
+#include "Layer.h"
 #include "LengthCompletionWindow.h"
 #include "PageDescriptionWindow.h"
+#include "Settings.h"
 #include "SynonymWindow.h"
 #include "VisibilityAspect.h"
 #include "word_filter.h"
@@ -93,4 +95,36 @@ CompletablePageAgent::CompletablePageAgent(
     syn_win->set_right_neighbor(len_completion_win.get());
     ant_win->set_left_neighbor(len_completion_win.get());
     ant_win->set_right_neighbor(completion_win.get());
+
+    // respond to changes in LengthCompletion setting
+    Settings::LengthCompletion::grab().add_enabledness_observer(
+        [&]()
+        {
+            Settings::LengthCompletion::grab().as_enabledness().match({
+                {
+                    Enabledness::Enabled::grab(),
+                    [&]()
+                    {
+                        len_completion_win->enable(VisibilityAspect::WindowVisibility::grab());
+                        syn_win->set_right_neighbor(len_completion_win.get());
+                        ant_win->set_left_neighbor(len_completion_win.get());
+                    }
+                },
+                {
+                    Enabledness::Disabled::grab(),
+                    [&]()
+                    {
+                        if (completable_page->get_active_window(Layer::Bottom::grab()) == len_completion_win.get()  )
+                            completable_page->set_active_window(completion_win.get());
+
+                        len_completion_win->disable(VisibilityAspect::WindowVisibility::grab());
+                        syn_win->set_right_neighbor(ant_win.get());
+                        ant_win->set_left_neighbor(syn_win.get());
+                    }
+                },
+            });
+
+            completion_win->resize();
+        }
+    );
 }
