@@ -49,11 +49,10 @@ static std::vector<std::string> const content =
         std::vector<std::string> content;
         content.push_back("");
         content.push_back("            FEATURE   KEY(s)");
-        content.push_back("   ---------------------------------------------"
-                                                 "--------------------------------   ");
+        content.push_back("   ------------------------------------------------------   ");
         content.push_back("        toggle help   ','");
-        content.push_back("         switch tab   shift + arrow left/right, "
-                                                 "arrow left/right when help shown");
+        content.push_back("         switch tab   shift + arrow left/right, ");
+        content.push_back("                      or arrow left/right when help shown");
         content.push_back("     change setting   Return");
 //         content.push_back("          scrolling   arrow up/down, page up/down, home/end");
         content.push_back("   enter shell mode   any of '$', '~', '`'");

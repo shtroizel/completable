@@ -49,11 +49,10 @@ static std::vector<std::string> const content =
         std::vector<std::string> content;
         content.push_back("");
         content.push_back("                FEATURE   KEY(s)");
-        content.push_back("   -------------------------------------------------"
-                                                     "--------------------------------   ");
+        content.push_back("   ------------------------------------------------------------   ");
         content.push_back("            toggle help   ','");
-        content.push_back("             switch tab   shift + arrow left/right, "
-                                                     "arrow left/right when help shown");
+        content.push_back("             switch tab   shift + arrow left/right,");
+        content.push_back("                          or arrow left/right when help shown");
         content.push_back("           update input   letters");
         content.push_back("   complete unambiguous   tab");
         content.push_back("    change window focus   arrow left/right");
