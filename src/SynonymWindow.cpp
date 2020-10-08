@@ -51,9 +51,8 @@ SynonymWindow::SynonymWindow(
     word_filter & wf
 )
     : AbstractListWindow(cs, ws, iw, wf)
-    , completion_win(cw)
 {
-    completion_win.add_dirty_dependency(this);
+    cw.add_dirty_dependency(this);
 }
 
 
@@ -72,10 +71,12 @@ std::string SynonymWindow::title()
 
 void SynonymWindow::resize_hook()
 {
-    height = completion_win.get_height();
-    width = completion_win.get_width() + root_x % 2;
-    y = completion_win.get_y();
-    x = completion_win.get_width();
+    y = 3;
+    x = root_x / 2;
+
+    int combined_height = root_y - 5 - y;
+    height = combined_height / 1.618;
+    width = x + root_x % 2;
 }
 
 
