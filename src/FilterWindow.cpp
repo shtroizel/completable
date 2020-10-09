@@ -165,6 +165,8 @@ void FilterWindow::on_KEY_DOWN()
 
 void FilterWindow::on_RETURN()
 {
+    // first option in filter window is exclusive / inclusive,
+    // for which we use -1 because it is both before and outside the index range for word_attribute
     if (hover == -1)
     {
         int direction_index = wf.direction.as_index() + 1;
