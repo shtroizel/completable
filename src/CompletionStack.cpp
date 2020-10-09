@@ -56,8 +56,14 @@ void CompletionStack::push(int ch)
 
         // grow
         ++completion_count;
-        clear_top();
 
+        // check if nothing to do
+        std::string prev_prefix_with_ch = prev_top.prefix;
+        prev_prefix_with_ch += (char) ch;
+        if (top().prefix == prev_prefix_with_ch)
+            return;
+
+        clear_top();
         top().prefix = prev_top.prefix;
     }
     top().prefix += ch;
@@ -105,10 +111,7 @@ void CompletionStack::push(int ch)
 void CompletionStack::pop()
 {
     if (completion_count > 1)
-    {
-        clear_top();
         --completion_count;
-    }
 }
 
 
