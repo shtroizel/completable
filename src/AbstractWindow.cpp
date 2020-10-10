@@ -296,6 +296,7 @@ void AbstractWindow::disable(VisibilityAspect::Type aspect)
     }
 
     disabled->set(aspect);
+    mark_dirty();
 }
 
 
