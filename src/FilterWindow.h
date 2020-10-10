@@ -46,15 +46,18 @@ public:
     ~FilterWindow() override;
 
 private:
-    std::string title() override;
-    void resize_hook() override;
-    void post_resize_hook() override;
-    void pre_disable_hook() override;
-    void draw_hook() override;
-    void on_KEY_UP() override;
-    void on_KEY_DOWN() override;
-    void on_RETURN() override;
-    Layer::Type layer() const override;
+    // resolved dependencies
+    std::string title() override final;
+    void resize_hook() override final;
+    void draw_hook() override final;
+    Layer::Type layer() const override final;
+
+    // options
+    void post_resize_hook() override final;
+    void pre_disable_hook() override final;
+    void on_KEY_UP() override final;
+    void on_KEY_DOWN() override final;
+    void on_RETURN() override final;
 
 private:
     int hover{-1};
