@@ -407,7 +407,7 @@ void FilterWindow::pre_disable_hook()
                     start = std::chrono::high_resolution_clock::now();
                 }
 
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                std::this_thread::sleep_for(std::chrono::microseconds(17));
             }
         }
     };
