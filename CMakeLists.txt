@@ -29,6 +29,7 @@ else()
 endif()
 
 find_package(Curses REQUIRED)
+find_package(Threads REQUIRED)
 
 set(
     completable_srcs
@@ -61,11 +62,12 @@ set(
 )
 
 add_executable(completable ${completable_srcs})
+target_link_libraries(completable Threads::Threads ${CURSES_LIBRARIES})
 
 if(matchmaker_DL STREQUAL "ON")
-    target_link_libraries(completable ${CURSES_LIBRARIES} dl)
+    target_link_libraries(completable dl)
 else()
-    target_link_libraries(completable matchmaker ${CURSES_LIBRARIES})
+    target_link_libraries(completable matchmaker)
 endif()
 
 target_include_directories(
