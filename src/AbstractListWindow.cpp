@@ -72,14 +72,15 @@ void AbstractListWindow::draw_hook()
     int i = 0;
     for (; i < display_count && i < height - 2; ++i) // 2 for borders (top, bottom)
     {
-        std::string const & word = string_from_index(words[display_start() + i]);
+        int word_len{0};
+        char const * word = string_from_index(words[display_start() + i], &word_len);
 
         // highlight first word
         if (is_active() && i == 0)
             wattron(w, A_REVERSE);
 
         int j = 0;
-        for (; j < (int) word.length() && j < width - 2; ++j) // 2 for borders (left, right)
+        for (; j < word_len && j < width - 2; ++j) // 2 for borders (left, right)
             mvwaddch(w, i + 1, j + 1, word[j]);
 
         if (is_active() && i == 0)
@@ -223,7 +224,8 @@ void AbstractListWindow::on_RETURN()
     if (ds >= (int) words.size())
         ds = (int) words.size() - 1;
 
-    std::string const & selected = string_from_index(words[ds]);
+    int selected_len{0};
+    char const * selected = string_from_index(words[ds], &selected_len);
 
     // save old prefix to word_stack
     ws.push({cs.top().prefix, this, ds});
@@ -231,8 +233,8 @@ void AbstractListWindow::on_RETURN()
     // update completion stack
     while (cs.count() > 1)
         cs.pop();
-    for (auto ch : selected)
-        cs.push(ch);
+    for (int i = 0; i < selected_len; ++i)
+        cs.push(selected[i]);
 
     input_win.mark_dirty();
 
@@ -268,26 +270,30 @@ void AbstractListWindow::on_DELETE()
 void AbstractListWindow::on_TAB()
 {
     auto const & c = cs.top();
-    std::string const & prefix = c.prefix;
+    int prefix_len = (int) c.prefix.length();
 
     if (c.standard_completion.size() > 0)
     {
-        std::string const & first_entry = matchmaker::at(c.standard_completion[0]);
+        int first_entry_len{0};
+        char const * first_entry = matchmaker::at(c.standard_completion[0], &first_entry_len);
 
         // find out the "target_completion_count" or the completion count after skipping
         // by common characters
         int target_completion_count = cs.count() - 1;
-        bool ok = first_entry.size() > prefix.size();
+        bool ok = first_entry_len > prefix_len;
         while (ok)
         {
             for (auto i : c.standard_completion)
             {
-                std::string const & entry = matchmaker::at(i);
+                int entry_len{0};
+                char const * entry = matchmaker::at(i, &entry_len);
 
-                if ((int) entry.size() < target_completion_count)
+                // are entry and first_entry long enough to compare at target_completion_count?
+                if (entry_len <= target_completion_count)
                     ok = false;
-                else if ((int) first_entry.size() < target_completion_count)
+                else if (first_entry_len <= target_completion_count)
                     ok = false;
+
                 else if (entry[target_completion_count] != first_entry[target_completion_count])
                     ok = false;
             }
@@ -298,7 +304,7 @@ void AbstractListWindow::on_TAB()
 
         bool cs_modified{false};
         // grow up to the target completion count
-        for (int i = (int) prefix.size(); i < target_completion_count; ++i)
+        for (int i = prefix_len; i < target_completion_count && i < first_entry_len; ++i)
         {
             cs.push(first_entry[i]);
             cs_modified = true;
@@ -343,16 +349,18 @@ std::vector<int> const & AbstractListWindow::get_words() const
         if (c.display_start >= (int) c.standard_completion.size())
             c.display_start = (int) c.standard_completion.size() - 1;
 
-        auto const & unfiltered = unfiltered_words(c.standard_completion[c.display_start]);
+        int const * unfiltered{nullptr};
+        int unfiltered_count{0};
+        unfiltered_words(c.standard_completion[c.display_start], &unfiltered, &unfiltered_count);
 
-        words_cache.reserve(unfiltered.size());
+        words_cache.reserve(unfiltered_count);
 
         if (!apply_filter())
-            words_cache = unfiltered;
+            words_cache.assign(unfiltered, unfiltered + unfiltered_count);
         else
-            for (auto word : unfiltered)
-                if (wf.passes(word))
-                    words_cache.push_back(word);
+            for (int i = 0; i < unfiltered_count; ++i)
+                if (wf.passes(unfiltered[i]))
+                    words_cache.push_back(unfiltered[i]);
 
     }
 
@@ -360,7 +368,7 @@ std::vector<int> const & AbstractListWindow::get_words() const
 }
 
 
-std::string const & AbstractListWindow::string_from_index(int index)
+char const * AbstractListWindow::string_from_index(int index, int * len)
 {
-    return matchmaker::at(index);
+    return matchmaker::at(index, len);
 }

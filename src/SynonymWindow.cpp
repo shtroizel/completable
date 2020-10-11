@@ -86,7 +86,7 @@ int & SynonymWindow::display_start()
 }
 
 
-std::vector<int> const & SynonymWindow::unfiltered_words(int word) const
+void SynonymWindow::unfiltered_words(int index, int const * * words, int * count) const
 {
-    return matchmaker::synonyms(word);
+    matchmaker::synonyms(index, words, count);
 }

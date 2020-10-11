@@ -93,7 +93,7 @@ void AntonymWindow::on_post_RETURN()
 }
 
 
-std::vector<int> const & AntonymWindow::unfiltered_words(int word) const
+void AntonymWindow::unfiltered_words(int index, int const * * words, int * count) const
 {
-    return matchmaker::antonyms(word);
+    matchmaker::antonyms(index, words, count);
 }

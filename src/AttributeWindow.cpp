@@ -32,6 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AttributeWindow.h"
 
+#include <cstring>
 #include <iostream>
 
 #include <ncurses.h>
@@ -125,16 +126,24 @@ void AttributeWindow::draw_hook()
     ++line;
 
     {
-        std::vector<std::string const *> pos;
-        matchmaker::parts_of_speech(selection, pos);
+        char const * const * pos{nullptr};
+        int8_t const * flagged{nullptr};
+        int pos_count{0};
+        matchmaker::parts_of_speech(selection, &pos, &flagged, &pos_count);
 
         std::string const pos_label{"Parts of Speech:"};
         mvwprintw(w, line, 1, pos_label.c_str());
 
         int indent = pos_label.size() + 1;
-        for (auto p : pos)
+        for (int pos_index = 0; pos_index < pos_count; ++pos_index)
         {
-            if (width - indent <= (int) p->length() + 2)
+            if (!flagged[pos_index])
+                continue;
+
+            auto & p = pos[pos_index];
+            int p_len = strlen(p);
+
+            if (width - indent <= p_len + 2)
             {
                 for (; indent < width - 1; ++indent)
                     mvwaddch(w, line, indent, ' ');
@@ -149,8 +158,8 @@ void AttributeWindow::draw_hook()
             }
 
             mvwprintw(w, line, indent, "  ");
-            mvwprintw(w, line, indent + 2, p->c_str());
-            indent += p->length() + 2;
+            mvwprintw(w, line, indent + 2, p);
+            indent += p_len + 2;
         }
 
         for (; line < 4; ++line)

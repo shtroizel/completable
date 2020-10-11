@@ -82,13 +82,14 @@ int & LengthCompletionWindow::display_start()
 }
 
 
-std::vector<int> const & LengthCompletionWindow::unfiltered_words(int) const
+void LengthCompletionWindow::unfiltered_words(int, int const * * words, int * count) const
 {
-    return cs.top().length_completion;
+    *words = cs.top().length_completion.data();
+    *count = (int) cs.top().length_completion.size();
 }
 
 
-std::string const & LengthCompletionWindow::string_from_index(int index)
+char const * LengthCompletionWindow::string_from_index(int index, int * len)
 {
-    return matchmaker::at(matchmaker::from_longest(index));
+    return matchmaker::at(matchmaker::from_longest(index), len);
 }

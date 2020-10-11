@@ -70,7 +70,8 @@ int & CompletionWindow::display_start()
 }
 
 
-std::vector<int> const & CompletionWindow::unfiltered_words(int) const
+void CompletionWindow::unfiltered_words(int, int const * * words, int * count) const
 {
-    return cs.top().standard_completion;
+    *words = cs.top().standard_completion.data();
+    *count = (int) cs.top().standard_completion.size();
 }

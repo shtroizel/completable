@@ -67,16 +67,16 @@ private:
 
     // new dependencies
     virtual int & display_start() = 0;
-    virtual std::vector<int> const & unfiltered_words(int) const = 0;
+    virtual void unfiltered_words(int index, int const * * words, int * count) const = 0;
     virtual bool apply_filter() const = 0;
 
     // new options
     virtual void on_post_RETURN() {}
-    virtual std::string const & string_from_index(int);
+    virtual char const * string_from_index(int index, int * len);
 
     // cache
     std::vector<int> words;
-    class CacheDirty
+    class CacheDirty // because observing is disturbing
     {
     public:
         void set_false() { dirty = false; }
@@ -89,6 +89,7 @@ private:
     mutable std::vector<int> words_cache;
 
     // same or longer lifetime as this and avoided during destruction
+    // TODO guarantee using keys
     InputWindow & input_win;
     word_filter & wf;
 };

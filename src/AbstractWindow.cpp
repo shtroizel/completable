@@ -107,7 +107,7 @@ void AbstractWindow::draw(bool clear_first)
         return;
     }
 
-    // always draw when clear_first
+    // always draw when clear_first regardless of dirty
     if (!dirty && !clear_first)
         return;
 

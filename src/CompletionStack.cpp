@@ -73,9 +73,9 @@ void CompletionStack::push(int ch)
         int start{0};
         int length{0};
         matchmaker::complete(
-            top().prefix,
-            start,
-            length
+            top().prefix.c_str(),
+            &start,
+            &length
         );
         top().standard_completion.reserve(length);
         for (int i = start; i < start + length; ++i)
@@ -129,8 +129,8 @@ void CompletionStack::clear_top()
     {
         // use entire dictionary for completions
 
-        top().standard_completion.reserve(matchmaker::size());
-        for (int i = 0; i < matchmaker::size(); ++i)
+        top().standard_completion.reserve(matchmaker::count());
+        for (int i = 0; i < matchmaker::count(); ++i)
             if (wf.passes(i))
                 top().standard_completion.push_back(i);
 

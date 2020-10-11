@@ -46,25 +46,23 @@ namespace matchmaker
     static void * handle{nullptr};
 #endif
 
-    static int (*mm_size)(){nullptr};
-    static std::string const & (*mm_at)(int){nullptr};
-    static int (*mm_lookup)(std::string const &, bool *){nullptr};
+    static int (*mm_count)(){nullptr};
+    static char const * (*mm_at)(int, int *){nullptr};
+    static int (*mm_lookup)(char const *, bool *){nullptr};
     static int (*mm_as_longest)(int){nullptr};
     static int (*mm_from_longest)(int){nullptr};
-    static std::vector<std::size_t> const & (*mm_lengths)(){nullptr};
-    static bool (*mm_length_location)(std::size_t, int &, int &){nullptr};
-    static std::vector<std::string> const & (*mm_all_parts_of_speech)(){nullptr};
-    static std::vector<int8_t> const & (*mm_flagged_parts_of_speech)(int){nullptr};
-    static void (*mm_parts_of_speech)(int, std::vector<std::string const *> &){nullptr};
+    static void (*mm_lengths)(int const * *, int *){nullptr};
+    static bool (*mm_length_location)(int, int *, int *){nullptr};
+    static bool (*mm_parts_of_speech)(int, char const * const * *, int8_t const * *, int *){nullptr};
     static bool (*mm_is_name)(int){nullptr};
     static bool (*mm_is_male_name)(int){nullptr};
     static bool (*mm_is_female_name)(int){nullptr};
     static bool (*mm_is_place)(int){nullptr};
     static bool (*mm_is_compound)(int){nullptr};
     static bool (*mm_is_acronym)(int){nullptr};
-    static std::vector<int> const & (*mm_synonyms)(int){nullptr};
-    static std::vector<int> const & (*mm_antonyms)(int){nullptr};
-    static void (*mm_complete)(std::string const &, int &, int &){nullptr};
+    static void (*mm_synonyms)(int, int const * *, int *){nullptr};
+    static void (*mm_antonyms)(int, int const * *, int *){nullptr};
+    static void (*mm_complete)(char const *, int *, int *){nullptr};
 
 
 
@@ -74,6 +72,8 @@ namespace matchmaker
         char * ret = nullptr;
 
 #ifdef MM_DL
+        // *** DYNAMIC LOADING ***
+
         handle = dlopen(so_filename, RTLD_NOW);
         if (nullptr == handle)
         {
@@ -93,19 +93,20 @@ namespace matchmaker
                 ok = false;                                                                                \
         }
 #else
-        (void) so_filename;
+        // use normal linking
+        (void) so_filename; // quiet unused variable warning
+
+        // just redirect to global namespace version of function provided by matchmaker library's header
         #define init_func(_f) mm_##_f = &::mm_##_f;
 #endif
 
-        init_func(size);
+        init_func(count);
         init_func(at);
         init_func(lookup);
         init_func(as_longest);
         init_func(from_longest);
         init_func(lengths);
         init_func(length_location);
-        init_func(all_parts_of_speech);
-        init_func(flagged_parts_of_speech);
         init_func(parts_of_speech);
         init_func(is_name);
         init_func(is_male_name);
@@ -131,15 +132,13 @@ namespace matchmaker
         }
 #endif
 
-        mm_size = nullptr;
+        mm_count = nullptr;
         mm_at = nullptr;
         mm_lookup = nullptr;
         mm_as_longest = nullptr;
         mm_from_longest = nullptr;
         mm_lengths = nullptr;
         mm_length_location = nullptr;
-        mm_all_parts_of_speech = nullptr;
-        mm_flagged_parts_of_speech = nullptr;
         mm_parts_of_speech = nullptr;
         mm_is_name = nullptr;
         mm_is_male_name = nullptr;
@@ -153,26 +152,30 @@ namespace matchmaker
     }
 
 
-    int size()
+    int count()
     {
-        if (nullptr == mm_size)
+        if (nullptr == mm_count)
             return 0;
 
-        return (*mm_size)();
+        return (*mm_count)();
     }
 
 
-    std::string const & at(int index)
+    char const * at(int index, int * length)
     {
-        static std::string const empty_str;
+        static char const * empty_str = "";
         if (nullptr == mm_at)
+        {
+            if (nullptr != length)
+                *length = 0;
             return empty_str;
+        }
 
-        return (*mm_at)(index);
+        return (*mm_at)(index, length);
     }
 
 
-    int lookup(std::string const & word, bool * found)
+    int lookup(char const * word, bool * found)
     {
         if (nullptr == mm_lookup)
             return -1;
@@ -199,51 +202,42 @@ namespace matchmaker
     }
 
 
-    std::vector<std::size_t> const & lengths()
+    void lengths(int const * * len_array, int * count)
     {
-        static std::vector<std::size_t> const empty_vect;
         if (nullptr == mm_lengths)
-            return empty_vect;
+        {
+            *count = 0;
+            return;
+        }
 
-        return (*mm_lengths)();
+        (*mm_lengths)(len_array, count);
     }
 
 
-    bool length_location(std::size_t length, int & index, int & count)
+    bool length_location(int length, int * length_index, int * count)
     {
         if (nullptr == mm_length_location)
+        {
+            *length_index = -1;
+            *count = 0;
             return false;
+        }
 
-        return (*mm_length_location)(length, index, count);
+        return (*mm_length_location)(length, length_index, count);
     }
 
 
-    std::vector<std::string> const & all_parts_of_speech()
-    {
-        static std::vector<std::string> const empty_vect;
-        if (nullptr == mm_all_parts_of_speech)
-            return empty_vect;
-
-        return (*mm_all_parts_of_speech)();
-    }
-
-
-    std::vector<int8_t> const & flagged_parts_of_speech(int index)
-    {
-        static std::vector<int8_t> const empty_vect;
-        if (nullptr == mm_flagged_parts_of_speech)
-            return empty_vect;
-
-        return (*mm_flagged_parts_of_speech)(index);
-    }
-
-
-    void parts_of_speech(int index, std::vector<std::string const *> & pos)
+    bool parts_of_speech(int index, char const * const * * pos, int8_t const * * flagged, int * count)
     {
         if (nullptr == mm_parts_of_speech)
-            return;
+        {
+            *pos = nullptr;
+            *flagged = nullptr;
+            *count = 0;
+            return false;
+        }
 
-        (*mm_parts_of_speech)(index, pos);
+        return (*mm_parts_of_speech)(index, pos, flagged, count);
     }
 
 
@@ -301,30 +295,40 @@ namespace matchmaker
     }
 
 
-    std::vector<int> const & synonyms(int index)
+    void synonyms(int index, int const * * syn_array, int * count)
     {
-        static std::vector<int> const empty_vect;
         if (nullptr == mm_synonyms)
-            return empty_vect;
+        {
+            *syn_array = nullptr;
+            *count = 0;
+            return;
+        }
 
-        return (*mm_synonyms)(index);
+        (*mm_synonyms)(index, syn_array, count);
     }
 
 
-    std::vector<int> const & antonyms(int index)
+    void antonyms(int index, int const * * ant_array, int * count)
     {
-        static std::vector<int> const empty_vect;
         if (nullptr == mm_antonyms)
-            return empty_vect;
+        {
+            *ant_array = nullptr;
+            *count = 0;
+            return;
+        }
 
-        return (*mm_antonyms)(index);
+        (*mm_antonyms)(index, ant_array, count);
     }
 
 
-    void complete(std::string const & prefix, int & start, int & length)
+    void complete(char const * prefix, int * start, int * length)
     {
         if (nullptr == mm_complete)
+        {
+            *start = -1;
+            *length = 0;
             return;
+        }
 
         (*mm_complete)(prefix, start, length);
     }

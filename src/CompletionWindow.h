@@ -46,6 +46,6 @@ class CompletionWindow : public AbstractListWindow
 
     // resolved AbstractListWindow dependencies
     int & display_start() override final;
-    std::vector<int> const & unfiltered_words(int) const override final;
+    void unfiltered_words(int, int const * *, int *) const override final;
     bool apply_filter() const override final { return false; }
 };

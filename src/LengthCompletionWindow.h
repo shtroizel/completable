@@ -58,11 +58,11 @@ private:
 
     // resolved AbstractListWindow dependencies
     int & display_start() override final;
-    std::vector<int> const & unfiltered_words(int) const override final;
+    void unfiltered_words(int, int const * *, int *) const override final;
     bool apply_filter() const override final { return false; }
 
     // AbstractListWindow options
-    std::string const & string_from_index(int) override final;
+    char const * string_from_index(int, int *) override final;
 
     CompletionWindow const & completion_win;
 };

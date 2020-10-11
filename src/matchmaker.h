@@ -41,23 +41,21 @@ namespace matchmaker
     void unset_library();
 
     // matchmaker interface
-    int size();
-    std::string const & at(int index);
-    int lookup(std::string const & word, bool * found);
+    int count();
+    char const * at(int index, int * length);
+    int lookup(char const * word, bool * found);
     int as_longest(int index);
     int from_longest(int length_index);
-    std::vector<std::size_t> const & lengths();
-    bool length_location(std::size_t length, int & length_index, int & count);
-    std::vector<std::string> const & all_parts_of_speech();
-    std::vector<int8_t> const & flagged_parts_of_speech(int index);
-    void parts_of_speech(int index, std::vector<std::string const *> & pos);
+    void lengths(int const * * len_array, int * count);
+    bool length_location(int length, int * length_index, int * count);
+    bool parts_of_speech(int index, char const * const * * pos, int8_t const * * flagged, int * count);
     bool is_name(int index);
     bool is_male_name(int index);
     bool is_female_name(int index);
     bool is_place(int index);
     bool is_compound(int index);
     bool is_acronym(int index);
-    std::vector<int> const & synonyms(int index);
-    std::vector<int> const & antonyms(int index);
-    void complete(std::string const & prefix, int & start, int & length);
+    void synonyms(int index, int const * * syn_array, int * count);
+    void antonyms(int index, int const * * ant_array, int * count);
+    void complete(char const * prefix, int * start, int * length);
 }
