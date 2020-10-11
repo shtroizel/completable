@@ -117,21 +117,28 @@ void AbstractPage::set_active_page(AbstractPage * pg)
             for (auto w : active_page()->content->mut_at(l).first)
                 w->disable(VisibilityAspect::PageVisibility::grab());
 
+    AbstractWindow const * pg_act_win = pg->get_active_window();
+
     // synce WindowVisibility aspect for Help layer, specifically:
     //
     // if help enabled for old page then enable help for new page if not already
     // and...
     // if help disabled for old page then disable help for new page if not already
-    if (nullptr != active_page())
+    if (nullptr != active_page() && nullptr != pg_act_win)
     {
-        if (active_page()->get_active_window()->get_layer() == Layer::Help::grab())
+        // if help enabled for old/current active_page()
+        if (nullptr != active_page()->get_active_window() &&
+                active_page()->get_active_window()->get_layer() == Layer::Help::grab())
         {
-            if (pg->get_active_window()->get_layer() != Layer::Help::grab())
+
+            // then enable if help disabled for new active_page()
+            if (pg_act_win->get_layer() != Layer::Help::grab())
                 pg->on_COMMA();
         }
-        else
+        else // otherwise if help disabled for old/current active_page()
         {
-            if (pg->get_active_window()->get_layer() == Layer::Help::grab())
+            // then disable if help enabled for new active_page()
+            if (pg_act_win->get_layer() == Layer::Help::grab())
                 pg->on_COMMA();
         }
     }
