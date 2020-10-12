@@ -374,6 +374,11 @@ void FilterWindow::pre_disable_hook()
     bool finished = false;
     auto start = std::chrono::high_resolution_clock::now();
 
+    // clear old window content
+    for (int i = 1; i < height - 1; ++i)
+        for (int j = 1; j < width - 1; ++j)
+            mvwaddch(w, i, j, ' ');
+
     std::thread animation_thread{
         [&]()
         {
@@ -383,14 +388,6 @@ void FilterWindow::pre_disable_hook()
                 auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
                 if (duration.count() > 107)
                 {
-                    for (int i = 1; i < height - 1; ++i)
-                    {
-                        for (int j = 1; j < width - 1; ++j)
-                        {
-                            mvwaddch(w, i, j, ' ');
-                        }
-                    }
-
                     int x_margin = width / 2 - busy_content[busy_index][1].length() / 2;
                     int y_margin = height / 2 - busy_content[busy_index].size() / 2;
                     --y_margin;
