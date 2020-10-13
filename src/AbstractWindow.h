@@ -89,6 +89,7 @@ public:
 
     void set_enabled(bool, VisibilityAspect::Type);
     bool is_enabled() const;
+    bool is_enabled(VisibilityAspect::Type) const;
     void enable(VisibilityAspect::Type);
     void disable(VisibilityAspect::Type);
 

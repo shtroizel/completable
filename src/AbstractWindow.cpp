@@ -267,6 +267,12 @@ bool AbstractWindow::is_enabled() const
 }
 
 
+bool AbstractWindow::is_enabled(VisibilityAspect::Type aspect) const
+{
+    return !disabled->is_set(aspect);
+}
+
+
 void AbstractWindow::enable(VisibilityAspect::Type aspect)
 {
     disabled->unset(aspect);
