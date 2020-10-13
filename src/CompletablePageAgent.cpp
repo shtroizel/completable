@@ -96,71 +96,64 @@ CompletablePageAgent::CompletablePageAgent(
     ant_win->set_left_neighbor(len_completion_win.get());
     ant_win->set_right_neighbor(completion_win.get());
 
+    // initial enabledness
+    len_completion_win->set_enabled(
+        EnablednessSetting::Length_spc_Completion::grab().as_enabledness() == Enabledness::Enabled::grab(),
+        VisibilityAspect::WindowVisibility::grab()
+    );
+    ant_win->set_enabled(
+        EnablednessSetting::Antonyms::grab().as_enabledness() == Enabledness::Enabled::grab(),
+        VisibilityAspect::WindowVisibility::grab()
+    );
+
     // response to window enabledness changes
-    auto on_win_enabledness = [&](AbstractWindow * win)
-    {
-        EnablednessSetting::Antonyms::grab().as_enabledness().match({
-            {
-                Enabledness::Enabled::grab(),
-                [&]()
-                {
-                    win->enable(VisibilityAspect::WindowVisibility::grab());
-                }
-            },
-            {
-                Enabledness::Disabled::grab(),
-                [&]()
-                {
-                    if (completable_page->get_active_window(Layer::Bottom::grab()) == win)
-                        win->activate_left();
-
-                    win->disable(VisibilityAspect::WindowVisibility::grab());
-                }
-            },
-        });
-
-        // resize all other windows
-        AbstractWindow * start = win->get_left_neighbor();
-        AbstractWindow * iter = start;
-        do
+    auto on_win_enabledness =
+        [&](EnablednessSetting::Type setting, AbstractWindow * win)
         {
-            iter->resize();
-            iter = iter->get_left_neighbor();
-        }
-        while (iter != start);
-    };
-
-
-    EnablednessSetting::Length_spc_Completion::grab().add_enabledness_observer(
-        [&]()
-        {
-            EnablednessSetting::Length_spc_Completion::grab().as_enabledness().match({
+            setting.as_enabledness().match({
                 {
                     Enabledness::Enabled::grab(),
                     [&]()
                     {
-                        len_completion_win->enable(VisibilityAspect::WindowVisibility::grab());
-                        syn_win->set_right_neighbor(len_completion_win.get());
-                        ant_win->set_left_neighbor(len_completion_win.get());
+                        win->enable(VisibilityAspect::WindowVisibility::grab());
                     }
                 },
                 {
                     Enabledness::Disabled::grab(),
                     [&]()
                     {
-                        if (completable_page->get_active_window(Layer::Bottom::grab()) == len_completion_win.get()  )
-                            completable_page->set_active_window(completion_win.get());
+                        if (completable_page->get_active_window(Layer::Bottom::grab()) == win)
+                            win->activate_left();
 
-                        len_completion_win->disable(VisibilityAspect::WindowVisibility::grab());
-                        syn_win->set_right_neighbor(ant_win.get());
-                        ant_win->set_left_neighbor(syn_win.get());
+                        win->disable(VisibilityAspect::WindowVisibility::grab());
                     }
                 },
             });
 
-            completion_win->resize();
-        }
+            // resize all other windows
+            AbstractWindow * start = win->get_left_neighbor();
+            AbstractWindow * iter = start;
+            do
+            {
+                iter->resize();
+                iter = iter->get_left_neighbor();
+            }
+            while (iter != start);
+        };
+
+    EnablednessSetting::Length_spc_Completion::grab().add_enabledness_observer(
+        std::bind(
+            on_win_enabledness,
+            EnablednessSetting::Length_spc_Completion::grab(),
+            len_completion_win.get()
+        )
     );
 
-    EnablednessSetting::Antonyms::grab().add_enabledness_observer(std::bind(on_win_enabledness, ant_win.get()));
+    EnablednessSetting::Antonyms::grab().add_enabledness_observer(
+        std::bind(
+            on_win_enabledness,
+            EnablednessSetting::Antonyms::grab(),
+            ant_win.get()
+        )
+    );
 }
