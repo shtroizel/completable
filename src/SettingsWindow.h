@@ -41,11 +41,15 @@ class SettingsWindow : public AbstractWindow
     using AbstractWindow::AbstractWindow;
 
     // resolved dependencies
-    std::string title() override;
-    void resize_hook() override;
-    void draw_hook() override;
-    Layer::Type layer() const override;
+    std::string title() final;
+    void resize_hook() final;
+    void draw_hook() final;
+    Layer::Type layer() const final;
 
     // options
-    void on_RETURN() override final;
+    void on_RETURN() final;
+    void on_KEY_UP() final;
+    void on_KEY_DOWN() final;
+
+    int selection{0};
 };

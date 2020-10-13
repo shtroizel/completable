@@ -36,6 +36,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "CompletionWindow.h"
 #include "CompletionStack.h"
+#include "EnablednessSetting.h"
 #include "InputWindow.h"
 #include "LengthCompletionWindow.h"
 #include "matchmaker.h"
@@ -75,7 +76,11 @@ void SynonymWindow::resize_hook()
     x = root_x / 2;
 
     int combined_height = root_y - 5 - y;
-    height = combined_height / 1.618;
+    if (EnablednessSetting::Antonyms::grab().as_enabledness() == Enabledness::Enabled::grab())
+        height = combined_height / 1.618;
+    else
+        height = combined_height;
+
     width = x + root_x % 2;
 }
 

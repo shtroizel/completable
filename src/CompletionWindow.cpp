@@ -36,7 +36,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "CompletionStack.h"
 #include "InputWindow.h"
-#include "Settings.h"
+#include "EnablednessSetting.h"
 
 
 
@@ -55,7 +55,7 @@ void CompletionWindow::resize_hook()
     x = 0;
 
     int combined_height = root_y - 5 - y;
-    if (Settings::LengthCompletion::grab().as_enabledness() == Enabledness::Enabled::grab())
+    if (EnablednessSetting::Length_spc_Completion::grab().as_enabledness() == Enabledness::Enabled::grab())
         height = combined_height / 1.618;
     else
         height = combined_height;

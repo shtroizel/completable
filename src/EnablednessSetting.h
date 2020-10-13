@@ -42,10 +42,12 @@ PROPERTYx1_MATCHABLE(
     Enabledness::Type, enabledness,
 
     // matchable name
-    Settings,
+    EnablednessSetting,
 
     // variants
-    LengthCompletion
+    Length_spc_Completion,
+    Antonyms
 );
 
-SET_PROPERTY(Settings, LengthCompletion, enabledness, Enabledness::Enabled::grab());
+SET_PROPERTY(EnablednessSetting, Length_spc_Completion, enabledness, Enabledness::Enabled::grab());
+SET_PROPERTY(EnablednessSetting, Antonyms, enabledness, Enabledness::Enabled::grab());

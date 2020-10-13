@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "InputWindow.h"
 #include "Layer.h"
-#include "Settings.h"
+#include "EnablednessSetting.h"
 #include "VisibilityAspect.h"
 
 
@@ -65,13 +65,43 @@ void SettingsWindow::resize_hook()
 
 void SettingsWindow::draw_hook()
 {
-    mvwprintw(w, 2, 1, "Length Completion: ");
+    static int const right_align =
+        [&]()
+        {
+            int max_len{0};
+            for (auto s : EnablednessSetting::variants())
+                if (max_len < (int) s.as_string().length())
+                    max_len = s.as_string().length();
+            return max_len + 7;
+        }();
 
-    wattron(w, A_REVERSE);
-    mvwprintw(w, 2, 20, Settings::LengthCompletion::grab().as_enabledness().as_string().c_str());
-    wattroff(w, A_REVERSE);
 
-    wprintw(w, "  ");
+    for (auto setting : EnablednessSetting::variants())
+    {
+        // print setting name
+        mvwprintw(
+            w,
+            setting.as_index() + 2,
+            right_align - setting.as_string().length(),
+            setting.as_string().c_str()
+        );
+
+        mvwprintw(w, setting.as_index() + 2, right_align, ":");
+
+        // print enabledness
+        if (setting.as_index() == selection)
+            wattron(w, A_REVERSE);
+        mvwprintw(w, setting.as_index() + 2, right_align + 2, setting.as_enabledness().as_string().c_str());
+        wattroff(w, A_REVERSE);
+
+        // clear space after "Enabled" since "Disabled" is a char longer
+        mvwaddch(
+            w,
+            setting.as_index() + 2,
+            right_align + 2 + setting.as_enabledness().as_string().size(),
+            ' '
+        );
+    }
 }
 
 
@@ -83,10 +113,32 @@ Layer::Type SettingsWindow::layer() const
 
 void SettingsWindow::on_RETURN()
 {
-    int index = Settings::LengthCompletion::grab().as_enabledness().as_index() + 1;
+    auto setting = EnablednessSetting::from_index(selection);
+
+    int index = setting.as_enabledness().as_index() + 1;
     if (index >= (int) Enabledness::variants().size())
         index = 0;
 
-    Settings::LengthCompletion::grab().set_enabledness(Enabledness::from_index(index));
+    setting.set_enabledness(Enabledness::from_index(index));
     mark_dirty();
+}
+
+
+void SettingsWindow::on_KEY_UP()
+{
+    if (selection > 0)
+    {
+        --selection;
+        mark_dirty();
+    }
+}
+
+
+void SettingsWindow::on_KEY_DOWN()
+{
+    if (selection < (int) EnablednessSetting::variants().size() - 1)
+    {
+        ++selection;
+        mark_dirty();
+    }
 }

@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Layer.h"
 #include "LengthCompletionWindow.h"
 #include "PageDescriptionWindow.h"
-#include "Settings.h"
+#include "EnablednessSetting.h"
 #include "SynonymWindow.h"
 #include "VisibilityAspect.h"
 #include "word_filter.h"
@@ -96,11 +96,45 @@ CompletablePageAgent::CompletablePageAgent(
     ant_win->set_left_neighbor(len_completion_win.get());
     ant_win->set_right_neighbor(completion_win.get());
 
-    // respond to changes in LengthCompletion setting
-    Settings::LengthCompletion::grab().add_enabledness_observer(
+    // response to window enabledness changes
+    auto on_win_enabledness = [&](AbstractWindow * win)
+    {
+        EnablednessSetting::Antonyms::grab().as_enabledness().match({
+            {
+                Enabledness::Enabled::grab(),
+                [&]()
+                {
+                    win->enable(VisibilityAspect::WindowVisibility::grab());
+                }
+            },
+            {
+                Enabledness::Disabled::grab(),
+                [&]()
+                {
+                    if (completable_page->get_active_window(Layer::Bottom::grab()) == win)
+                        win->activate_left();
+
+                    win->disable(VisibilityAspect::WindowVisibility::grab());
+                }
+            },
+        });
+
+        // resize all other windows
+        AbstractWindow * start = win->get_left_neighbor();
+        AbstractWindow * iter = start;
+        do
+        {
+            iter->resize();
+            iter = iter->get_left_neighbor();
+        }
+        while (iter != start);
+    };
+
+
+    EnablednessSetting::Length_spc_Completion::grab().add_enabledness_observer(
         [&]()
         {
-            Settings::LengthCompletion::grab().as_enabledness().match({
+            EnablednessSetting::Length_spc_Completion::grab().as_enabledness().match({
                 {
                     Enabledness::Enabled::grab(),
                     [&]()
@@ -127,4 +161,6 @@ CompletablePageAgent::CompletablePageAgent(
             completion_win->resize();
         }
     );
+
+    EnablednessSetting::Antonyms::grab().add_enabledness_observer(std::bind(on_win_enabledness, ant_win.get()));
 }

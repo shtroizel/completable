@@ -54,7 +54,7 @@ static std::vector<std::string> const content =
         content.push_back("         switch tab   shift + arrow left/right, ");
         content.push_back("                      or arrow left/right when help shown");
         content.push_back("     change setting   Return");
-//         content.push_back("          scrolling   arrow up/down, page up/down, home/end");
+        content.push_back("   change selection   arrow up/down");
         content.push_back("   enter shell mode   any of '$', '~', '`'");
         content.push_back("               quit   Esc, ctrl + c");
         content.push_back("");
