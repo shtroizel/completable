@@ -72,6 +72,8 @@ public:
 
     void set_left_neighbor(AbstractWindow * neighbor);
     void set_right_neighbor(AbstractWindow * neighbor);
+    AbstractWindow * get_left_neighbor() { return left_neighbor; };
+    AbstractWindow * get_right_neighbor() { return right_neighbor; };
 
     bool is_active();
 
