@@ -35,6 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ncurses.h>
 
 #include "AbstractPage.h"
+#include "EnablednessSetting.h"
 #include "Layer.h"
 
 
@@ -68,7 +69,7 @@ void IndicatorWindow::draw_hook()
 
         if (pg == active_page)
         {
-            if (global_borders_enabled())
+            if (EnablednessSetting::Borders::grab().as_enabledness() == Enabledness::Enabled::grab())
             {
                 mvwaddch(w, 0, abbreviation_x - 2, ACS_ULCORNER);
                 mvwaddch(w, 0, abbreviation_x - 1, ACS_HLINE);

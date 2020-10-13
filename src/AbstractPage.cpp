@@ -35,6 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ncurses.h>
 
 #include "AbstractWindow.h"
+#include "EnablednessSetting.h"
 #include "Layer.h"
 #include "VisibilityAspect.h"
 #include "key_codes.h"
@@ -53,6 +54,8 @@ AbstractPage::AbstractPage()
 {
     for (auto l : Layer::variants())
         content->mut_at(l).second = nullptr;
+
+    EnablednessSetting::Borders::grab().add_enabledness_observer([&](){ draw(true); });
 }
 
 

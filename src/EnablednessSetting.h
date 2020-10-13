@@ -45,9 +45,11 @@ PROPERTYx1_MATCHABLE(
     EnablednessSetting,
 
     // variants
+    Borders,
     Length_spc_Completion,
     Antonyms
 );
 
-SET_PROPERTY(EnablednessSetting, Length_spc_Completion, enabledness, Enabledness::Enabled::grab());
-SET_PROPERTY(EnablednessSetting, Antonyms, enabledness, Enabledness::Enabled::grab());
+SET_PROPERTY(EnablednessSetting, Borders, enabledness, Enabledness::Enabled::grab());
+SET_PROPERTY(EnablednessSetting, Length_spc_Completion, enabledness, Enabledness::Disabled::grab());
+SET_PROPERTY(EnablednessSetting, Antonyms, enabledness, Enabledness::Disabled::grab());

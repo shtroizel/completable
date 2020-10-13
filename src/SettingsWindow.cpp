@@ -54,7 +54,7 @@ std::string SettingsWindow::title()
 
 void SettingsWindow::resize_hook()
 {
-    height = 5;
+    height = EnablednessSetting::variants().size() + 4;
     width = 53;
 
     // center window

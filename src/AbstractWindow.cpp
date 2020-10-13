@@ -36,8 +36,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <ncurses.h>
 
-#include "CompletionStack.h"
 #include "AbstractPage.h"
+#include "CompletionStack.h"
+#include "EnablednessSetting.h"
 #include "Layer.h"
 #include "VisibilityAspect.h"
 #include "key_codes.h"
@@ -115,7 +116,8 @@ void AbstractWindow::draw(bool clear_first)
         wclear(w);
 
     // border
-    if (global_borders_enabled() && borders_enabled())
+    if (EnablednessSetting::Borders::grab().as_enabledness() == Enabledness::Enabled::grab() &&
+            borders_enabled())
         box(w, 0, 0);
 
     // title

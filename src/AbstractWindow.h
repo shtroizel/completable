@@ -85,8 +85,6 @@ public:
     void mark_dirty();
     void add_dirty_dependency(AbstractWindow * win);
 
-    static bool & global_borders_enabled(){ static bool sb{true}; return sb; }
-
     void set_enabled(bool, VisibilityAspect::Type);
     bool is_enabled() const;
     bool is_enabled(VisibilityAspect::Type) const;

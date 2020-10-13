@@ -36,6 +36,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ncurses.h>
 
 #include "CompletablePageAgent.h"
+#include "EnablednessSetting.h"
 #include "IndicatorWindow.h"
 #include "MatchmakerPage.h"
 #include "PageDescriptionWindow.h"
@@ -51,8 +52,8 @@ int main(int argc, char ** argv)
     if (argc == 2)
     {
         std::string const a1{argv[1]};
-        if (a1 == "no_borders")
-            AbstractWindow::global_borders_enabled() = false;
+        if (a1 == "borders_disabled")
+            EnablednessSetting::Borders::grab().set_enabledness(Enabledness::Disabled::grab());
     }
 
 #ifndef MM_DL
