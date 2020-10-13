@@ -93,6 +93,9 @@ public:
     void enable(VisibilityAspect::Type);
     void disable(VisibilityAspect::Type);
 
+    void activate_left();
+    void activate_right();
+
 private:
     // dependencies
     virtual std::string title() = 0;
@@ -116,8 +119,6 @@ private:
     virtual void on_BACKSPACE() {}
     virtual void on_printable_ascii(int) {}
 
-    void on_KEY_LEFT();
-    void on_KEY_RIGHT();
 
 protected:
     WINDOW * w{nullptr};

@@ -217,17 +217,17 @@ void AbstractWindow::on_KEY(int key)
 
     switch (key)
     {
-        case KEY_LEFT           : on_KEY_LEFT();  return;
-        case KEY_RIGHT          : on_KEY_RIGHT(); return;
-        case KEY_UP             : on_KEY_UP();    return;
-        case KEY_DOWN           : on_KEY_DOWN();  return;
-        case PAGE_UP            : on_PAGE_UP();   return;
-        case PAGE_DOWN          : on_PAGE_DOWN(); return;
-        case HOME               : on_HOME();      return;
-        case END                : on_END();       return;
-        case RETURN             : on_RETURN();    return;
-        case DELETE             : on_DELETE();    return;
-        case TAB                : on_TAB();       return;
+        case KEY_LEFT           : activate_left();  return;
+        case KEY_RIGHT          : activate_right(); return;
+        case KEY_UP             : on_KEY_UP();      return;
+        case KEY_DOWN           : on_KEY_DOWN();    return;
+        case PAGE_UP            : on_PAGE_UP();     return;
+        case PAGE_DOWN          : on_PAGE_DOWN();   return;
+        case HOME               : on_HOME();        return;
+        case END                : on_END();         return;
+        case RETURN             : on_RETURN();      return;
+        case DELETE             : on_DELETE();      return;
+        case TAB                : on_TAB();         return;
         case KEY_BACKSPACE      :
         case BACKSPACE_127      :
         case BACKSPACE_BKSLSH_B : on_BACKSPACE(); return;
@@ -300,7 +300,7 @@ void AbstractWindow::disable(VisibilityAspect::Type aspect)
 }
 
 
-void AbstractWindow::on_KEY_LEFT()
+void AbstractWindow::activate_left()
 {
     if (nullptr == left_neighbor)
         return;
@@ -309,11 +309,16 @@ void AbstractWindow::on_KEY_LEFT()
     if (nullptr == active_page)
         return;
 
-    active_page->set_active_window(left_neighbor);
+    AbstractWindow * l = left_neighbor;
+    while (!l->is_enabled(VisibilityAspect::WindowVisibility::grab()) && l != this)
+        l = l->get_left_neighbor();
+
+    if (l != this && l->is_enabled(VisibilityAspect::WindowVisibility::grab()))
+        active_page->set_active_window(l);
 }
 
 
-void AbstractWindow::on_KEY_RIGHT()
+void AbstractWindow::activate_right()
 {
     if (nullptr == left_neighbor)
         return;
@@ -322,5 +327,10 @@ void AbstractWindow::on_KEY_RIGHT()
     if (nullptr == active_page)
         return;
 
-    active_page->set_active_window(right_neighbor);
+    AbstractWindow * r = right_neighbor;
+    while (!r->is_enabled(VisibilityAspect::WindowVisibility::grab()) && r != this)
+        r = r->get_right_neighbor();
+
+    if (r != this && r->is_enabled(VisibilityAspect::WindowVisibility::grab()))
+        active_page->set_active_window(r);
 }
