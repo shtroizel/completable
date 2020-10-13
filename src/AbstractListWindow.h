@@ -49,21 +49,21 @@ protected:
 
 private:
     // resolved dependencies
-    void draw_hook() override final;
-    Layer::Type layer() const override final;
+    void draw_hook() final;
+    Layer::Type layer() const final;
 
     // options
-    void on_KEY_UP() override final;
-    void on_KEY_DOWN() override final;
-    void on_PAGE_UP() override final;
-    void on_PAGE_DOWN() override final;
-    void on_HOME() override final;
-    void on_END() override final;
-    void on_RETURN() override final;
-    void on_DELETE() override final;
-    void on_TAB() override final;
-    void on_BACKSPACE() override final;
-    void on_printable_ascii(int) override final;
+    void on_KEY_UP() final;
+    void on_KEY_DOWN() final;
+    void on_PAGE_UP() final;
+    void on_PAGE_DOWN() final;
+    void on_HOME() final;
+    void on_END() final;
+    void on_RETURN() final;
+    void on_DELETE() final;
+    void on_TAB() final;
+    void on_BACKSPACE() final;
+    void on_printable_ascii(int) final;
 
     // new dependencies
     virtual int & display_start() = 0;
