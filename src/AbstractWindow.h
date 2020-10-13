@@ -86,7 +86,6 @@ public:
     static bool & global_borders_enabled(){ static bool sb{true}; return sb; }
 
     void set_enabled(bool, VisibilityAspect::Type);
-    void toggle_enabled(VisibilityAspect::Type);
     bool is_enabled() const;
     void enable(VisibilityAspect::Type);
     void disable(VisibilityAspect::Type);

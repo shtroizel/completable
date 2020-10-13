@@ -261,12 +261,6 @@ void AbstractWindow::set_enabled(bool state, VisibilityAspect::Type aspect)
 }
 
 
-void AbstractWindow::toggle_enabled(VisibilityAspect::Type aspect)
-{
-    set_enabled(disabled->is_set(aspect), aspect);
-}
-
-
 bool AbstractWindow::is_enabled() const
 {
     return 0 == disabled->currently_set().size();
