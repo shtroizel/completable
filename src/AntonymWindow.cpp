@@ -75,7 +75,7 @@ std::string AntonymWindow::title()
 void AntonymWindow::resize_hook()
 {
     y = syn_win.get_y() + syn_win.get_height();
-    x = syn_win.get_width();
+    x = syn_win.get_x();
     height = root_y - y - 5;
     width = syn_win.get_width();
 }
