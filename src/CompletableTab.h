@@ -1,3 +1,5 @@
+#pragma once
+
 /*
 Copyright (c) 2020, Eric Hyer
 All rights reserved.
@@ -29,50 +31,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
+#include <string>
+#include <stack>
+#include <vector>
 
-#include "PageDescriptionWindow.h"
-
-#include <ncurses.h>
-
-#include "AbstractPage.h"
-#include "Layer.h"
+#include "AbstractTab.h"
 
 
 
-std::string PageDescriptionWindow::title()
+class CompletableTab : public AbstractTab
 {
-    static std::string const t;
-    return t;
-}
+    using AbstractTab::AbstractTab;
 
-
-void PageDescriptionWindow::resize_hook()
-{
-    height = 3;
-    width = 17;
-    y = 0;
-    x = 1;
-}
-
-
-void PageDescriptionWindow::draw_hook()
-{
-    auto page = AbstractPage::get_active_page();
-    if (nullptr == page)
-        return;
-
-    for (int i = 0; i < (int) page->get_description().size(); ++i)
-        mvwaddch(w, 1, i, page->get_description()[i]);
-}
-
-
-void PageDescriptionWindow::post_resize_hook()
-{
-    keypad(w, true);
-}
-
-
-Layer::Type PageDescriptionWindow::layer() const
-{
-    return Layer::Bottom::grab();
-}
+    // resolved dependencies
+    std::array<char, 17> const & description() const override;
+    char abbreviation() const override { return 'C'; }
+    int indicator_position() const override { return 0; }
+};

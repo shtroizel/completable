@@ -34,7 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <ncurses.h>
 
-#include "AbstractPage.h"
+#include "AbstractTab.h"
 #include "EnablednessSetting.h"
 #include "Layer.h"
 
@@ -58,16 +58,16 @@ void IndicatorWindow::resize_hook()
 
 void IndicatorWindow::draw_hook()
 {
-    auto active_page = AbstractPage::get_active_page();
-    if (nullptr == active_page)
+    auto active_tab = AbstractTab::get_active_tab();
+    if (nullptr == active_tab)
         return;
 
     int abbreviation_x = 0;
-    for (auto pg : pages)
+    for (auto tab : tabs)
     {
-        abbreviation_x = width - 3 - (5 * pg->get_indicator_position());
+        abbreviation_x = width - 3 - (5 * tab->get_indicator_position());
 
-        if (pg == active_page)
+        if (tab == active_tab)
         {
             if (EnablednessSetting::Borders::grab().as_enabledness() == Enabledness::Enabled::grab())
             {
@@ -105,7 +105,7 @@ void IndicatorWindow::draw_hook()
             mvwaddch(w, 2, abbreviation_x + 2, ' ');
         }
 
-        mvwaddch(w, 1, abbreviation_x, pg->get_abbreviation());
+        mvwaddch(w, 1, abbreviation_x, tab->get_abbreviation());
         wattroff(w, A_REVERSE);
     }
 }

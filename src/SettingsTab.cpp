@@ -1,5 +1,3 @@
-#pragma once
-
 /*
 Copyright (c) 2020, Eric Hyer
 All rights reserved.
@@ -32,34 +30,33 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include <memory>
-#include <stack>
-
-#include "SettingsPage.h"
+#include "SettingsTab.h"
 
 
 
-class IndicatorWindow;
-class PageDescriptionWindow;
-class AccessHelpWindow;
-class SettingsHelpWindow;
-class SettingsWindow;
-
-class SettingsPageAgent
+std::array<char, 17> const & SettingsTab::description() const
 {
-public:
-    SettingsPageAgent(SettingsPageAgent const &) = delete;
-    SettingsPageAgent & operator=(SettingsPageAgent const &) = delete;
-
-    SettingsPageAgent(std::shared_ptr<PageDescriptionWindow>, std::shared_ptr<IndicatorWindow>);
-    SettingsPage * operator()() { return settings_page.get(); }
-
-private:
-    std::shared_ptr<PageDescriptionWindow> page_desc_win;
-    std::shared_ptr<IndicatorWindow> indicator_win;
-
-    std::shared_ptr<AccessHelpWindow> access_help_win;
-    std::shared_ptr<SettingsHelpWindow> help_win;
-    std::shared_ptr<SettingsWindow> settings_win;
-    std::shared_ptr<SettingsPage> settings_page;
-};
+    static std::array<char, 17> desc = []()
+                                       {
+                                           std::array<char, 17> d;
+                                           d[0]  = 's';
+                                           d[1]  = 'e';
+                                           d[2]  = 't';
+                                           d[3]  = 't';
+                                           d[4]  = 'i';
+                                           d[5]  = 'n';
+                                           d[6]  = 'g';
+                                           d[7]  = 's';
+                                           d[8]  = ' ';
+                                           d[9]  = ' ';
+                                           d[10] = ' ';
+                                           d[11] = ' ';
+                                           d[12] = ' ';
+                                           d[13] = ' ';
+                                           d[14] = ' ';
+                                           d[15] = ' ';
+                                           d[16] = ' ';
+                                           return d;
+                                       }();
+    return desc;
+}

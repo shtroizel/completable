@@ -30,7 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "AbstractPage.h"
+#include "AbstractTab.h"
 
 #include <ncurses.h>
 
@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-AbstractPage::AbstractPage()
+AbstractTab::AbstractTab()
     : content{
         std::make_shared<
             matchable::MatchBox<
@@ -59,22 +59,22 @@ AbstractPage::AbstractPage()
 }
 
 
-AbstractPage::~AbstractPage()
+AbstractTab::~AbstractTab()
 {
     content.reset();
-    active_page() = nullptr;
+    active_tab() = nullptr;
     left_neighbor = nullptr;
     right_neighbor = nullptr;
 }
 
 
-void AbstractPage::add_window(AbstractWindow * win)
+void AbstractTab::add_window(AbstractWindow * win)
 {
     if (nullptr == win)
         return;
 
     content->mut_at(win->get_layer()).first.push_back(win);
-    win->add_page(this);
+    win->add_tab(this);
 
     // guarantee active window by setting first window active
     if (content->at(win->get_layer()).first.size() == 1)
@@ -82,7 +82,7 @@ void AbstractPage::add_window(AbstractWindow * win)
 }
 
 
-void AbstractPage::resize()
+void AbstractTab::resize()
 {
     if (is_active())
         for (auto l : Layer::variants())
@@ -91,7 +91,7 @@ void AbstractPage::resize()
 }
 
 
-void AbstractPage::draw(bool clear_first)
+void AbstractTab::draw(bool clear_first)
 {
     if (is_active())
     {
@@ -110,52 +110,52 @@ void AbstractPage::draw(bool clear_first)
 
 
 
-void AbstractPage::set_active_page(AbstractPage * pg)
+void AbstractTab::set_active_tab(AbstractTab * pg)
 {
     if (nullptr == pg)
         return;
 
-    if (nullptr != active_page())
+    if (nullptr != active_tab())
         for (auto l : Layer::variants())
-            for (auto w : active_page()->content->mut_at(l).first)
-                w->disable(VisibilityAspect::PageVisibility::grab());
+            for (auto w : active_tab()->content->mut_at(l).first)
+                w->disable(VisibilityAspect::TabVisibility::grab());
 
     AbstractWindow const * pg_act_win = pg->get_active_window();
 
     // synce WindowVisibility aspect for Help layer, specifically:
     //
-    // if help enabled for old page then enable help for new page if not already
+    // if help enabled for old tab then enable help for new tab if not already
     // and...
-    // if help disabled for old page then disable help for new page if not already
-    if (nullptr != active_page() && nullptr != pg_act_win)
+    // if help disabled for old tab then disable help for new tab if not already
+    if (nullptr != active_tab() && nullptr != pg_act_win)
     {
-        // if help enabled for old/current active_page()
-        if (nullptr != active_page()->get_active_window() &&
-                active_page()->get_active_window()->get_layer() == Layer::Help::grab())
+        // if help enabled for old/current active_tab()
+        if (nullptr != active_tab()->get_active_window() &&
+                active_tab()->get_active_window()->get_layer() == Layer::Help::grab())
         {
 
-            // then enable if help disabled for new active_page()
+            // then enable if help disabled for new active_tab()
             if (pg_act_win->get_layer() != Layer::Help::grab())
                 pg->on_COMMA();
         }
-        else // otherwise if help disabled for old/current active_page()
+        else // otherwise if help disabled for old/current active_tab()
         {
-            // then disable if help enabled for new active_page()
+            // then disable if help enabled for new active_tab()
             if (pg_act_win->get_layer() == Layer::Help::grab())
                 pg->on_COMMA();
         }
     }
 
-    active_page() = pg;
+    active_tab() = pg;
 
-    if (nullptr != active_page())
+    if (nullptr != active_tab())
         for (auto l : Layer::variants())
-            for (auto w : active_page()->content->mut_at(l).first)
-                w->enable(VisibilityAspect::PageVisibility::grab());
+            for (auto w : active_tab()->content->mut_at(l).first)
+                w->enable(VisibilityAspect::TabVisibility::grab());
 }
 
 
-void AbstractPage::set_active_window(AbstractWindow * win)
+void AbstractTab::set_active_window(AbstractWindow * win)
 {
     if (nullptr == win)
         return;
@@ -183,7 +183,7 @@ void AbstractPage::set_active_window(AbstractWindow * win)
 }
 
 
-AbstractWindow * AbstractPage::get_active_window()
+AbstractWindow * AbstractTab::get_active_window()
 {
     if (layer_Help_enabled)
         return content->mut_at(Layer::Help::grab()).second;
@@ -195,13 +195,13 @@ AbstractWindow * AbstractPage::get_active_window()
 }
 
 
-AbstractWindow * AbstractPage::get_active_window(Layer::Type layer)
+AbstractWindow * AbstractTab::get_active_window(Layer::Type layer)
 {
     return content->mut_at(layer).second;
 }
 
 
-void AbstractPage::on_KEY(int key)
+void AbstractTab::on_KEY(int key)
 {
     if (!is_active())
         return;
@@ -242,7 +242,7 @@ void AbstractPage::on_KEY(int key)
 }
 
 
-void AbstractPage::on_ANY_F()
+void AbstractTab::on_ANY_F()
 {
     if (layer_Help_enabled)
         return;
@@ -251,13 +251,13 @@ void AbstractPage::on_ANY_F()
 }
 
 
-void AbstractPage::on_COMMA()
+void AbstractTab::on_COMMA()
 {
     toggle_layer(Layer::Help::grab(), layer_Help_enabled);
 }
 
 
-void AbstractPage::toggle_layer(Layer::Type layer, bool & layer_enabled)
+void AbstractTab::toggle_layer(Layer::Type layer, bool & layer_enabled)
 {
     if (layer_enabled)
     {
@@ -282,15 +282,15 @@ void AbstractPage::toggle_layer(Layer::Type layer, bool & layer_enabled)
 }
 
 
-void AbstractPage::on_SHIFT_LEFT()
+void AbstractTab::on_SHIFT_LEFT()
 {
     if (nullptr != left_neighbor)
-        AbstractPage::set_active_page(left_neighbor);
+        AbstractTab::set_active_tab(left_neighbor);
 }
 
 
-void AbstractPage::on_SHIFT_RIGHT()
+void AbstractTab::on_SHIFT_RIGHT()
 {
     if (nullptr != right_neighbor)
-        AbstractPage::set_active_page(right_neighbor);
+        AbstractTab::set_active_tab(right_neighbor);
 }

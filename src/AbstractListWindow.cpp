@@ -34,7 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <ncurses.h>
 
-#include "AbstractPage.h"
+#include "AbstractTab.h"
 #include "CompletionStack.h"
 #include "InputWindow.h"
 #include "Layer.h"
@@ -247,7 +247,7 @@ void AbstractListWindow::on_DELETE()
     if (ws.size() == 0)
         return;
 
-    if (!belongs_to_active_page())
+    if (!belongs_to_active_tab())
         return;
 
     auto & [s, w, ds] = ws.top();
@@ -260,8 +260,8 @@ void AbstractListWindow::on_DELETE()
 
     ws.pop();
 
-    auto active_page = AbstractPage::get_active_page();
-    active_page->set_active_window(w);
+    auto active_tab = AbstractTab::get_active_tab();
+    active_tab->set_active_window(w);
     input_win.mark_dirty();
     display_start() = ds;
 }

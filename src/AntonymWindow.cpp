@@ -34,7 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <ncurses.h>
 
-#include "AbstractPage.h"
+#include "AbstractTab.h"
 #include "CompletionStack.h"
 #include "InputWindow.h"
 #include "CompletionWindow.h"
@@ -89,7 +89,7 @@ int & AntonymWindow::display_start()
 
 void AntonymWindow::on_post_RETURN()
 {
-    AbstractPage::get_active_page()->set_active_window(&syn_win);
+    AbstractTab::get_active_tab()->set_active_window(&syn_win);
 }
 
 

@@ -34,28 +34,28 @@ find_package(Threads REQUIRED)
 set(
     completable_srcs
     src/AbstractCompletionDataWindow.cpp
-    src/AbstractPage.cpp
     src/AbstractListWindow.cpp
+    src/AbstractTab.cpp
     src/AbstractWindow.cpp
     src/AccessHelpWindow.cpp
     src/AntonymWindow.cpp
     src/AttributeWindow.cpp
     src/CompletableHelpWindow.cpp
-    src/CompletablePage.cpp
-    src/CompletablePageAgent.cpp
+    src/CompletableTab.cpp
+    src/CompletableTabAgent.cpp
     src/CompletionStack.cpp
     src/CompletionWindow.cpp
     src/FilterWindow.cpp
     src/IndicatorWindow.cpp
     src/InputWindow.cpp
     src/LengthCompletionWindow.cpp
-    src/MatchmakerPage.cpp
-    src/PageDescriptionWindow.cpp
+    src/MatchmakerTab.cpp
     src/SettingsHelpWindow.cpp
-    src/SettingsPage.cpp
-    src/SettingsPageAgent.cpp
+    src/SettingsTab.cpp
+    src/SettingsTabAgent.cpp
     src/SettingsWindow.cpp
     src/SynonymWindow.cpp
+    src/TabDescriptionWindow.cpp
     src/completable.cpp
     src/completable_shell.cpp
     src/matchmaker.cpp

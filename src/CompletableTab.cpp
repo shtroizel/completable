@@ -30,26 +30,28 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "SettingsPage.h"
+#include "CompletableTab.h"
+
+#include "AbstractWindow.h"
 
 
 
-std::array<char, 17> const & SettingsPage::description() const
+std::array<char, 17> const & CompletableTab::description() const
 {
     static std::array<char, 17> desc = []()
                                        {
                                            std::array<char, 17> d;
-                                           d[0]  = 's';
-                                           d[1]  = 'e';
-                                           d[2]  = 't';
-                                           d[3]  = 't';
-                                           d[4]  = 'i';
-                                           d[5]  = 'n';
-                                           d[6]  = 'g';
-                                           d[7]  = 's';
-                                           d[8]  = ' ';
-                                           d[9]  = ' ';
-                                           d[10] = ' ';
+                                           d[0]  = 'c';
+                                           d[1]  = 'o';
+                                           d[2]  = 'm';
+                                           d[3]  = 'p';
+                                           d[4]  = 'l';
+                                           d[5]  = 'e';
+                                           d[6]  = 't';
+                                           d[7]  = 'a';
+                                           d[8]  = 'b';
+                                           d[9]  = 'l';
+                                           d[10] = 'e';
                                            d[11] = ' ';
                                            d[12] = ' ';
                                            d[13] = ' ';

@@ -35,12 +35,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <ncurses.h>
 
-#include "CompletablePageAgent.h"
+#include "CompletableTabAgent.h"
 #include "EnablednessSetting.h"
 #include "IndicatorWindow.h"
-#include "MatchmakerPage.h"
-#include "PageDescriptionWindow.h"
-#include "SettingsPageAgent.h"
+#include "MatchmakerTab.h"
+#include "TabDescriptionWindow.h"
+#include "SettingsTabAgent.h"
 #include "key_codes.h"
 #include "matchmaker.h"
 #include "completable_shell.h"
@@ -73,12 +73,12 @@ int main(int argc, char ** argv)
     int prev_root_y{root_y};
     int prev_root_x{root_x};
 
-    auto page_desc_win = std::make_shared<PageDescriptionWindow>();
+    auto tab_desc_win = std::make_shared<TabDescriptionWindow>();
     auto indicator_win = std::make_shared<IndicatorWindow>();
 
-    CompletablePageAgent cpa{page_desc_win, indicator_win};
+    CompletableTabAgent cpa{tab_desc_win, indicator_win};
 
-    SettingsPageAgent spa{page_desc_win, indicator_win};
+    SettingsTabAgent spa{tab_desc_win, indicator_win};
 
     cpa()->set_left_neighbor(spa());
     spa()->set_right_neighbor(cpa());
@@ -92,17 +92,17 @@ int main(int argc, char ** argv)
 //     AbstractPage::set_active_page(&page_c);
 // #endif
 
-    AbstractPage::set_active_page(cpa());
+    AbstractTab::set_active_tab(cpa());
 
 
     bool resized_draw{true};
     int ch{0};
-    AbstractPage * active_page{nullptr};
+    AbstractTab * active_tab{nullptr};
 
     while (true)
     {
-        active_page = AbstractPage::get_active_page();
-        if (nullptr == active_page)
+        active_tab = AbstractTab::get_active_tab();
+        if (nullptr == active_tab)
             break;
 
         // *** terminal resized? *************
@@ -111,17 +111,17 @@ int main(int argc, char ** argv)
         getmaxyx(stdscr, root_y, root_x);
         if (root_y != prev_root_y || root_x != prev_root_x)
         {
-            active_page->resize();
+            active_tab->resize();
             resized_draw = true;
         }
         // ***********************************
 
-        active_page->draw(resized_draw);
+        active_tab->draw(resized_draw);
         resized_draw = false;
 
         // a window is needed for keyboard input
-        // page_desc_win is on all pages and is always enabled so it is the chosen one
-        ch = wgetch(page_desc_win->get_WINDOW());
+        // tab_desc_win is on all tabs and is always enabled so it is the chosen one
+        ch = wgetch(tab_desc_win->get_WINDOW());
 
         if (ch == '$' || ch == '~' || ch == '`')
         {
@@ -135,16 +135,16 @@ int main(int argc, char ** argv)
         }
         else if (ch == ESC)
         {
-            nodelay(page_desc_win->get_WINDOW(), true);
-            ch = wgetch(page_desc_win->get_WINDOW());
-            nodelay(page_desc_win->get_WINDOW(), false);
+            nodelay(tab_desc_win->get_WINDOW(), true);
+            ch = wgetch(tab_desc_win->get_WINDOW());
+            nodelay(tab_desc_win->get_WINDOW(), false);
 
             if (ch == ERR)
                 break;
         }
         else
         {
-            active_page->on_KEY(ch);
+            active_tab->on_KEY(ch);
         }
     }
 

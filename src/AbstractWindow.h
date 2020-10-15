@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ncurses window
 typedef struct _win_st WINDOW;
 
-class AbstractPage;
+class AbstractTab;
 class CompletionStack;
 using WordStack = std::stack<word_stack_element>;
 MATCHABLE_FWD(VisibilityAspect);
@@ -77,8 +77,8 @@ public:
 
     bool is_active();
 
-    bool belongs_to_active_page();
-    void add_page(AbstractPage *);
+    bool belongs_to_active_tab();
+    void add_tab(AbstractTab *);
 
     void on_KEY(int key);
 
@@ -126,7 +126,7 @@ protected:
     int width{0};
     int y{0};
     int x{0};
-    std::vector<AbstractPage *> pages;
+    std::vector<AbstractTab *> tabs;
 
 private:
     std::shared_ptr<VisibilityAspect::Flags> disabled;

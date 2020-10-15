@@ -30,11 +30,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "CompletablePageAgent.h"
+#include "CompletableTabAgent.h"
 
 #include "AntonymWindow.h"
 #include "AttributeWindow.h"
-#include "CompletablePage.h"
+#include "CompletableTab.h"
 #include "CompletionStack.h"
 #include "CompletionWindow.h"
 #include "FilterWindow.h"
@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "InputWindow.h"
 #include "Layer.h"
 #include "LengthCompletionWindow.h"
-#include "PageDescriptionWindow.h"
+#include "TabDescriptionWindow.h"
 #include "EnablednessSetting.h"
 #include "SynonymWindow.h"
 #include "VisibilityAspect.h"
@@ -51,11 +51,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-CompletablePageAgent::CompletablePageAgent(
-    std::shared_ptr<PageDescriptionWindow> pdw,
+CompletableTabAgent::CompletableTabAgent(
+    std::shared_ptr<TabDescriptionWindow> pdw,
     std::shared_ptr<IndicatorWindow> iw
 )
-    : page_desc_win{pdw}
+    : tab_desc_win{pdw}
     , indicator_win{iw}
     , wf{std::make_shared<word_filter>()}
     , cs{std::make_shared<CompletionStack>(*wf)}
@@ -68,25 +68,25 @@ CompletablePageAgent::CompletablePageAgent(
     , att_win{std::make_shared<AttributeWindow>(*cs, ws, *completion_win, *len_completion_win, *syn_win, *ant_win)}
     , filter_win{std::make_shared<FilterWindow>(*cs, ws, *input_win, *wf)}
     , completable_help_win{std::make_shared<CompletableHelpWindow>()}
-    , completable_page{std::make_shared<CompletablePage>()}
+    , completable_tab{std::make_shared<CompletableTab>()}
 {
     filter_win->disable(VisibilityAspect::WindowVisibility::grab());
 
-    completable_page->add_window(page_desc_win.get());
-    completable_page->add_window(indicator_win.get());
-    completable_page->add_window(input_win.get());
-    completable_page->add_window(completion_win.get());
-    completable_page->add_window(len_completion_win.get());
-    completable_page->add_window(att_win.get());
-    completable_page->add_window(syn_win.get());
-    completable_page->add_window(ant_win.get());
-    completable_page->add_window(filter_win.get());
-    completable_page->add_window(completable_help_win.get());
+    completable_tab->add_window(tab_desc_win.get());
+    completable_tab->add_window(indicator_win.get());
+    completable_tab->add_window(input_win.get());
+    completable_tab->add_window(completion_win.get());
+    completable_tab->add_window(len_completion_win.get());
+    completable_tab->add_window(att_win.get());
+    completable_tab->add_window(syn_win.get());
+    completable_tab->add_window(ant_win.get());
+    completable_tab->add_window(filter_win.get());
+    completable_tab->add_window(completable_help_win.get());
 
-    completable_page->set_active_window(completion_win.get());
-    completable_page->set_active_window(completable_help_win.get());
+    completable_tab->set_active_window(completion_win.get());
+    completable_tab->set_active_window(completable_help_win.get());
 
-    // define neighbors for left/right arrow key switching of windows within completable page
+    // define neighbors for left/right arrow key switching of windows within completable tab
     completion_win->set_left_neighbor(ant_win.get());
     completion_win->set_right_neighbor(syn_win.get());
     len_completion_win->set_left_neighbor(syn_win.get());
@@ -122,7 +122,7 @@ CompletablePageAgent::CompletablePageAgent(
                     Enabledness::Disabled::grab(),
                     [&]()
                     {
-                        if (completable_page->get_active_window(Layer::Bottom::grab()) == win)
+                        if (completable_tab->get_active_window(Layer::Bottom::grab()) == win)
                             win->activate_left();
 
                         win->disable(VisibilityAspect::WindowVisibility::grab());

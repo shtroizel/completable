@@ -30,35 +30,49 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "CompletablePage.h"
+#include "TabDescriptionWindow.h"
 
-#include "AbstractWindow.h"
+#include <ncurses.h>
+
+#include "AbstractTab.h"
+#include "Layer.h"
 
 
 
-std::array<char, 17> const & CompletablePage::description() const
+std::string TabDescriptionWindow::title()
 {
-    static std::array<char, 17> desc = []()
-                                       {
-                                           std::array<char, 17> d;
-                                           d[0]  = 'c';
-                                           d[1]  = 'o';
-                                           d[2]  = 'm';
-                                           d[3]  = 'p';
-                                           d[4]  = 'l';
-                                           d[5]  = 'e';
-                                           d[6]  = 't';
-                                           d[7]  = 'a';
-                                           d[8]  = 'b';
-                                           d[9]  = 'l';
-                                           d[10] = 'e';
-                                           d[11] = ' ';
-                                           d[12] = ' ';
-                                           d[13] = ' ';
-                                           d[14] = ' ';
-                                           d[15] = ' ';
-                                           d[16] = ' ';
-                                           return d;
-                                       }();
-    return desc;
+    static std::string const t;
+    return t;
+}
+
+
+void TabDescriptionWindow::resize_hook()
+{
+    height = 3;
+    width = 17;
+    y = 0;
+    x = 1;
+}
+
+
+void TabDescriptionWindow::draw_hook()
+{
+    auto tab = AbstractTab::get_active_tab();
+    if (nullptr == tab)
+        return;
+
+    for (int i = 0; i < (int) tab->get_description().size(); ++i)
+        mvwaddch(w, 1, i, tab->get_description()[i]);
+}
+
+
+void TabDescriptionWindow::post_resize_hook()
+{
+    keypad(w, true);
+}
+
+
+Layer::Type TabDescriptionWindow::layer() const
+{
+    return Layer::Bottom::grab();
 }

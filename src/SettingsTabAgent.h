@@ -31,20 +31,35 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#include <string>
+
+#include <memory>
 #include <stack>
-#include <vector>
 
-#include "AbstractPage.h"
-
+#include "SettingsTab.h"
 
 
-class CompletablePage : public AbstractPage
+
+class IndicatorWindow;
+class TabDescriptionWindow;
+class AccessHelpWindow;
+class SettingsHelpWindow;
+class SettingsWindow;
+
+class SettingsTabAgent
 {
-    using AbstractPage::AbstractPage;
+public:
+    SettingsTabAgent(SettingsTabAgent const &) = delete;
+    SettingsTabAgent & operator=(SettingsTabAgent const &) = delete;
 
-    // resolved dependencies
-    std::array<char, 17> const & description() const override;
-    char abbreviation() const override { return 'C'; }
-    int indicator_position() const override { return 0; }
+    SettingsTabAgent(std::shared_ptr<TabDescriptionWindow>, std::shared_ptr<IndicatorWindow>);
+    SettingsTab * operator()() { return settings_tab.get(); }
+
+private:
+    std::shared_ptr<TabDescriptionWindow> tab_desc_win;
+    std::shared_ptr<IndicatorWindow> indicator_win;
+
+    std::shared_ptr<AccessHelpWindow> access_help_win;
+    std::shared_ptr<SettingsHelpWindow> help_win;
+    std::shared_ptr<SettingsWindow> settings_win;
+    std::shared_ptr<SettingsTab> settings_tab;
 };

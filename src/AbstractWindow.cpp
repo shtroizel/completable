@@ -36,7 +36,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <ncurses.h>
 
-#include "AbstractPage.h"
+#include "AbstractTab.h"
 #include "CompletionStack.h"
 #include "EnablednessSetting.h"
 #include "Layer.h"
@@ -176,12 +176,12 @@ void AbstractWindow::set_right_neighbor(AbstractWindow * n)
 
 bool AbstractWindow::is_active()
 {
-    if (!belongs_to_active_page())
+    if (!belongs_to_active_tab())
         return false;
 
-    auto active_page = AbstractPage::get_active_page();
+    auto active_tab = AbstractTab::get_active_tab();
 
-    auto act_win = active_page->get_active_window();
+    auto act_win = active_tab->get_active_window();
     if (nullptr == act_win)
         return false;
 
@@ -189,23 +189,23 @@ bool AbstractWindow::is_active()
 }
 
 
-bool AbstractWindow::belongs_to_active_page()
+bool AbstractWindow::belongs_to_active_tab()
 {
-    auto active_page = AbstractPage::get_active_page();
-    if (nullptr == active_page)
+    auto active_tab = AbstractTab::get_active_tab();
+    if (nullptr == active_tab)
         return false;
 
-    for (auto pg : pages)
-        if (pg == active_page)
+    for (auto tab : tabs)
+        if (tab == active_tab)
             return true;
 
     return false;
 }
 
 
-void AbstractWindow::add_page(AbstractPage * page)
+void AbstractWindow::add_tab(AbstractTab * tab)
 {
-    pages.push_back(page);
+    tabs.push_back(tab);
 }
 
 
@@ -307,8 +307,8 @@ void AbstractWindow::activate_left()
     if (nullptr == left_neighbor)
         return;
 
-    auto active_page = AbstractPage::get_active_page();
-    if (nullptr == active_page)
+    auto active_tab = AbstractTab::get_active_tab();
+    if (nullptr == active_tab)
         return;
 
     AbstractWindow * l = left_neighbor;
@@ -316,7 +316,7 @@ void AbstractWindow::activate_left()
         l = l->get_left_neighbor();
 
     if (l != this && l->is_enabled(VisibilityAspect::WindowVisibility::grab()))
-        active_page->set_active_window(l);
+        active_tab->set_active_window(l);
 }
 
 
@@ -325,8 +325,8 @@ void AbstractWindow::activate_right()
     if (nullptr == left_neighbor)
         return;
 
-    auto active_page = AbstractPage::get_active_page();
-    if (nullptr == active_page)
+    auto active_tab = AbstractTab::get_active_tab();
+    if (nullptr == active_tab)
         return;
 
     AbstractWindow * r = right_neighbor;
@@ -334,5 +334,5 @@ void AbstractWindow::activate_right()
         r = r->get_right_neighbor();
 
     if (r != this && r->is_enabled(VisibilityAspect::WindowVisibility::grab()))
-        active_page->set_active_window(r);
+        active_tab->set_active_window(r);
 }

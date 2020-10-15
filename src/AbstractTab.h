@@ -43,26 +43,26 @@ MATCHABLE_FWD(Layer)
 
 class AbstractWindow;
 
-class AbstractPage
+class AbstractTab
 {
 public:
-    AbstractPage(AbstractPage const &) = delete;
-    AbstractPage & operator=(AbstractPage const &) = delete;
+    AbstractTab(AbstractTab const &) = delete;
+    AbstractTab & operator=(AbstractTab const &) = delete;
 
-    AbstractPage();
-    virtual ~AbstractPage();
+    AbstractTab();
+    virtual ~AbstractTab();
 
     void add_window(AbstractWindow *);
 
     void resize();
     void draw(bool clear_first);
 
-    void set_left_neighbor(AbstractPage * neighbor) { left_neighbor = neighbor; }
-    void set_right_neighbor(AbstractPage * neighbor) { right_neighbor = neighbor; }
+    void set_left_neighbor(AbstractTab * neighbor) { left_neighbor = neighbor; }
+    void set_right_neighbor(AbstractTab * neighbor) { right_neighbor = neighbor; }
 
-    static void set_active_page(AbstractPage *);
-    static AbstractPage * get_active_page() { return active_page(); }
-    bool is_active() { return nullptr != active_page() && active_page()->description() == description(); }
+    static void set_active_tab(AbstractTab *);
+    static AbstractTab * get_active_tab() { return active_tab(); }
+    bool is_active() { return nullptr != active_tab() && active_tab()->description() == description(); }
 
     void set_active_window(AbstractWindow *);
     AbstractWindow * get_active_window();
@@ -89,8 +89,8 @@ private:
 
 
 private:
-    AbstractPage * left_neighbor{nullptr};
-    AbstractPage * right_neighbor{nullptr};
+    AbstractTab * left_neighbor{nullptr};
+    AbstractTab * right_neighbor{nullptr};
 
     std::shared_ptr<
         matchable::MatchBox<
@@ -102,5 +102,5 @@ private:
     bool layer_Help_enabled{false};
 
     // static variables that look like functions
-    static AbstractPage * & active_page() { static AbstractPage * w{nullptr}; return w; }
+    static AbstractTab * & active_tab() { static AbstractTab * w{nullptr}; return w; }
 };
