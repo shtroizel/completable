@@ -1,3 +1,5 @@
+#pragma once
+
 /*
 Copyright (c) 2020, Eric Hyer
 All rights reserved.
@@ -30,49 +32,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "TabDescriptionWindow.h"
-
-#include <ncurses.h>
-
-#include "AbstractTab.h"
-#include "Layer.h"
+#include "AbstractWindow.h"
 
 
 
-std::string TabDescriptionWindow::title()
+class MatchmakerHelpWindow : public AbstractWindow
 {
-    static std::string const t;
-    return t;
-}
+    using AbstractWindow::AbstractWindow;
 
-
-void TabDescriptionWindow::resize_hook()
-{
-    height = 3;
-    width = 17;
-    y = 0;
-    x = 1;
-}
-
-
-void TabDescriptionWindow::draw_hook()
-{
-    auto tab = AbstractTab::get_active_tab();
-    if (nullptr == tab)
-        return;
-
-    for (int i = 0; i < (int) tab->get_description().size() && i < width; ++i)
-        mvwaddch(w, 1, i, tab->get_description()[i]);
-}
-
-
-void TabDescriptionWindow::post_resize_hook()
-{
-    keypad(w, true);
-}
-
-
-Layer::Type TabDescriptionWindow::layer() const
-{
-    return Layer::Bottom::grab();
-}
+    // resolved dependencies
+    std::string title() override final;
+    void resize_hook() override final;
+    void draw_hook() override final;
+    Layer::Type layer() const override final;
+};

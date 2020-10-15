@@ -49,7 +49,10 @@ set(
     src/IndicatorWindow.cpp
     src/InputWindow.cpp
     src/LengthCompletionWindow.cpp
+    src/MatchmakerHelpWindow.cpp
     src/MatchmakerTab.cpp
+    src/MatchmakerTabAgent.cpp
+    src/TabDescriptionWindow.cpp
     src/SettingsHelpWindow.cpp
     src/SettingsTab.cpp
     src/SettingsTabAgent.cpp

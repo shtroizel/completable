@@ -1,3 +1,5 @@
+#pragma once
+
 /*
 Copyright (c) 2020, Eric Hyer
 All rights reserved.
@@ -30,49 +32,34 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "TabDescriptionWindow.h"
+#include <memory>
+#include <stack>
 
-#include <ncurses.h>
-
-#include "AbstractTab.h"
-#include "Layer.h"
+#include "MatchmakerTab.h"
 
 
 
-std::string TabDescriptionWindow::title()
+class IndicatorWindow;
+class TabDescriptionWindow;
+class AccessHelpWindow;
+class MatchmakerHelpWindow;
+class SettingsWindow;
+
+class MatchmakerTabAgent
 {
-    static std::string const t;
-    return t;
-}
+public:
+    MatchmakerTabAgent(MatchmakerTabAgent const &) = delete;
+    MatchmakerTabAgent & operator=(MatchmakerTabAgent const &) = delete;
 
+    MatchmakerTabAgent(std::shared_ptr<TabDescriptionWindow>, std::shared_ptr<IndicatorWindow>);
+    MatchmakerTab * operator()() { return matchmaker_tab.get(); }
 
-void TabDescriptionWindow::resize_hook()
-{
-    height = 3;
-    width = 17;
-    y = 0;
-    x = 1;
-}
+private:
+    std::shared_ptr<TabDescriptionWindow> tab_desc_win;
+    std::shared_ptr<IndicatorWindow> indicator_win;
 
-
-void TabDescriptionWindow::draw_hook()
-{
-    auto tab = AbstractTab::get_active_tab();
-    if (nullptr == tab)
-        return;
-
-    for (int i = 0; i < (int) tab->get_description().size() && i < width; ++i)
-        mvwaddch(w, 1, i, tab->get_description()[i]);
-}
-
-
-void TabDescriptionWindow::post_resize_hook()
-{
-    keypad(w, true);
-}
-
-
-Layer::Type TabDescriptionWindow::layer() const
-{
-    return Layer::Bottom::grab();
-}
+    std::shared_ptr<AccessHelpWindow> access_help_win;
+    std::shared_ptr<MatchmakerHelpWindow> help_win;
+    std::shared_ptr<SettingsWindow> settings_win;
+    std::shared_ptr<MatchmakerTab> matchmaker_tab;
+};

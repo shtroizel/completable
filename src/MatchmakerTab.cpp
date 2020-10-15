@@ -30,49 +30,33 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "TabDescriptionWindow.h"
-
-#include <ncurses.h>
-
-#include "AbstractTab.h"
-#include "Layer.h"
+#include "MatchmakerTab.h"
 
 
 
-std::string TabDescriptionWindow::title()
+std::array<char, 17> const & MatchmakerTab::description() const
 {
-    static std::string const t;
-    return t;
-}
-
-
-void TabDescriptionWindow::resize_hook()
-{
-    height = 3;
-    width = 17;
-    y = 0;
-    x = 1;
-}
-
-
-void TabDescriptionWindow::draw_hook()
-{
-    auto tab = AbstractTab::get_active_tab();
-    if (nullptr == tab)
-        return;
-
-    for (int i = 0; i < (int) tab->get_description().size() && i < width; ++i)
-        mvwaddch(w, 1, i, tab->get_description()[i]);
-}
-
-
-void TabDescriptionWindow::post_resize_hook()
-{
-    keypad(w, true);
-}
-
-
-Layer::Type TabDescriptionWindow::layer() const
-{
-    return Layer::Bottom::grab();
+    static std::array<char, 17> desc = []()
+                                       {
+                                           std::array<char, 17> d;
+                                           d[0]  = 'm';
+                                           d[1]  = 'a';
+                                           d[2]  = 't';
+                                           d[3]  = 'c';
+                                           d[4]  = 'h';
+                                           d[5]  = 'm';
+                                           d[6]  = 'a';
+                                           d[7]  = 'k';
+                                           d[8]  = 'e';
+                                           d[9]  = 'r';
+                                           d[10] = ' ';
+                                           d[11] = ' ';
+                                           d[12] = ' ';
+                                           d[13] = ' ';
+                                           d[14] = ' ';
+                                           d[15] = ' ';
+                                           d[16] = ' ';
+                                           return d;
+                                       }();
+    return desc;
 }

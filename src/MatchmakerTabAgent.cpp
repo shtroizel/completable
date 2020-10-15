@@ -1,5 +1,3 @@
-#pragma once
-
 /*
 Copyright (c) 2020, Eric Hyer
 All rights reserved.
@@ -32,16 +30,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "AbstractPage.h"
+#include "MatchmakerTabAgent.h"
+
+#include "IndicatorWindow.h"
+#include "TabDescriptionWindow.h"
+#include "AccessHelpWindow.h"
+#include "MatchmakerHelpWindow.h"
+#include "MatchmakerTab.h"
+#include "SettingsWindow.h"
 
 
-
-class MatchmakerPage : public AbstractPage
+MatchmakerTabAgent::MatchmakerTabAgent(
+    std::shared_ptr<TabDescriptionWindow> pdw,
+    std::shared_ptr<IndicatorWindow> iw
+)
+    : tab_desc_win{pdw}
+    , indicator_win{iw}
+    , access_help_win{std::make_shared<AccessHelpWindow>()}
+    , help_win{std::make_shared<MatchmakerHelpWindow>()}
+    , settings_win{std::make_shared<SettingsWindow>()}
+    , matchmaker_tab{std::make_shared<MatchmakerTab>()}
 {
-    using AbstractPage::AbstractPage;
+    matchmaker_tab->add_window(tab_desc_win.get());
+    matchmaker_tab->add_window(indicator_win.get());
 
-    // resolved dependencies
-    std::array<char, 17> const & description() const override;
-    char abbreviation() const override { return 'M'; }
-    int indicator_position() const override { return 2; }
-};
+    matchmaker_tab->add_window(access_help_win.get());
+    matchmaker_tab->add_window(help_win.get());
+    matchmaker_tab->set_active_window(settings_win.get());
+}

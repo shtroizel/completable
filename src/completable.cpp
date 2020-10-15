@@ -39,6 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "EnablednessSetting.h"
 #include "IndicatorWindow.h"
 #include "MatchmakerTab.h"
+#include "MatchmakerTabAgent.h"
 #include "TabDescriptionWindow.h"
 #include "SettingsTabAgent.h"
 #include "key_codes.h"
@@ -83,16 +84,14 @@ int main(int argc, char ** argv)
     cpa()->set_left_neighbor(spa());
     spa()->set_right_neighbor(cpa());
 
-// #ifdef MM_DL
-//     MatchmakerPage page_m{{&page_desc_win, &indicator_win}};
-//     page_s.set_left_neighbor(&page_m);
-//     page_m.set_right_neighbor(&page_s);
-//     AbstractPage::set_active_page(&page_m);
-// #else
-//     AbstractPage::set_active_page(&page_c);
-// #endif
-
+#ifdef MM_DL
+    MatchmakerTabAgent mpa{tab_desc_win, indicator_win};
+    mpa()->set_right_neighbor(spa());
+    spa()->set_left_neighbor(mpa());
+    AbstractTab::set_active_tab(mpa());
+#else
     AbstractTab::set_active_tab(cpa());
+#endif
 
 
     bool resized_draw{true};
