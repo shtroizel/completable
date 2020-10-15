@@ -30,7 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "SettingsHelpMessageWindow.h"
+#include "AccessHelpWindow.h"
 
 #include <ncurses.h>
 
@@ -39,14 +39,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-std::string SettingsHelpMessageWindow::title()
+std::string AccessHelpWindow::title()
 {
     static std::string const t{"enter , for help"};
     return t;
 }
 
 
-void SettingsHelpMessageWindow::resize_hook()
+void AccessHelpWindow::resize_hook()
 {
     height = 3;
     width = root_x / 2;
@@ -55,7 +55,7 @@ void SettingsHelpMessageWindow::resize_hook()
 }
 
 
-Layer::Type SettingsHelpMessageWindow::layer() const
+Layer::Type AccessHelpWindow::layer() const
 {
     return Layer::Bottom::grab();
 }

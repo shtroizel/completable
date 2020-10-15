@@ -35,7 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractWindow.h"
 
 
-class SettingsHelpMessageWindow : public AbstractWindow
+class AccessHelpWindow : public AbstractWindow
 {
     using AbstractWindow::AbstractWindow;
 

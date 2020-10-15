@@ -37,6 +37,7 @@ set(
     src/AbstractPage.cpp
     src/AbstractListWindow.cpp
     src/AbstractWindow.cpp
+    src/AccessHelpWindow.cpp
     src/AntonymWindow.cpp
     src/AttributeWindow.cpp
     src/CompletableHelpWindow.cpp
@@ -50,7 +51,6 @@ set(
     src/LengthCompletionWindow.cpp
     src/MatchmakerPage.cpp
     src/PageDescriptionWindow.cpp
-    src/SettingsHelpMessageWindow.cpp
     src/SettingsHelpWindow.cpp
     src/SettingsPage.cpp
     src/SettingsPageAgent.cpp

@@ -34,7 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "IndicatorWindow.h"
 #include "PageDescriptionWindow.h"
-#include "SettingsHelpMessageWindow.h"
+#include "AccessHelpWindow.h"
 #include "SettingsHelpWindow.h"
 #include "SettingsPage.h"
 #include "SettingsWindow.h"
@@ -46,7 +46,7 @@ SettingsPageAgent::SettingsPageAgent(
 )
     : page_desc_win{pdw}
     , indicator_win{iw}
-    , help_message_win{std::make_shared<SettingsHelpMessageWindow>()}
+    , access_help_win{std::make_shared<AccessHelpWindow>()}
     , help_win{std::make_shared<SettingsHelpWindow>()}
     , settings_win{std::make_shared<SettingsWindow>()}
     , settings_page{std::make_shared<SettingsPage>()}
@@ -54,7 +54,7 @@ SettingsPageAgent::SettingsPageAgent(
     settings_page->add_window(page_desc_win.get());
     settings_page->add_window(indicator_win.get());
 
-    settings_page->add_window(help_message_win.get());
+    settings_page->add_window(access_help_win.get());
     settings_page->add_window(help_win.get());
     settings_page->add_window(settings_win.get());
     settings_page->set_active_window(settings_win.get());
