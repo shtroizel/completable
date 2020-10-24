@@ -43,7 +43,8 @@ class IndicatorWindow;
 class TabDescriptionWindow;
 class AccessHelpWindow;
 class MatchmakerHelpWindow;
-class SettingsWindow;
+class MatchmakerLocationWindow;
+class MatchmakerSelectionWindow;
 
 class MatchmakerTabAgent
 {
@@ -60,6 +61,7 @@ private:
 
     std::shared_ptr<AccessHelpWindow> access_help_win;
     std::shared_ptr<MatchmakerHelpWindow> help_win;
-    std::shared_ptr<SettingsWindow> settings_win;
+    std::shared_ptr<MatchmakerSelectionWindow> mm_sel_win;
+    std::shared_ptr<MatchmakerLocationWindow> mm_loc_win;
     std::shared_ptr<MatchmakerTab> matchmaker_tab;
 };

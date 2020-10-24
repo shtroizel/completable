@@ -21,7 +21,7 @@ endif()
 
 
 if(matchmaker_DL STREQUAL "ON")
-    add_definitions(-DMM_DL)
+    add_definitions(-DMM_DYNAMIC_LOADING)
 else()
     get_filename_component(rpath_dir "${matchmaker_DIR}/.." REALPATH)
     set(CMAKE_INSTALL_RPATH "${rpath_dir}")
@@ -50,6 +50,8 @@ set(
     src/InputWindow.cpp
     src/LengthCompletionWindow.cpp
     src/MatchmakerHelpWindow.cpp
+    src/MatchmakerLocationWindow.cpp
+    src/MatchmakerSelectionWindow.cpp
     src/MatchmakerTab.cpp
     src/MatchmakerTabAgent.cpp
     src/TabDescriptionWindow.cpp
@@ -65,7 +67,7 @@ set(
 )
 
 add_executable(completable ${completable_srcs})
-target_link_libraries(completable Threads::Threads ${CURSES_LIBRARIES})
+target_link_libraries(completable Threads::Threads ${CURSES_LIBRARIES} stdc++fs)
 
 if(matchmaker_DL STREQUAL "ON")
     target_link_libraries(completable dl)

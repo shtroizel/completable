@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "InputWindow.h"
 #include "Layer.h"
 #include "LengthCompletionWindow.h"
+#include "MatchmakerState.h"
 #include "TabDescriptionWindow.h"
 #include "EnablednessSetting.h"
 #include "SynonymWindow.h"
@@ -155,5 +156,23 @@ CompletableTabAgent::CompletableTabAgent(
             EnablednessSetting::Antonyms::grab(),
             ant_win.get()
         )
+    );
+
+    // respond to matchmaker state changes
+    MatchmakerStateInstance::Instance::grab().add_state_observer(
+        [&]()
+        {
+            // clear out the word stack
+            while (!ws.empty())
+                ws.pop();
+
+            // clear out completion stack
+            while (cs->count() > 1)
+            {
+                cs->clear_top();
+                cs->pop();
+            }
+            cs->clear_top();
+        }
     );
 }

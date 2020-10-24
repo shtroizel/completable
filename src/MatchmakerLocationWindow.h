@@ -1,3 +1,5 @@
+#pragma once
+
 /*
 Copyright (c) 2020, Eric Hyer
 All rights reserved.
@@ -30,34 +32,34 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "MatchmakerTabAgent.h"
+#include "AbstractWindow.h"
 
-#include "IndicatorWindow.h"
-#include "TabDescriptionWindow.h"
-#include "AccessHelpWindow.h"
-#include "MatchmakerHelpWindow.h"
-#include "MatchmakerTab.h"
-#include "MatchmakerLocationWindow.h"
-#include "MatchmakerSelectionWindow.h"
+#include <string>
 
 
-MatchmakerTabAgent::MatchmakerTabAgent(
-    std::shared_ptr<TabDescriptionWindow> pdw,
-    std::shared_ptr<IndicatorWindow> iw
-)
-    : tab_desc_win{pdw}
-    , indicator_win{iw}
-    , access_help_win{std::make_shared<AccessHelpWindow>()}
-    , help_win{std::make_shared<MatchmakerHelpWindow>()}
-    , mm_sel_win{std::make_shared<MatchmakerSelectionWindow>()}
-    , mm_loc_win{std::make_shared<MatchmakerLocationWindow>(*mm_sel_win)}
-    , matchmaker_tab{std::make_shared<MatchmakerTab>()}
+
+class MatchmakerSelectionWindow;
+
+class MatchmakerLocationWindow : public AbstractWindow
 {
-    matchmaker_tab->add_window(tab_desc_win.get());
-    matchmaker_tab->add_window(indicator_win.get());
-    matchmaker_tab->add_window(access_help_win.get());
-    matchmaker_tab->add_window(mm_loc_win.get());
-    matchmaker_tab->add_window(mm_sel_win.get());
-    matchmaker_tab->add_window(help_win.get());
-    matchmaker_tab->set_active_window(mm_loc_win.get());
-}
+public:
+    explicit MatchmakerLocationWindow(MatchmakerSelectionWindow &);
+
+private:
+    // resolved dependencies
+    std::string title() final;
+    void resize_hook() final;
+    void draw_hook() final;
+    Layer::Type layer() const final;
+
+    // options
+    void on_TAB() final;
+    void on_printable_ascii(int) final;
+    void on_BACKSPACE() final;
+    void on_RETURN() final;
+    void on_KEY_UP() final;
+    void on_KEY_DOWN() final;
+
+    MatchmakerSelectionWindow & mm_sel_win;
+    std::string search_prefix;
+};

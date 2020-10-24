@@ -48,15 +48,17 @@ static std::vector<std::string> const content =
     {
         std::vector<std::string> content;
         content.push_back("");
-        content.push_back("            FEATURE   KEY(s)");
-        content.push_back("   ------------------------------------------------------   ");
-        content.push_back("        toggle help   ','");
-        content.push_back("         switch tab   shift + arrow left/right, ");
-        content.push_back("                      or arrow left/right when help shown");
-//         content.push_back("     change setting   Return");
-//         content.push_back("   change selection   arrow up/down");
-        content.push_back("   enter shell mode   any of '$', '~', '`'");
-        content.push_back("               quit   Esc, ctrl + c");
+        content.push_back("                  FEATURE   KEY(s)");
+        content.push_back("   ------------------------------------------------------------   ");
+        content.push_back("              toggle help   ','");
+        content.push_back("               switch tab   shift + arrow left/right, ");
+        content.push_back("                            or arrow left/right when help shown");
+        content.push_back("   update search location   letters, symbols");
+        content.push_back("    search given location   Tab");
+        content.push_back("         change selection   arrow up/down");
+        content.push_back("        select dictionary   Return");
+        content.push_back("         enter shell mode   any of '$', '~', '`'");
+        content.push_back("                     quit   Esc, ctrl + c");
         content.push_back("");
         return content;
     }();

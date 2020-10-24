@@ -57,7 +57,7 @@ int main(int argc, char ** argv)
             EnablednessSetting::Borders::grab().set_enabledness(Enabledness::Disabled::grab());
     }
 
-#ifndef MM_DL
+#ifndef MM_DYNAMIC_LOADING
     matchmaker::set_library(nullptr); // disable dynamic loading, use linking instead
 #endif
 
@@ -84,7 +84,7 @@ int main(int argc, char ** argv)
     cpa()->set_left_neighbor(spa());
     spa()->set_right_neighbor(cpa());
 
-#ifdef MM_DL
+#ifdef MM_DYNAMIC_LOADING
     MatchmakerTabAgent mpa{tab_desc_win, indicator_win};
     mpa()->set_right_neighbor(spa());
     spa()->set_left_neighbor(mpa());

@@ -30,9 +30,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "matchmaker.h"
+#include "MatchmakerState.h"
 
+#include <iostream>
 
-#ifdef MM_DL
+#ifdef MM_DYNAMIC_LOADING
     #include <dlfcn.h>
 #else
     #include <matchmaker/matchmaker.h>
@@ -42,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace matchmaker
 {
-#ifdef MM_DL
+#ifdef MM_DYNAMIC_LOADING
     static void * handle{nullptr};
 #endif
 
@@ -71,12 +73,13 @@ namespace matchmaker
         unset_library();
         char * ret = nullptr;
 
-#ifdef MM_DL
+#ifdef MM_DYNAMIC_LOADING
         // *** DYNAMIC LOADING ***
 
-        handle = dlopen(so_filename, RTLD_NOW);
+        handle = dlmopen(LM_ID_NEWLM, so_filename, RTLD_NOW);
         if (nullptr == handle)
         {
+            MatchmakerStateInstance::Instance::grab().set_state(MatchmakerState::Unloaded::grab());
             ret = dlerror();
             return ret;
         }
@@ -118,13 +121,22 @@ namespace matchmaker
         init_func(antonyms);
         init_func(complete);
 
+#ifdef MM_DYNAMIC_LOADING
+        if (ok)
+            MatchmakerStateInstance::Instance::grab().set_state(MatchmakerState::Loaded::grab());
+        else
+            MatchmakerStateInstance::Instance::grab().set_state(MatchmakerState::Unloaded::grab());
+#else
+        MatchmakerStateInstance::Instance::grab().set_state(MatchmakerState::Linked::grab());
+#endif
+
         return ret;
     }
 
 
     void unset_library()
     {
-#ifdef MM_DL
+#ifdef MM_DYNAMIC_LOADING
         if (nullptr != handle)
         {
             dlclose(handle);

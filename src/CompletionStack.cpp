@@ -34,6 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <queue>
 
+#include "MatchmakerState.h"
 #include "matchmaker.h"
 #include "word_filter.h"
 
@@ -47,6 +48,9 @@ CompletionStack::CompletionStack(word_filter const & f) : wf(f)
 
 void CompletionStack::push(int ch)
 {
+    if (MatchmakerStateInstance::Instance::grab().as_state() == MatchmakerState::Unloaded::grab())
+        return;
+
     if (completion_count >= CAPACITY)
         return;
 
