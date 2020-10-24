@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 std::string AccessHelpWindow::title()
 {
-    static std::string const t{"enter , for help"};
+    static std::string const t{"press ',' for help"};
     return t;
 }
 
