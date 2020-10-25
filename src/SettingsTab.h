@@ -45,7 +45,6 @@ public:
 
 private:
     // resolved dependencies
-    std::array<char, 17> const & description() const override;
     char abbreviation() const override { return 'S'; }
     int indicator_position() const override { return 1; }
     Tab::Type as_matchable() const final { return Tab::settings::grab(); }

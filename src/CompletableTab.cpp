@@ -40,31 +40,3 @@ CompletableTab::CompletableTab() : AbstractTab()
 {
     Tab::completable::grab().set_AbstractTab(this);
 }
-
-
-std::array<char, 17> const & CompletableTab::description() const
-{
-    static std::array<char, 17> desc = []()
-                                       {
-                                           std::array<char, 17> d;
-                                           d[0]  = 'c';
-                                           d[1]  = 'o';
-                                           d[2]  = 'm';
-                                           d[3]  = 'p';
-                                           d[4]  = 'l';
-                                           d[5]  = 'e';
-                                           d[6]  = 't';
-                                           d[7]  = 'a';
-                                           d[8]  = 'b';
-                                           d[9]  = 'l';
-                                           d[10] = 'e';
-                                           d[11] = ' ';
-                                           d[12] = ' ';
-                                           d[13] = ' ';
-                                           d[14] = ' ';
-                                           d[15] = ' ';
-                                           d[16] = ' ';
-                                           return d;
-                                       }();
-    return desc;
-}

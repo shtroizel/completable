@@ -156,14 +156,12 @@ public:
      */
     void on_KEY(int key);
 
-    std::array<char, 17> const & get_description() const { return description(); }
     char get_abbreviation() const { return abbreviation(); }
     int get_indicator_position() const { return indicator_position(); }
 
 
 private:
     // dependencies
-    virtual std::array<char, 17> const & description() const = 0;
     virtual char abbreviation() const = 0;
     virtual int indicator_position() const = 0;
     virtual Tab::Type as_matchable() const = 0;

@@ -61,8 +61,8 @@ void TabDescriptionWindow::draw_hook()
     if (tab.is_nil())
         return;
 
-    for (int i = 0; i < (int) tab.as_AbstractTab()->get_description().size() && i < width; ++i)
-        mvwaddch(w, 1, i, tab.as_AbstractTab()->get_description()[i]);
+    for (int i = 0; i < (int) tab.as_string().length() && i < width; ++i)
+        mvwaddch(w, 1, i, tab.as_string()[i]);
 }
 
 

@@ -38,31 +38,3 @@ SettingsTab::SettingsTab() : AbstractTab()
 {
     Tab::settings::grab().set_AbstractTab(this);
 }
-
-
-std::array<char, 17> const & SettingsTab::description() const
-{
-    static std::array<char, 17> desc = []()
-                                       {
-                                           std::array<char, 17> d;
-                                           d[0]  = 's';
-                                           d[1]  = 'e';
-                                           d[2]  = 't';
-                                           d[3]  = 't';
-                                           d[4]  = 'i';
-                                           d[5]  = 'n';
-                                           d[6]  = 'g';
-                                           d[7]  = 's';
-                                           d[8]  = ' ';
-                                           d[9]  = ' ';
-                                           d[10] = ' ';
-                                           d[11] = ' ';
-                                           d[12] = ' ';
-                                           d[13] = ' ';
-                                           d[14] = ' ';
-                                           d[15] = ' ';
-                                           d[16] = ' ';
-                                           return d;
-                                       }();
-    return desc;
-}
