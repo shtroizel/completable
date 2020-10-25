@@ -45,7 +45,6 @@ public:
 
 private:
     // resolved dependencies
-    char abbreviation() const override { return 'M'; }
     int indicator_position() const override { return 2; }
     Tab::Type as_matchable() const final { return Tab::matchmaker::grab(); }
 };

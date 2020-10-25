@@ -105,7 +105,14 @@ void IndicatorWindow::draw_hook()
             mvwaddch(w, 2, abbreviation_x + 2, ' ');
         }
 
-        mvwaddch(w, 1, abbreviation_x, tab.as_AbstractTab()->get_abbreviation());
+        char abbreviation = 'X';
+        if (tab.as_string().length() > 0)
+            abbreviation = tab.as_string()[0];
+
+        if (abbreviation >= 'a' && abbreviation <= 'z')
+            abbreviation -= 'a' - 'A';
+
+        mvwaddch(w, 1, abbreviation_x, abbreviation);
         wattroff(w, A_REVERSE);
     }
 }

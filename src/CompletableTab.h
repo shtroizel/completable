@@ -48,7 +48,6 @@ public:
 
 private:
     // resolved dependencies
-    char abbreviation() const final { return 'C'; }
     int indicator_position() const final { return 0; }
     Tab::Type as_matchable() const final { return Tab::completable::grab(); }
 };

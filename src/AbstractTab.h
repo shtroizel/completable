@@ -156,13 +156,11 @@ public:
      */
     void on_KEY(int key);
 
-    char get_abbreviation() const { return abbreviation(); }
     int get_indicator_position() const { return indicator_position(); }
 
 
 private:
     // dependencies
-    virtual char abbreviation() const = 0;
     virtual int indicator_position() const = 0;
     virtual Tab::Type as_matchable() const = 0;
 
