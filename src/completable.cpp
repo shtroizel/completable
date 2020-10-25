@@ -77,20 +77,20 @@ int main(int argc, char ** argv)
     auto tab_desc_win = std::make_shared<TabDescriptionWindow>();
     auto indicator_win = std::make_shared<IndicatorWindow>();
 
-    CompletableTabAgent cpa{tab_desc_win, indicator_win};
+    CompletableTabAgent cta{tab_desc_win, indicator_win};
 
-    SettingsTabAgent spa{tab_desc_win, indicator_win};
+    SettingsTabAgent sta{tab_desc_win, indicator_win};
 
-    cpa()->set_left_neighbor(spa());
-    spa()->set_right_neighbor(cpa());
+    cta()->set_left_neighbor(sta());
+    sta()->set_right_neighbor(cta());
 
 #ifdef MM_DYNAMIC_LOADING
-    MatchmakerTabAgent mpa{tab_desc_win, indicator_win};
-    mpa()->set_right_neighbor(spa());
-    spa()->set_left_neighbor(mpa());
-    AbstractTab::set_active_tab(mpa());
+    MatchmakerTabAgent mta{tab_desc_win, indicator_win};
+    mta()->set_right_neighbor(sta());
+    sta()->set_left_neighbor(mta());
+    AbstractTab::set_active_tab(mta());
 #else
-    AbstractTab::set_active_tab(cpa());
+    AbstractTab::set_active_tab(cta());
 #endif
 
 
