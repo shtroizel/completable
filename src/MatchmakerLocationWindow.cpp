@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Layer.h"
 #include "MatchmakerSelectionWindow.h"
 #include "VisibilityAspect.h"
+#include "exec_long_task_with_busy_animation.h"
 
 
 
@@ -90,24 +91,30 @@ Layer::Type MatchmakerLocationWindow::layer() const
 
 void MatchmakerLocationWindow::on_TAB()
 {
-    std::vector<std::string> dictionaries;
-    try
-    {
-        for (auto const & entry : std::filesystem::recursive_directory_iterator(search_prefix))
+    exec_long_task_with_busy_animation(
+        [&]()
         {
-            if (entry.is_regular_file())
+            std::vector<std::string> dictionaries;
+            try
             {
-                if (strcmp(entry.path().filename().c_str(), "libmatchmaker.so") == 0)
+                for (auto const & entry : std::filesystem::recursive_directory_iterator(search_prefix))
                 {
-                    std::string dict = entry.path();
-                    dictionaries.push_back(dict);
+                    if (entry.is_regular_file())
+                    {
+                        if (strcmp(entry.path().filename().c_str(), "libmatchmaker.so") == 0)
+                        {
+                            std::string dict = entry.path();
+                            dictionaries.push_back(dict);
+                        }
+                    }
                 }
             }
-        }
-    }
-    catch (std::filesystem::__cxx11::filesystem_error const &) {}
+            catch (std::filesystem::__cxx11::filesystem_error const &) {}
 
-    mm_sel_win.set_content(dictionaries);
+            mm_sel_win.set_content(dictionaries);
+        },
+        mm_sel_win
+    );
 }
 
 
