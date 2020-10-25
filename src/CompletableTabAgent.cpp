@@ -173,6 +173,9 @@ CompletableTabAgent::CompletableTabAgent(
                 cs->pop();
             }
             cs->clear_top();
+
+            if (MatchmakerStateInstance::Instance::grab().as_state() == MatchmakerState::Loaded::grab())
+                AbstractTab::set_active_tab(completable_tab.get());
         }
     );
 }
