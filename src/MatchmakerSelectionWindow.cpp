@@ -57,14 +57,14 @@ void MatchmakerSelectionWindow::set_content(std::vector<std::string> new_content
 
 std::string MatchmakerSelectionWindow::title()
 {
-    static std::string const t{"dictionaries"};
+    static std::string const t{""};
     return t;
 }
 
 
 void MatchmakerSelectionWindow::resize_hook()
 {
-    y = 7;
+    y = 5; // overlap with last line of MatchmakerLocationWindow
     x = 0;
 
     height = root_y - y;
@@ -74,6 +74,13 @@ void MatchmakerSelectionWindow::resize_hook()
 
 void MatchmakerSelectionWindow::draw_hook()
 {
+    if (EnablednessSetting::Borders::grab().as_enabledness() == Enabledness::Enabled::grab())
+    {
+        box(w, 0, 0);
+        mvwaddch(w, 0, 0, ACS_LTEE);
+        mvwaddch(w, 0, width - 1, ACS_RTEE);
+    }
+
     int display_count = (int) content.size() - selected;
 
     int i = 0;

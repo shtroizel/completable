@@ -54,6 +54,9 @@ private:
     void draw_hook() final;
     Layer::Type layer() const final;
 
+    // options
+    bool borders_enabled() const override final { return false; } // draw our own instead
+
     std::vector<std::string> content;
     int selected{0};
 };

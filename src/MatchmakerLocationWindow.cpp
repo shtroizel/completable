@@ -74,6 +74,12 @@ void MatchmakerLocationWindow::resize_hook()
 
 void MatchmakerLocationWindow::draw_hook()
 {
+    if (EnablednessSetting::Borders::grab().as_enabledness() == Enabledness::Enabled::grab())
+    {
+        mvwaddch(w, height - 1, 0, ACS_LTEE);
+        mvwaddch(w, height - 1, width - 1, ACS_RTEE);
+    }
+
     int i = 0;
     for (; i < (int) search_prefix.size() && i < width - 2; ++i)
         mvwaddch(w, 1, i + 1, search_prefix[i]);
