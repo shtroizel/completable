@@ -156,6 +156,11 @@ public:
      */
     void on_KEY(int key);
 
+    /**
+     * Indicator positions start at 0 and go from right to left
+     *
+     * @returns The tab's indicator position (example: third indicator from the right has position 2)
+     */
     int get_indicator_position() const { return indicator_position(); }
 
 
@@ -178,12 +183,13 @@ private:
     std::shared_ptr<
         matchable::MatchBox<
             Layer::Type,
+            // first for all windows in layer, second for layer's active window
             std::pair<std::vector<AbstractWindow *>, AbstractWindow *>
         >
     > layers;
     bool layer_F_enabled{false};
     bool layer_Help_enabled{false};
 
-    // static variables that look like functions
+    // static variable for the active tab (look like a function but its a variable)
     static AbstractTab * & active_tab() { static AbstractTab * tab; return tab; }
 };
