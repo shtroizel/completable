@@ -44,6 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Layer.h"
 #include "VisibilityAspect.h"
 #include "matchmaker.h"
+#include "exec_long_task_with_busy_animation.h"
+
 
 
 void MatchmakerSelectionWindow::set_content(std::vector<std::string> new_content)
@@ -109,7 +111,13 @@ Layer::Type MatchmakerSelectionWindow::layer() const
 void MatchmakerSelectionWindow::on_RETURN()
 {
     if (content.size() > 0)
-        matchmaker::set_library(content.at(selected).c_str());
+    {
+        exec_long_task_with_busy_animation(
+            [&]() { matchmaker::set_library(content.at(selected).c_str()); },
+            *this
+        );
+        mark_dirty();
+    }
 }
 
 
