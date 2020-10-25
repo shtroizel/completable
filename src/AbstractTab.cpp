@@ -259,7 +259,8 @@ void AbstractTab::on_ANY_F()
     if (layer_Help_enabled)
         return;
 
-    toggle_layer(Layer::F::grab(), layer_F_enabled);
+    if (layers->at(Layer::F::grab()).first.size() > 0)
+        toggle_layer(Layer::F::grab(), layer_F_enabled);
 }
 
 
