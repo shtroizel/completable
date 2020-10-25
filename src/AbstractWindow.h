@@ -52,6 +52,10 @@ MATCHABLE_FWD(Layer);
 MATCHABLE_FWD(Tab);
 MATCHABLE_FWD(VisibilityAspect);
 
+
+/**
+ * AbstractWindow serves as the base for all windows, wrapping the low-level ncurses WINDOW type.
+ */
 class AbstractWindow
 {
 public:
@@ -61,25 +65,114 @@ public:
     AbstractWindow();
     virtual ~AbstractWindow();
 
+    /**
+     * clear and refresh the window
+     */
     void clear();
+
+    /**
+     * delete and recreate the underlying ncurses WINDOW using the size and location specified by
+     * the deriver's resize_hook()
+     *
+     * derivers may optionally implement post_resize_hook() if they need to react on resize after the
+     * new underlying WINDOW has been created.
+     */
     void resize();
+
+    /**
+     * Conditionally redraws the window if it is enabled and has been marked dirty
+     * @see is_enabled()
+     * @see mark_dirty()
+     *
+     * @param clear_first When true the window is first cleared before drawing. Furthermore, when true
+     *     enabled windows are always redrawn regardless of whether they have been marked dirty or not
+     */
     void draw(bool clear_first);
+
+    /**
+     * Windows are assigned to "layers" that define their stacking order. Each window belongs to exactly
+     * one layer. Derivers define this by implementing the layer() dependency.
+     *
+     * @returns The layer in which the window resides
+     */
     Layer::Type get_layer() const;
+
+    /**
+     * @returns The window's height
+     */
     int get_height() const { return height; }
+
+    /**
+     * @returns The window's width
+     */
     int get_width() const { return width; }
+
+    /**
+     * @returns The window's y position within the ncurses "stdscr"
+     */
     int get_y() const { return y; }
+
+    /**
+     * @returns The window's x position within the ncurses "stdscr"
+     */
     int get_x() const { return x; }
+
+    /**
+     * @returns The underlying ncurses WINDOW
+     */
     WINDOW * get_WINDOW() const { return w; }
+
+    /**
+     * Titles are provided by derivers by implementing title()
+     *
+     * @returns The windows title
+     */
     std::string get_title() { return title(); }
 
+    /**
+     * Defines window switching behavior when switching to the left.
+     * Neighbors need to be set per tab since windows can exist in more than one tab.
+     *
+     * @param[in] tab A tab where this window has been added (@see AbstractTab::add_window())
+     * @param[in] neighbor The window to switch to when switching to the left
+     */
     void set_left_neighbor(Tab::Type tab, AbstractWindow * neighbor);
+
+    /**
+     * Defines window switching behavior when switching to the right.
+     * Neighbors need to be set per tab since windows can exist in more than one tab.
+     *
+     * @param[in] tab A tab where this window has been added (@see AbstractTab::add_window())
+     * @param[in] neighbor The window to switch to when switching to the right
+     */
     void set_right_neighbor(Tab::Type tab, AbstractWindow * neighbor);
+
+    /**
+     * @param[in] tab A tab where this window has been added (@see AbstractTab::add_window())
+     * @returns The windows left neighbor
+     * @see set_left_neighbor()
+     */
     AbstractWindow * get_left_neighbor(Tab::Type tab);
+
+    /**
+     * @param[in] tab A tab where this window has been added (@see AbstractTab::add_window())
+     * @returns The windows right neighbor
+     * @see set_right_neighbor()
+     */
     AbstractWindow * get_right_neighbor(Tab::Type tab);
 
+    /**
+     * @returns true if this window is the active window of the top-most enabled layer
+     *     of the currently active tab, or false otherwise
+     * @see AbstractTab::get_active_window()
+     */
     bool is_active();
 
+    /**
+     * @returns true if this window has been added to the currently active tab, or false otherwise
+     */
     bool belongs_to_active_tab();
+
     void add_tab(Tab::Type tab);
 
     void on_KEY(int key);
