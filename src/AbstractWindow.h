@@ -117,6 +117,9 @@ private:
     virtual void on_BACKSPACE() {}
     virtual void on_printable_ascii(int) {}
 
+    // common implementation for activate_left() and activate_right()
+    void activate_neighbor(AbstractWindow * (AbstractWindow::*)());
+
 
 protected:
     WINDOW * w{nullptr};

@@ -304,35 +304,22 @@ void AbstractWindow::disable(VisibilityAspect::Type aspect)
 
 void AbstractWindow::activate_left()
 {
-    if (nullptr == left_neighbor)
-        return;
-
-    auto active_tab = AbstractTab::get_active_tab();
-    if (nullptr == active_tab)
-        return;
-
-    AbstractWindow * l = left_neighbor;
-    while (!l->is_enabled(VisibilityAspect::WindowVisibility::grab()) && l != this)
-        l = l->get_left_neighbor();
-
-    if (l != this && l->is_enabled(VisibilityAspect::WindowVisibility::grab()))
-        active_tab->set_active_window(l);
+    activate_neighbor(&AbstractWindow::get_left_neighbor);
 }
 
 
 void AbstractWindow::activate_right()
 {
-    if (nullptr == left_neighbor)
-        return;
+    activate_neighbor(&AbstractWindow::get_right_neighbor);
+}
 
-    auto active_tab = AbstractTab::get_active_tab();
-    if (nullptr == active_tab)
-        return;
 
-    AbstractWindow * r = right_neighbor;
-    while (!r->is_enabled(VisibilityAspect::WindowVisibility::grab()) && r != this)
-        r = r->get_right_neighbor();
+void AbstractWindow::activate_neighbor(AbstractWindow * (AbstractWindow::*get_neighbor)())
+{
+    AbstractWindow * n = (this->*get_neighbor)();
+    while (nullptr != n && n != this && !n->is_enabled(VisibilityAspect::WindowVisibility::grab()))
+        n = (n->*get_neighbor)();
 
-    if (r != this && r->is_enabled(VisibilityAspect::WindowVisibility::grab()))
-        active_tab->set_active_window(r);
+    if (nullptr != n && n != this && n->tabs.size() == 1)
+        n->tabs[0]->set_active_window(n);
 }
