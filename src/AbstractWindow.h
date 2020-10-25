@@ -184,23 +184,85 @@ public:
      * the window is added with AbstractTab::add_window()
      *
      * @param key Only AbstractTab has the key (@see AccessKey_AbstractWindow_add_tab)
-     * @param tab The handle back-referencing the tab to which this window was added
+     * @param[in] tab The handle back-referencing the tab to which this window was added
      */
     void add_tab(AccessKey_AbstractWindow_add_tab key, Tab::Type tab);
 
+    /**
+     * Event handler for keyboard keys
+     *
+     * @param[in] key keyboard key to be handled
+     */
     void on_KEY(int key);
 
+    /**
+     * Allows draw() to always be called within an event loop while maintaining efficiency.
+     * Only when the window is "dirty" will draw be performed.
+     * Use mark_dirty() to signify that the window needs to be redrawn
+     */
     void mark_dirty();
+
+    /**
+     * "Dirty dependencies" are windows that inherit this window's dirtiness.
+     * In other words, redraw these windows too when this window is dirty
+     *
+     * @param[in] win A window that should be redrawn when this window becomes dirty
+     */
     void add_dirty_dependency(AbstractWindow * win);
 
-    void set_enabled(bool, VisibilityAspect::Type);
-    bool is_enabled() const;
-    bool is_enabled(VisibilityAspect::Type) const;
-    void enable(VisibilityAspect::Type);
-    void disable(VisibilityAspect::Type);
+    /**
+     * Set the window's enabledness for some given VisibilityAspect.
+     * A window may be enabled or disabled for various reasons.
+     * Maybe the tab has been switched.
+     * Maybe the window's tab is active but the window's layer has been disabled.
+     * Such reasons are referred to as "aspects", and AbstractWindow maintains enabledness for each one
+     *
+     * @param[in] enabledness The enabledness state
+     * @param[in] aspect The aspect to which the given enabledness state pertains
+     */
+    void set_enabled(bool enabledness, VisibilityAspect::Type aspect);
 
+    /**
+     * @returns true when all visibility aspects are enabled, or false if any aspect is disabled
+     */
+    bool is_enabled() const;
+
+    /**
+     * @param[in] aspect The aspect for which enabledness is queried
+     * @returns The window's enabledness for the given visibility aspect
+     */
+    bool is_enabled(VisibilityAspect::Type aspect) const;
+
+    /**
+     * Enable the window for the given visibility aspect
+     * @param[in] aspect The aspect for which this window is to be enabled
+     */
+    void enable(VisibilityAspect::Type aspect);
+
+    /**
+     * Disable the window for the given visibility aspect
+     * @param[in] aspect The aspect for which this window is to be disabled
+     */
+    void disable(VisibilityAspect::Type aspect);
+
+    /**
+     * Activate the window's left neighbor for the given tab.
+     * The tab must be specified since the window could exist in more than one tab and thus have
+     * different neighbors in each tab
+     *
+     * @param[in] tab The tab in which the left neighbor is to be activated
+     */
     void activate_left(Tab::Type tab);
+
+    /**
+     * Activate the window's right neighbor for the given tab.
+     * The tab must be specified since the window could exist in more than one tab and thus have
+     * different neighbors in each tab
+     *
+     * @param[in] tab The tab in which the right neighbor is to be activated
+     */
     void activate_right(Tab::Type tab);
+
 
 private:
     // dependencies

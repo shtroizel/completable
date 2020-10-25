@@ -270,9 +270,9 @@ void AbstractWindow::add_dirty_dependency(AbstractWindow * dep)
 }
 
 
-void AbstractWindow::set_enabled(bool state, VisibilityAspect::Type aspect)
+void AbstractWindow::set_enabled(bool enabledness, VisibilityAspect::Type aspect)
 {
-    if (state)
+    if (enabledness)
         enable(aspect);
     else
         disable(aspect);
@@ -332,7 +332,7 @@ void AbstractWindow::activate_right(Tab::Type tab)
 
 void AbstractWindow::activate_neighbor(
     Tab::Type tab,
-    std::function<AbstractWindow * (AbstractWindow * win, Tab::Type)> get_neighbor
+    std::function<AbstractWindow * (AbstractWindow *, Tab::Type)> get_neighbor
 )
 {
     AbstractWindow * n = get_neighbor(this, tab);
