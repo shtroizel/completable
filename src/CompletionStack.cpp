@@ -148,3 +148,13 @@ void CompletionStack::clear_top()
         std::sort_heap(top().length_completion.begin(), top().length_completion.end());
     }
 }
+
+
+void CompletionStack::clear_all()
+{
+    for (completion_count = 2; completion_count <= CAPACITY; ++completion_count)
+        clear_top();
+
+    completion_count = 1;
+    clear_top();
+}

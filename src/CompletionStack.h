@@ -74,6 +74,7 @@ public:
     completion const & top() const { return completions[completion_count - 1]; }
     completion & top() { return completions[completion_count - 1]; }
     void clear_top();
+    void clear_all();
 
 
 private:

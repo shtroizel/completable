@@ -167,12 +167,7 @@ CompletableTabAgent::CompletableTabAgent(
                 ws.pop();
 
             // clear out completion stack
-            while (cs->count() > 1)
-            {
-                cs->clear_top();
-                cs->pop();
-            }
-            cs->clear_top();
+            cs->clear_all();
 
             if (MatchmakerStateInstance::Instance::grab().as_state() == MatchmakerState::Loaded::grab())
                 AbstractTab::set_active_tab(Tab::completable::grab());
