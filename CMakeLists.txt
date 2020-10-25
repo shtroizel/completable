@@ -63,6 +63,7 @@ set(
     src/TabDescriptionWindow.cpp
     src/completable.cpp
     src/completable_shell.cpp
+    src/exec_long_task_with_busy_animation.cpp
     src/matchmaker.cpp
 )
 
