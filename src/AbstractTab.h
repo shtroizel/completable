@@ -97,7 +97,7 @@ private:
             Layer::Type,
             std::pair<std::vector<AbstractWindow *>, AbstractWindow *>
         >
-    > content;
+    > layers;
     bool layer_F_enabled{false};
     bool layer_Help_enabled{false};
 

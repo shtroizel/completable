@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 AbstractTab::AbstractTab()
-    : content{
+    : layers{
         std::make_shared<
             matchable::MatchBox<
                 Layer::Type,
@@ -53,7 +53,7 @@ AbstractTab::AbstractTab()
       }
 {
     for (auto l : Layer::variants())
-        content->mut_at(l).second = nullptr;
+        layers->mut_at(l).second = nullptr;
 
     EnablednessSetting::Borders::grab().add_enabledness_observer([&](){ draw(true); });
 }
@@ -61,7 +61,7 @@ AbstractTab::AbstractTab()
 
 AbstractTab::~AbstractTab()
 {
-    content.reset();
+    layers.reset();
     active_tab() = nullptr;
     left_neighbor = nullptr;
     right_neighbor = nullptr;
@@ -73,12 +73,12 @@ void AbstractTab::add_window(AbstractWindow * win)
     if (nullptr == win)
         return;
 
-    content->mut_at(win->get_layer()).first.push_back(win);
+    layers->mut_at(win->get_layer()).first.push_back(win);
     win->add_tab(this);
 
     // guarantee active window by setting first window active
-    if (content->at(win->get_layer()).first.size() == 1)
-        content->mut_at(win->get_layer()).second = win;
+    if (layers->at(win->get_layer()).first.size() == 1)
+        layers->mut_at(win->get_layer()).second = win;
 }
 
 
@@ -86,7 +86,7 @@ void AbstractTab::resize()
 {
     if (is_active())
         for (auto l : Layer::variants())
-            for (auto w : content->mut_at(l).first)
+            for (auto w : layers->mut_at(l).first)
                 w->resize();
 }
 
@@ -95,15 +95,15 @@ void AbstractTab::draw(bool clear_first)
 {
     if (is_active())
     {
-        for (auto w : content->mut_at(Layer::Bottom::grab()).first)
+        for (auto w : layers->mut_at(Layer::Bottom::grab()).first)
             w->draw(clear_first);
 
         if (layer_F_enabled)
-            for (auto w : content->mut_at(Layer::F::grab()).first)
+            for (auto w : layers->mut_at(Layer::F::grab()).first)
                 w->draw(clear_first);
 
         if (layer_Help_enabled)
-            for (auto w : content->mut_at(Layer::Help::grab()).first)
+            for (auto w : layers->mut_at(Layer::Help::grab()).first)
                 w->draw(clear_first);
     }
 }
@@ -117,7 +117,7 @@ void AbstractTab::set_active_tab(AbstractTab * pg)
 
     if (nullptr != active_tab())
         for (auto l : Layer::variants())
-            for (auto w : active_tab()->content->mut_at(l).first)
+            for (auto w : active_tab()->layers->mut_at(l).first)
                 w->disable(VisibilityAspect::TabVisibility::grab());
 
     AbstractWindow const * pg_act_win = pg->get_active_window();
@@ -148,9 +148,10 @@ void AbstractTab::set_active_tab(AbstractTab * pg)
 
     active_tab() = pg;
 
+    // enable TabVisibility aspect for each window within each layer
     if (nullptr != active_tab())
         for (auto l : Layer::variants())
-            for (auto w : active_tab()->content->mut_at(l).first)
+            for (auto w : active_tab()->layers->mut_at(l).first)
                 w->enable(VisibilityAspect::TabVisibility::grab());
 }
 
@@ -163,7 +164,7 @@ void AbstractTab::set_active_window(AbstractWindow * win)
     // verify given window exists in the given layer
     {
         bool found = false;
-        for (auto w : content->at(win->get_layer()).first)
+        for (auto w : layers->at(win->get_layer()).first)
         {
             if (w == win)
             {
@@ -176,28 +177,28 @@ void AbstractTab::set_active_window(AbstractWindow * win)
     }
 
     // need to redraw both old and new active windows
-    content->mut_at(win->get_layer()).second->mark_dirty();
+    layers->mut_at(win->get_layer()).second->mark_dirty();
     win->mark_dirty();
 
-    content->mut_at(win->get_layer()).second = win;
+    layers->mut_at(win->get_layer()).second = win;
 }
 
 
 AbstractWindow * AbstractTab::get_active_window()
 {
     if (layer_Help_enabled)
-        return content->mut_at(Layer::Help::grab()).second;
+        return layers->mut_at(Layer::Help::grab()).second;
 
     if (layer_F_enabled)
-        return content->mut_at(Layer::F::grab()).second;
+        return layers->mut_at(Layer::F::grab()).second;
 
-    return content->mut_at(Layer::Bottom::grab()).second;
+    return layers->mut_at(Layer::Bottom::grab()).second;
 }
 
 
 AbstractWindow * AbstractTab::get_active_window(Layer::Type layer)
 {
-    return content->mut_at(layer).second;
+    return layers->mut_at(layer).second;
 }
 
 
@@ -263,20 +264,20 @@ void AbstractTab::toggle_layer(Layer::Type layer, bool & layer_enabled)
     {
         // disable layer
         layer_enabled = false;
-        for (auto w : content->mut_at(layer).first)
+        for (auto w : layers->mut_at(layer).first)
             w->disable(VisibilityAspect::WindowVisibility::grab());
 
         // mark other layers dirty
         for (auto l : Layer::variants())
             if (l != layer)
-                for (auto w : content->mut_at(l).first)
+                for (auto w : layers->mut_at(l).first)
                     w->mark_dirty();
     }
     else
     {
         // enable layer
         layer_enabled = true;
-        for (auto w : content->mut_at(layer).first)
+        for (auto w : layers->mut_at(layer).first)
             w->enable(VisibilityAspect::WindowVisibility::grab());
     }
 }
