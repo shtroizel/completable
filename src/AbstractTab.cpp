@@ -76,7 +76,7 @@ void AbstractTab::add_window(AbstractWindow * win)
         return;
 
     layers->mut_at(win->get_layer()).first.push_back(win);
-    win->add_tab(as_handle());
+    win->add_tab(AccessKey_AbstractWindow_add_tab(), as_handle());
 
     // guarantee active window by setting first window active
     if (layers->at(win->get_layer()).first.size() == 1)

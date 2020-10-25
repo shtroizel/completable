@@ -54,6 +54,12 @@ MATCHABLE_FWD(VisibilityAspect);
 
 
 /**
+ * Only AbstractTab may call the AbstractWindow::add_tab() function
+ */
+class AccessKey_AbstractWindow_add_tab { friend AbstractTab; AccessKey_AbstractWindow_add_tab() {} };
+
+
+/**
  * AbstractWindow serves as the base for all windows, wrapping the low-level ncurses WINDOW type.
  */
 class AbstractWindow
@@ -173,7 +179,14 @@ public:
      */
     bool belongs_to_active_tab();
 
-    void add_tab(Tab::Type tab);
+    /**
+     * Only callable by AbstractTab, this function will add a back-reference handle to a tab when
+     * the window is added with AbstractTab::add_window()
+     *
+     * @param key Only AbstractTab has the key (@see AccessKey_AbstractWindow_add_tab)
+     * @param tab The handle back-referencing the tab to which this window was added
+     */
+    void add_tab(AccessKey_AbstractWindow_add_tab key, Tab::Type tab);
 
     void on_KEY(int key);
 

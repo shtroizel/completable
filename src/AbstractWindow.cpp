@@ -219,7 +219,7 @@ bool AbstractWindow::belongs_to_active_tab()
 }
 
 
-void AbstractWindow::add_tab(Tab::Type tab)
+void AbstractWindow::add_tab(AccessKey_AbstractWindow_add_tab, Tab::Type tab)
 {
     tabs->set(tab);
 }
