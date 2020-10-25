@@ -104,9 +104,6 @@ void CompletionStack::push(int ch)
     }
     std::sort_heap(top().length_completion.begin(), top().length_completion.end());
 
-    // set selected entry to first for both normal completion and length completion
-    // notice how for normal completion this is a matchmaker index while for length completion
-    // this is the first element in the "length_completion" vector
     top().display_start = 0;
     top().len_display_start = 0;
 }

@@ -74,8 +74,6 @@ namespace matchmaker
         char * ret = nullptr;
 
 #ifdef MM_DYNAMIC_LOADING
-        // *** DYNAMIC LOADING ***
-
         handle = dlmopen(LM_ID_NEWLM, so_filename, RTLD_NOW);
         if (nullptr == handle)
         {
