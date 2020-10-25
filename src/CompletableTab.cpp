@@ -36,6 +36,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
+CompletableTab::CompletableTab() : AbstractTab()
+{
+    Tab::completable::grab().set_AbstractTab(this);
+}
+
+
 std::array<char, 17> const & CompletableTab::description() const
 {
     static std::array<char, 17> desc = []()

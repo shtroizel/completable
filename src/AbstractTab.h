@@ -35,13 +35,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 #include <vector>
 
+#include <matchable/matchable.h>
 #include <matchable/matchable_fwd.h>
 
 
 
 MATCHABLE_FWD(Layer)
 
+class AbstractTab;
 class AbstractWindow;
+
+
+// handle for AbstractTab types
+// derivers need to use SPREAD_MATCHABLE() to add their types
+PROPERTYx1_MATCHABLE(AbstractTab *, AbstractTab, Tab)
 
 class AbstractTab
 {
@@ -52,17 +59,19 @@ public:
     AbstractTab();
     virtual ~AbstractTab();
 
+    Tab::Type as_handle() const { return as_matchable(); }
+
     void add_window(AbstractWindow *);
 
     void resize();
     void draw(bool clear_first);
 
-    void set_left_neighbor(AbstractTab * neighbor) { left_neighbor = neighbor; }
-    void set_right_neighbor(AbstractTab * neighbor) { right_neighbor = neighbor; }
+    void set_left_neighbor(Tab::Type neighbor) { left_neighbor = neighbor; }
+    void set_right_neighbor(Tab::Type neighbor) { right_neighbor = neighbor; }
 
-    static void set_active_tab(AbstractTab *);
-    static AbstractTab * get_active_tab() { return active_tab(); }
-    bool is_active() { return nullptr != active_tab() && active_tab()->description() == description(); }
+    static void set_active_tab(Tab::Type);
+    static Tab::Type get_active_tab();
+    bool is_active() { return get_active_tab() == as_handle(); }
 
     void set_active_window(AbstractWindow *);
     AbstractWindow * get_active_window();
@@ -80,6 +89,7 @@ private:
     virtual std::array<char, 17> const & description() const = 0;
     virtual char abbreviation() const = 0;
     virtual int indicator_position() const = 0;
+    virtual Tab::Type as_matchable() const = 0;
 
     void on_ANY_F();
     void on_COMMA();
@@ -89,8 +99,8 @@ private:
 
 
 private:
-    AbstractTab * left_neighbor{nullptr};
-    AbstractTab * right_neighbor{nullptr};
+    Tab::Type left_neighbor;
+    Tab::Type right_neighbor;
 
     std::shared_ptr<
         matchable::MatchBox<
@@ -102,5 +112,5 @@ private:
     bool layer_Help_enabled{false};
 
     // static variables that look like functions
-    static AbstractTab * & active_tab() { static AbstractTab * w{nullptr}; return w; }
+    static AbstractTab * & active_tab() { static AbstractTab * tab; return tab; }
 };

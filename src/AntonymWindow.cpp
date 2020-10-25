@@ -89,7 +89,7 @@ int & AntonymWindow::display_start()
 
 void AntonymWindow::on_post_RETURN()
 {
-    AbstractTab::get_active_tab()->set_active_window(&syn_win);
+    AbstractTab::get_active_tab().as_AbstractTab()->set_active_window(&syn_win);
 }
 
 

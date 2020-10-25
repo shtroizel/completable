@@ -39,12 +39,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
+SPREAD_MATCHABLE(Tab, completable)
+
 class CompletableTab : public AbstractTab
 {
-    using AbstractTab::AbstractTab;
+public:
+    CompletableTab();
 
+private:
     // resolved dependencies
-    std::array<char, 17> const & description() const override;
-    char abbreviation() const override { return 'C'; }
-    int indicator_position() const override { return 0; }
+    std::array<char, 17> const & description() const final;
+    char abbreviation() const final { return 'C'; }
+    int indicator_position() const final { return 0; }
+    Tab::Type as_matchable() const final { return Tab::completable::grab(); }
 };

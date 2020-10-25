@@ -34,6 +34,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
+MatchmakerTab::MatchmakerTab() : AbstractTab()
+{
+    Tab::matchmaker::grab().set_AbstractTab(this);
+}
+
+
 std::array<char, 17> const & MatchmakerTab::description() const
 {
     static std::array<char, 17> desc = []()

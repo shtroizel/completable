@@ -31,6 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
+#include <functional>
 #include <memory>
 #include <stack>
 #include <string>
@@ -47,8 +48,9 @@ typedef struct _win_st WINDOW;
 class AbstractTab;
 class CompletionStack;
 using WordStack = std::stack<word_stack_element>;
-MATCHABLE_FWD(VisibilityAspect);
 MATCHABLE_FWD(Layer);
+MATCHABLE_FWD(Tab);
+MATCHABLE_FWD(VisibilityAspect);
 
 class AbstractWindow
 {
@@ -70,15 +72,15 @@ public:
     WINDOW * get_WINDOW() const { return w; }
     std::string get_title() { return title(); }
 
-    void set_left_neighbor(AbstractWindow * neighbor);
-    void set_right_neighbor(AbstractWindow * neighbor);
-    AbstractWindow * get_left_neighbor() { return left_neighbor; };
-    AbstractWindow * get_right_neighbor() { return right_neighbor; };
+    void set_left_neighbor(Tab::Type tab, AbstractWindow * neighbor);
+    void set_right_neighbor(Tab::Type tab, AbstractWindow * neighbor);
+    AbstractWindow * get_left_neighbor(Tab::Type tab);
+    AbstractWindow * get_right_neighbor(Tab::Type tab);
 
     bool is_active();
 
     bool belongs_to_active_tab();
-    void add_tab(AbstractTab *);
+    void add_tab(Tab::Type tab);
 
     void on_KEY(int key);
 
@@ -91,8 +93,8 @@ public:
     void enable(VisibilityAspect::Type);
     void disable(VisibilityAspect::Type);
 
-    void activate_left();
-    void activate_right();
+    void activate_left(Tab::Type tab);
+    void activate_right(Tab::Type tab);
 
 private:
     // dependencies
@@ -118,7 +120,7 @@ private:
     virtual void on_printable_ascii(int) {}
 
     // common implementation for activate_left() and activate_right()
-    void activate_neighbor(AbstractWindow * (AbstractWindow::*)());
+    void activate_neighbor(Tab::Type, std::function<AbstractWindow * (AbstractWindow *, Tab::Type)>);
 
 
 protected:
@@ -129,12 +131,12 @@ protected:
     int width{0};
     int y{0};
     int x{0};
-    std::vector<AbstractTab *> tabs;
+    std::shared_ptr<Tab::Flags> tabs;
 
 private:
     std::shared_ptr<VisibilityAspect::Flags> disabled;
     bool dirty{false};
     std::vector<AbstractWindow *> dirty_dependencies;
-    AbstractWindow * left_neighbor{nullptr};
-    AbstractWindow * right_neighbor{nullptr};
+    std::shared_ptr<matchable::MatchBox<Tab::Type, AbstractWindow *>> left_neighbor;
+    std::shared_ptr<matchable::MatchBox<Tab::Type, AbstractWindow *>> right_neighbor;
 };

@@ -53,7 +53,11 @@ static int const MIN_ROOT_X{80};
 
 
 
-AbstractWindow::AbstractWindow() : disabled{std::make_shared<VisibilityAspect::Flags>()}
+AbstractWindow::AbstractWindow()
+    : tabs{std::make_shared<Tab::Flags>()}
+    , disabled{std::make_shared<VisibilityAspect::Flags>()}
+    , left_neighbor{std::make_shared<matchable::MatchBox<Tab::Type, AbstractWindow *>>()}
+    , right_neighbor{std::make_shared<matchable::MatchBox<Tab::Type, AbstractWindow *>>()}
 {
 }
 
@@ -150,7 +154,7 @@ Layer::Type AbstractWindow::get_layer() const
 }
 
 
-void AbstractWindow::set_left_neighbor(AbstractWindow * n)
+void AbstractWindow::set_left_neighbor(Tab::Type tab, AbstractWindow * n)
 {
     if (nullptr == n)
         return;
@@ -158,11 +162,11 @@ void AbstractWindow::set_left_neighbor(AbstractWindow * n)
     if (layer() != n->layer())
         return;
 
-    left_neighbor = n;
+    left_neighbor->set(tab, n);
 }
 
 
-void AbstractWindow::set_right_neighbor(AbstractWindow * n)
+void AbstractWindow::set_right_neighbor(Tab::Type tab, AbstractWindow * n)
 {
     if (nullptr == n)
         return;
@@ -170,7 +174,25 @@ void AbstractWindow::set_right_neighbor(AbstractWindow * n)
     if (layer() != n->layer())
         return;
 
-    right_neighbor = n;
+    right_neighbor->set(tab, n);
+}
+
+
+AbstractWindow * AbstractWindow::get_left_neighbor(Tab::Type tab)
+{
+    if (tab.is_nil())
+        return nullptr;
+
+    return left_neighbor->at(tab);
+}
+
+
+AbstractWindow * AbstractWindow::get_right_neighbor(Tab::Type tab)
+{
+    if (tab.is_nil())
+        return nullptr;
+
+    return right_neighbor->at(tab);
 }
 
 
@@ -179,9 +201,7 @@ bool AbstractWindow::is_active()
     if (!belongs_to_active_tab())
         return false;
 
-    auto active_tab = AbstractTab::get_active_tab();
-
-    auto act_win = active_tab->get_active_window();
+    auto act_win = AbstractTab::get_active_tab().as_AbstractTab()->get_active_window();
     if (nullptr == act_win)
         return false;
 
@@ -192,20 +212,16 @@ bool AbstractWindow::is_active()
 bool AbstractWindow::belongs_to_active_tab()
 {
     auto active_tab = AbstractTab::get_active_tab();
-    if (nullptr == active_tab)
+    if (active_tab.is_nil())
         return false;
 
-    for (auto tab : tabs)
-        if (tab == active_tab)
-            return true;
-
-    return false;
+    return tabs->is_set(active_tab);
 }
 
 
-void AbstractWindow::add_tab(AbstractTab * tab)
+void AbstractWindow::add_tab(Tab::Type tab)
 {
-    tabs.push_back(tab);
+    tabs->set(tab);
 }
 
 
@@ -219,20 +235,20 @@ void AbstractWindow::on_KEY(int key)
 
     switch (key)
     {
-        case KEY_LEFT           : activate_left();  return;
-        case KEY_RIGHT          : activate_right(); return;
-        case KEY_UP             : on_KEY_UP();      return;
-        case KEY_DOWN           : on_KEY_DOWN();    return;
-        case PAGE_UP            : on_PAGE_UP();     return;
-        case PAGE_DOWN          : on_PAGE_DOWN();   return;
-        case HOME               : on_HOME();        return;
-        case END                : on_END();         return;
-        case RETURN             : on_RETURN();      return;
-        case DELETE             : on_DELETE();      return;
-        case TAB                : on_TAB();         return;
+        case KEY_LEFT           : activate_left(AbstractTab::get_active_tab());  return;
+        case KEY_RIGHT          : activate_right(AbstractTab::get_active_tab()); return;
+        case KEY_UP             : on_KEY_UP();                                   return;
+        case KEY_DOWN           : on_KEY_DOWN();                                 return;
+        case PAGE_UP            : on_PAGE_UP();                                  return;
+        case PAGE_DOWN          : on_PAGE_DOWN();                                return;
+        case HOME               : on_HOME();                                     return;
+        case END                : on_END();                                      return;
+        case RETURN             : on_RETURN();                                   return;
+        case DELETE             : on_DELETE();                                   return;
+        case TAB                : on_TAB();                                      return;
         case KEY_BACKSPACE      :
         case BACKSPACE_127      :
-        case BACKSPACE_BKSLSH_B : on_BACKSPACE(); return;
+        case BACKSPACE_BKSLSH_B : on_BACKSPACE();                                return;
     }
 
     if (key > 31 && key < 127) // printable ascii
@@ -302,24 +318,27 @@ void AbstractWindow::disable(VisibilityAspect::Type aspect)
 }
 
 
-void AbstractWindow::activate_left()
+void AbstractWindow::activate_left(Tab::Type tab)
 {
-    activate_neighbor(&AbstractWindow::get_left_neighbor);
+    activate_neighbor(tab, [&](AbstractWindow * win, Tab::Type t) { return win->get_left_neighbor(t); });
 }
 
 
-void AbstractWindow::activate_right()
+void AbstractWindow::activate_right(Tab::Type tab)
 {
-    activate_neighbor(&AbstractWindow::get_right_neighbor);
+    activate_neighbor(tab, [&](AbstractWindow * win, Tab::Type t) { return win->get_right_neighbor(t); });
 }
 
 
-void AbstractWindow::activate_neighbor(AbstractWindow * (AbstractWindow::*get_neighbor)())
+void AbstractWindow::activate_neighbor(
+    Tab::Type tab,
+    std::function<AbstractWindow * (AbstractWindow * win, Tab::Type)> get_neighbor
+)
 {
-    AbstractWindow * n = (this->*get_neighbor)();
+    AbstractWindow * n = get_neighbor(this, tab);
     while (nullptr != n && n != this && !n->is_enabled(VisibilityAspect::WindowVisibility::grab()))
-        n = (n->*get_neighbor)();
+        n = get_neighbor(n, tab);
 
-    if (nullptr != n && n != this && n->tabs.size() == 1)
-        n->tabs[0]->set_active_window(n);
+    if (nullptr != n && n != this && n->tabs->is_set(tab))
+        tab.as_AbstractTab()->set_active_window(n);
 }

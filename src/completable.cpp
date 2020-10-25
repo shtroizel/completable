@@ -81,14 +81,14 @@ int main(int argc, char ** argv)
 
     SettingsTabAgent sta{tab_desc_win, indicator_win};
 
-    cta()->set_left_neighbor(sta());
-    sta()->set_right_neighbor(cta());
+    cta()->set_left_neighbor(sta()->as_handle());
+    sta()->set_right_neighbor(cta()->as_handle());
 
 #ifdef MM_DYNAMIC_LOADING
     MatchmakerTabAgent mta{tab_desc_win, indicator_win};
-    mta()->set_right_neighbor(sta());
-    sta()->set_left_neighbor(mta());
-    AbstractTab::set_active_tab(mta());
+    mta()->set_right_neighbor(sta()->as_handle());
+    sta()->set_left_neighbor(mta()->as_handle());
+    AbstractTab::set_active_tab(mta()->as_handle());
 #else
     AbstractTab::set_active_tab(cta());
 #endif
@@ -100,7 +100,10 @@ int main(int argc, char ** argv)
 
     while (true)
     {
-        active_tab = AbstractTab::get_active_tab();
+        if (AbstractTab::get_active_tab().is_nil())
+            break;
+
+        active_tab = AbstractTab::get_active_tab().as_AbstractTab();
         if (nullptr == active_tab)
             break;
 

@@ -34,6 +34,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
+SettingsTab::SettingsTab() : AbstractTab()
+{
+    Tab::settings::grab().set_AbstractTab(this);
+}
+
+
 std::array<char, 17> const & SettingsTab::description() const
 {
     static std::array<char, 17> desc = []()

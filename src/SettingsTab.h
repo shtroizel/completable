@@ -36,12 +36,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
+SPREAD_MATCHABLE(Tab, settings)
+
 class SettingsTab : public AbstractTab
 {
-    using AbstractTab::AbstractTab;
+public:
+    SettingsTab();
 
+private:
     // resolved dependencies
     std::array<char, 17> const & description() const override;
     char abbreviation() const override { return 'S'; }
     int indicator_position() const override { return 1; }
+    Tab::Type as_matchable() const final { return Tab::settings::grab(); }
 };

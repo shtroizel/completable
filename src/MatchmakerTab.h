@@ -36,12 +36,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
+SPREAD_MATCHABLE(Tab, matchmaker)
+
 class MatchmakerTab : public AbstractTab
 {
-    using AbstractTab::AbstractTab;
+public:
+    MatchmakerTab();
 
+private:
     // resolved dependencies
     std::array<char, 17> const & description() const override;
     char abbreviation() const override { return 'M'; }
     int indicator_position() const override { return 2; }
+    Tab::Type as_matchable() const final { return Tab::matchmaker::grab(); }
 };

@@ -59,13 +59,13 @@ void IndicatorWindow::resize_hook()
 void IndicatorWindow::draw_hook()
 {
     auto active_tab = AbstractTab::get_active_tab();
-    if (nullptr == active_tab)
+    if (active_tab.is_nil())
         return;
 
     int abbreviation_x = 0;
-    for (auto tab : tabs)
+    for (auto tab : Tab::variants())
     {
-        abbreviation_x = width - 3 - (5 * tab->get_indicator_position());
+        abbreviation_x = width - 3 - (5 * tab.as_AbstractTab()->get_indicator_position());
 
         if (tab == active_tab)
         {
@@ -105,7 +105,7 @@ void IndicatorWindow::draw_hook()
             mvwaddch(w, 2, abbreviation_x + 2, ' ');
         }
 
-        mvwaddch(w, 1, abbreviation_x, tab->get_abbreviation());
+        mvwaddch(w, 1, abbreviation_x, tab.as_AbstractTab()->get_abbreviation());
         wattroff(w, A_REVERSE);
     }
 }

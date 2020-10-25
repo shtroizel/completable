@@ -88,14 +88,14 @@ CompletableTabAgent::CompletableTabAgent(
     completable_tab->set_active_window(completable_help_win.get());
 
     // define neighbors for left/right arrow key switching of windows within completable tab
-    completion_win->set_left_neighbor(ant_win.get());
-    completion_win->set_right_neighbor(syn_win.get());
-    len_completion_win->set_left_neighbor(syn_win.get());
-    len_completion_win->set_right_neighbor(ant_win.get());
-    syn_win->set_left_neighbor(completion_win.get());
-    syn_win->set_right_neighbor(len_completion_win.get());
-    ant_win->set_left_neighbor(len_completion_win.get());
-    ant_win->set_right_neighbor(completion_win.get());
+    completion_win->set_left_neighbor(Tab::completable::grab(), ant_win.get());
+    completion_win->set_right_neighbor(Tab::completable::grab(), syn_win.get());
+    len_completion_win->set_left_neighbor(Tab::completable::grab(), syn_win.get());
+    len_completion_win->set_right_neighbor(Tab::completable::grab(), ant_win.get());
+    syn_win->set_left_neighbor(Tab::completable::grab(), completion_win.get());
+    syn_win->set_right_neighbor(Tab::completable::grab(), len_completion_win.get());
+    ant_win->set_left_neighbor(Tab::completable::grab(), len_completion_win.get());
+    ant_win->set_right_neighbor(Tab::completable::grab(), completion_win.get());
 
     // initial enabledness
     len_completion_win->set_enabled(
@@ -124,7 +124,7 @@ CompletableTabAgent::CompletableTabAgent(
                     [&]()
                     {
                         if (completable_tab->get_active_window(Layer::Bottom::grab()) == win)
-                            win->activate_left();
+                            win->activate_left(Tab::completable::grab());
 
                         win->disable(VisibilityAspect::WindowVisibility::grab());
                     }
@@ -132,12 +132,12 @@ CompletableTabAgent::CompletableTabAgent(
             });
 
             // resize all other windows
-            AbstractWindow * start = win->get_left_neighbor();
+            AbstractWindow * start = win->get_left_neighbor(Tab::completable::grab());
             AbstractWindow * iter = start;
             do
             {
                 iter->resize();
-                iter = iter->get_left_neighbor();
+                iter = iter->get_left_neighbor(Tab::completable::grab());
             }
             while (iter != start);
         };
@@ -175,7 +175,7 @@ CompletableTabAgent::CompletableTabAgent(
             cs->clear_top();
 
             if (MatchmakerStateInstance::Instance::grab().as_state() == MatchmakerState::Loaded::grab())
-                AbstractTab::set_active_tab(completable_tab.get());
+                AbstractTab::set_active_tab(Tab::completable::grab());
         }
     );
 }

@@ -56,6 +56,8 @@ AbstractTab::AbstractTab()
         layers->mut_at(l).second = nullptr;
 
     EnablednessSetting::Borders::grab().add_enabledness_observer([&](){ draw(true); });
+
+    Tab::nil.set_AbstractTab(nullptr);
 }
 
 
@@ -63,8 +65,8 @@ AbstractTab::~AbstractTab()
 {
     layers.reset();
     active_tab() = nullptr;
-    left_neighbor = nullptr;
-    right_neighbor = nullptr;
+    left_neighbor = Tab::nil;
+    right_neighbor = Tab::nil;
 }
 
 
@@ -74,7 +76,7 @@ void AbstractTab::add_window(AbstractWindow * win)
         return;
 
     layers->mut_at(win->get_layer()).first.push_back(win);
-    win->add_tab(this);
+    win->add_tab(as_handle());
 
     // guarantee active window by setting first window active
     if (layers->at(win->get_layer()).first.size() == 1)
@@ -110,9 +112,9 @@ void AbstractTab::draw(bool clear_first)
 
 
 
-void AbstractTab::set_active_tab(AbstractTab * pg)
+void AbstractTab::set_active_tab(Tab::Type tab)
 {
-    if (nullptr == pg)
+    if (tab.is_nil())
         return;
 
     if (nullptr != active_tab())
@@ -120,14 +122,14 @@ void AbstractTab::set_active_tab(AbstractTab * pg)
             for (auto w : active_tab()->layers->mut_at(l).first)
                 w->disable(VisibilityAspect::TabVisibility::grab());
 
-    AbstractWindow const * pg_act_win = pg->get_active_window();
+    AbstractWindow const * tab_act_win = tab.as_AbstractTab()->get_active_window();
 
     // synce WindowVisibility aspect for Help layer, specifically:
     //
     // if help enabled for old tab then enable help for new tab if not already
     // and...
     // if help disabled for old tab then disable help for new tab if not already
-    if (nullptr != active_tab() && nullptr != pg_act_win)
+    if (nullptr != active_tab() && nullptr != tab_act_win)
     {
         // if help enabled for old/current active_tab()
         if (nullptr != active_tab()->get_active_window() &&
@@ -135,24 +137,33 @@ void AbstractTab::set_active_tab(AbstractTab * pg)
         {
 
             // then enable if help disabled for new active_tab()
-            if (pg_act_win->get_layer() != Layer::Help::grab())
-                pg->on_COMMA();
+            if (tab_act_win->get_layer() != Layer::Help::grab())
+                tab.as_AbstractTab()->on_COMMA();
         }
         else // otherwise if help disabled for old/current active_tab()
         {
             // then disable if help enabled for new active_tab()
-            if (pg_act_win->get_layer() == Layer::Help::grab())
-                pg->on_COMMA();
+            if (tab_act_win->get_layer() == Layer::Help::grab())
+                tab.as_AbstractTab()->on_COMMA();
         }
     }
 
-    active_tab() = pg;
+    active_tab() = tab.as_AbstractTab();
 
     // enable TabVisibility aspect for each window within each layer
     if (nullptr != active_tab())
         for (auto l : Layer::variants())
             for (auto w : active_tab()->layers->mut_at(l).first)
                 w->enable(VisibilityAspect::TabVisibility::grab());
+}
+
+
+Tab::Type AbstractTab::get_active_tab()
+{
+    if (nullptr == active_tab())
+        return Tab::nil;
+
+    return active_tab()->as_handle();
 }
 
 
@@ -285,13 +296,13 @@ void AbstractTab::toggle_layer(Layer::Type layer, bool & layer_enabled)
 
 void AbstractTab::on_SHIFT_LEFT()
 {
-    if (nullptr != left_neighbor)
+    if (!left_neighbor.is_nil())
         AbstractTab::set_active_tab(left_neighbor);
 }
 
 
 void AbstractTab::on_SHIFT_RIGHT()
 {
-    if (nullptr != right_neighbor)
+    if (!right_neighbor.is_nil())
         AbstractTab::set_active_tab(right_neighbor);
 }

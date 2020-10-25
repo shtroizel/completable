@@ -260,7 +260,7 @@ void AbstractListWindow::on_DELETE()
 
     ws.pop();
 
-    auto active_tab = AbstractTab::get_active_tab();
+    auto active_tab = AbstractTab::get_active_tab().as_AbstractTab();
     active_tab->set_active_window(w);
     input_win.mark_dirty();
     display_start() = ds;

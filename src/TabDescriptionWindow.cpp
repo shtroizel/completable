@@ -58,11 +58,11 @@ void TabDescriptionWindow::resize_hook()
 void TabDescriptionWindow::draw_hook()
 {
     auto tab = AbstractTab::get_active_tab();
-    if (nullptr == tab)
+    if (tab.is_nil())
         return;
 
-    for (int i = 0; i < (int) tab->get_description().size() && i < width; ++i)
-        mvwaddch(w, 1, i, tab->get_description()[i]);
+    for (int i = 0; i < (int) tab.as_AbstractTab()->get_description().size() && i < width; ++i)
+        mvwaddch(w, 1, i, tab.as_AbstractTab()->get_description()[i]);
 }
 
 
