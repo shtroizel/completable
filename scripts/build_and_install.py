@@ -19,14 +19,17 @@ def usage():
     print('    -i  --install_dir         install directory')
     print('                                * defaults to <completable root>/install')
     print('                                * relative paths are relative to build_dir\n')
-    print('    -m  --matchmaker_dir      matchmaker install directory')
-    print('                                * defaults to <completable root>/matchmaker/install')
+    print('    -m  --matchmaker_dir      location of installed matchmaker cmake directory')
+    print('                                * defaults to <completable root>/matchmaker/install/'           \
+                                                         'matchmaker/lib/cmake')
     print('                                * relative paths are relative to <completable root>')
     print('                                * ignored if dynamic_loading (\'-l\')\n')
-    print('    -q  --q                   adds \'_q\' suffix to:')
-    print('                                * build_dir')
-    print('                                * install_dir')
-    print('                                * matchmaker_dir\n')
+    print('    -q  --q                   use if linking against a matchmaker library built with q only to:')
+    print('                                * include matchmaker_q/matchmaker.h instead of ' +              \
+            'matchmaker/matchmaker.h')
+    print('                                * change default matchmaker_dir to: ' +                         \
+                                             '<completable_root>/matchmaker/install/matchmaker_q/lib/cmake')
+    print('                                * ignored if dynamic_loading (\'-l\')\n')
     print('    -c  --clang               force use of clang compiler (defaults to system compiler)\n')
     print('    -d  --debug               debug build (default is release)\n')
     print('    -l  --dynamic_loading     load matchmaker at runtime')
@@ -43,6 +46,8 @@ def build_and_install(build_dir, install_dir, matchmaker_dir, use_clang, q, debu
         build_dir = completable_root + '/build'
     while build_dir[-1] == '/':
         build_dir = build_dir[:-1]
+    if q:
+        build_dir = build_dir + '_q'
 
     if install_dir == '':
         install_dir = completable_root + '/install'
@@ -50,25 +55,17 @@ def build_and_install(build_dir, install_dir, matchmaker_dir, use_clang, q, debu
         install_dir = install_dir[:-1]
 
     if matchmaker_dir == '':
-        matchmaker_dir = completable_root + '/matchmaker/install'
-    while matchmaker_dir[-1] == '/':
-        matchmaker_dir = matchmaker_dir[:-1]
-
-    if q:
-        build_dir = build_dir + '_q'
-        install_dir = install_dir + '_q'
-        matchmaker_dir = matchmaker_dir + '_q'
-
-    build_dir = build_dir + '/'
-    install_dir = install_dir + '/'
-    matchmaker_dir = matchmaker_dir + '/'
+        matchmaker_dir = completable_root + '/matchmaker/install/lib/matchmaker'
+        if q:
+            matchmaker_dir = matchmaker_dir + '_q'
+        matchmaker_dir = matchmaker_dir + '/cmake'
 
     shutil.rmtree(build_dir, ignore_errors=True)
     os.makedirs(build_dir)
     os.chdir(build_dir)
 
-    shutil.rmtree(install_dir, ignore_errors=True)
-    os.makedirs(install_dir)
+    if not os.path.exists(install_dir):
+        os.makedirs(install_dir)
 
     cmake_cmd = ['cmake', '-DCMAKE_INSTALL_PREFIX=' + install_dir]
     if use_clang:
@@ -84,7 +81,7 @@ def build_and_install(build_dir, install_dir, matchmaker_dir, use_clang, q, debu
         cmake_cmd.append('-Dmatchmaker_DL=ON')
     else:
         cmake_cmd.append('-Dmatchmaker_DL=OFF')
-        cmake_cmd.append('-Dmatchmaker_DIR=' + matchmaker_dir + '/lib/matchmaker/cmake')
+        cmake_cmd.append('-Dmatchmaker_DIR=' + matchmaker_dir)
 
     cmake_cmd.append(completable_root)
 
