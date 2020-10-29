@@ -7,6 +7,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wextra")
 
+if(q)
+    add_definitions(-DQ_ONLY)
+endif()
+
 if(EXISTS /etc/gentoo-release)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ltinfo")
 endif()

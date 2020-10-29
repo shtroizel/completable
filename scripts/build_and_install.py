@@ -77,6 +77,9 @@ def build_and_install(build_dir, install_dir, matchmaker_dir, use_clang, q, debu
     else:
         cmake_cmd.append('-DCMAKE_BUILD_TYPE=Release')
 
+    if q:
+        cmake_cmd.append('-Dq=ON')
+
     if dynamic_loading:
         cmake_cmd.append('-Dmatchmaker_DL=ON')
     else:

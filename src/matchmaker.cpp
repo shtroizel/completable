@@ -37,7 +37,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef MM_DYNAMIC_LOADING
     #include <dlfcn.h>
 #else
-    #include <matchmaker/matchmaker.h>
+    #ifdef Q_ONLY
+        #include <matchmaker_q/matchmaker.h>
+    #else
+        #include <matchmaker/matchmaker.h>
+    #endif
 #endif
 
 
