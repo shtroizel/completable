@@ -65,7 +65,11 @@ void IndicatorWindow::draw_hook()
     int abbreviation_x = 0;
     for (auto tab : Tab::variants())
     {
-        abbreviation_x = width - 3 - (5 * tab.as_AbstractTab()->get_indicator_position());
+        AbstractTab * abstract_tab = tab.as_AbstractTab();
+        if (nullptr == abstract_tab)
+            continue;
+
+        abbreviation_x = width - 3 - (5 * abstract_tab->get_indicator_position());
 
         if (tab == active_tab)
         {
