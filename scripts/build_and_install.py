@@ -93,10 +93,23 @@ def build_and_install(build_dir, install_dir, matchmaker_dir, use_clang, q, debu
         os.chdir(start_dir)
         exit(1)
 
-    if subprocess.run(['make', '-j' + str(multiprocessing.cpu_count()), 'install']).returncode != 0:
+    jobs = str(multiprocessing.cpu_count())
+
+    if subprocess.run(['make', '-j' + jobs]).returncode != 0:
         print('make failed')
         os.chdir(start_dir)
         exit(1)
+
+    if os.access(install_dir, os.W_OK):
+        if subprocess.run(['make', '-j' + jobs, 'install']).returncode != 0:
+            print('make install failed')
+            os.chdir(start_dir)
+            exit(1)
+    else:
+        if subprocess.run(['sudo', 'make', '-j' + jobs, 'install']).returncode != 0:
+            print('make install failed')
+            os.chdir(start_dir)
+            exit(1)
 
     os.chdir(start_dir)
 
