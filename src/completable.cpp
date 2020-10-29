@@ -90,7 +90,7 @@ int main(int argc, char ** argv)
     sta()->set_left_neighbor(mta()->as_handle());
     AbstractTab::set_active_tab(mta()->as_handle());
 #else
-    AbstractTab::set_active_tab(cta());
+    AbstractTab::set_active_tab(cta()->as_handle());
 #endif
 
 
