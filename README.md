@@ -20,7 +20,7 @@ scripts/build_and_install.py -h
 ### EXAMPLE: build q only (quick)
 ```
 matchmaker/scripts/build_and_install.py -q
-scripts/build_and_install.py -q -b build_q -i ../install_q
+scripts/build_and_install.py -q -i ../install_q
 install_q/bin/completable
 ```
 ### EXAMPLE: entire dictionary
