@@ -41,11 +41,11 @@ class IndicatorWindow : public AbstractWindow
     using AbstractWindow::AbstractWindow;
 
     // resolved dependencies
-    std::string title() override;
-    void resize_hook() override;
-    void draw_hook() override;
-    Layer::Type layer() const override;
+    std::string title() final;
+    void resize_hook() final;
+    void draw_hook() final;
+    Layer::Type layer() const final;
 
     // options
-    bool borders_enabled() const override final { return false; }
+    bool borders_enabled() const final { return false; }
 };

@@ -41,11 +41,11 @@ class CompletionWindow : public AbstractListWindow
     using AbstractListWindow::AbstractListWindow;
 
     // resolved AbstractWindow dependencies
-    std::string title() override final;
-    void resize_hook() override final;
+    std::string title() final;
+    void resize_hook() final;
 
     // resolved AbstractListWindow dependencies
-    int & display_start() override final;
-    void unfiltered_words(int, int const * *, int *) const override final;
-    bool apply_filter() const override final { return false; }
+    int & display_start() final;
+    void unfiltered_words(int, int const * *, int *) const final;
+    bool apply_filter() const final { return false; }
 };

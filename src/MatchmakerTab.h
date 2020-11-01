@@ -45,6 +45,6 @@ public:
 
 private:
     // resolved dependencies
-    int indicator_position() const override { return 2; }
+    int indicator_position() const final { return 2; }
     Tab::Type as_matchable() const final { return Tab::matchmaker::grab(); }
 };

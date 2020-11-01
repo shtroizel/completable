@@ -55,7 +55,7 @@ private:
     Layer::Type layer() const final;
 
     // options
-    bool borders_enabled() const override final { return false; } // draw our own instead
+    bool borders_enabled() const final { return false; } // draw our own instead
 
     std::vector<std::string> content;
     int selected{0};

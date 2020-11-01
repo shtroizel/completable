@@ -43,21 +43,21 @@ class FilterWindow : public AbstractCompletionDataWindow
 {
 public:
     FilterWindow(CompletionStack &, WordStack &, InputWindow &, word_filter &);
-    ~FilterWindow() override;
+    ~FilterWindow() final;
 
 private:
     // resolved dependencies
-    std::string title() override final;
-    void resize_hook() override final;
-    void draw_hook() override final;
-    Layer::Type layer() const override final;
+    std::string title() final;
+    void resize_hook() final;
+    void draw_hook() final;
+    Layer::Type layer() const final;
 
     // options
-    void post_resize_hook() override final;
-    void pre_disable_hook() override final;
-    void on_KEY_UP() override final;
-    void on_KEY_DOWN() override final;
-    void on_RETURN() override final;
+    void post_resize_hook() final;
+    void pre_disable_hook() final;
+    void on_KEY_UP() final;
+    void on_KEY_DOWN() final;
+    void on_RETURN() final;
 
 private:
     int hover{-1};
