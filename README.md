@@ -1,5 +1,5 @@
 # completable
-completable provides the matchmaker dictionary as a terminal application<br/>
+completable provides the matchmaker dictionary as an ncurses terminal application<br/>
 
 for information about matchmaker see https://github.com/shtroizel/matchmaker
 ## clone and initialize
