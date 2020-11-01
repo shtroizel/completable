@@ -39,6 +39,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class InputWindow;
 struct word_filter;
 
+
+
+/**
+ * The AbstractListWindow class provides drawing and event handling for windows that need to
+ * display lists of words based on "completion data"
+ */
 class AbstractListWindow : public AbstractCompletionDataWindow
 {
 public:
@@ -76,7 +82,7 @@ private:
 
     // cache
     std::vector<int> words;
-    class CacheDirty // because observing is disturbing
+    class CacheDirty // because observing is disturbing (see is_dirty())
     {
     public:
         void set_false() { dirty = false; }
@@ -88,8 +94,6 @@ private:
     CacheDirty cache_dirty;
     mutable std::vector<int> words_cache;
 
-    // same or longer lifetime as this and avoided during destruction
-    // TODO guarantee using keys
     InputWindow & input_win;
     word_filter & wf;
 };
