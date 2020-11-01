@@ -43,9 +43,9 @@ class MatchmakerSelectionWindow : public AbstractWindow
 public:
     void set_content(std::vector<std::string>);
 
-    void on_RETURN();
-    void on_KEY_UP();
-    void on_KEY_DOWN();
+    void load_currently_selected();
+    void select_previous();
+    void select_next();
 
 private:
     // resolved dependencies

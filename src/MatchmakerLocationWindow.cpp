@@ -143,17 +143,17 @@ void MatchmakerLocationWindow::on_BACKSPACE()
 
 void MatchmakerLocationWindow::on_RETURN()
 {
-    mm_sel_win.on_RETURN();
+    mm_sel_win.load_currently_selected();
 }
 
 
 void MatchmakerLocationWindow::on_KEY_UP()
 {
-    mm_sel_win.on_KEY_UP();
+    mm_sel_win.select_previous();
 }
 
 
 void MatchmakerLocationWindow::on_KEY_DOWN()
 {
-    mm_sel_win.on_KEY_DOWN();
+    mm_sel_win.select_next();
 }

@@ -115,7 +115,7 @@ Layer::Type MatchmakerSelectionWindow::layer() const
 }
 
 
-void MatchmakerSelectionWindow::on_RETURN()
+void MatchmakerSelectionWindow::load_currently_selected()
 {
     if (content.size() > 0)
     {
@@ -128,7 +128,7 @@ void MatchmakerSelectionWindow::on_RETURN()
 }
 
 
-void MatchmakerSelectionWindow::on_KEY_UP()
+void MatchmakerSelectionWindow::select_previous()
 {
     if (selected > 0)
     {
@@ -138,7 +138,7 @@ void MatchmakerSelectionWindow::on_KEY_UP()
 }
 
 
-void MatchmakerSelectionWindow::on_KEY_DOWN()
+void MatchmakerSelectionWindow::select_next()
 {
     if (selected < (int) content.size() - 1)
     {
