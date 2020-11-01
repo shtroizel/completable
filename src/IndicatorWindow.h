@@ -36,6 +36,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
+/**
+ * The IndicatorWindow class provides the tab indicator in the upper right of the interface. A border is
+ * shown around the active tab.
+ */
 class IndicatorWindow : public AbstractWindow
 {
     using AbstractWindow::AbstractWindow;

@@ -40,6 +40,10 @@ class CompletionWindow;
 class SynonymWindow;
 struct word_filter;
 
+
+/**
+ * AntonymWindow lists antonyms of the currently completed word
+ */
 class AntonymWindow : public AbstractListWindow
 {
 public:

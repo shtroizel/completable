@@ -39,6 +39,11 @@ class CompletionWindow;
 class InputWindow;
 struct word_filter;
 
+
+/**
+ * LengthCompletionWindow shows all words starting with the given input, sorted such that the longest
+ * words appear first.
+ */
 class LengthCompletionWindow : public AbstractListWindow
 {
 public:

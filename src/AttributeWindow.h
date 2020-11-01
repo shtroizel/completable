@@ -41,6 +41,10 @@ class LengthCompletionWindow;
 class SynonymWindow;
 class AntonymWindow;
 
+
+/**
+ * The AttributeWindow provides attributes including parts of speech for the currently completed word
+ */
 class AttributeWindow : public AbstractCompletionDataWindow
 {
 public:

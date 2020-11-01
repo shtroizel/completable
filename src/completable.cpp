@@ -100,11 +100,11 @@ int main(int argc, char ** argv)
 
     while (true)
     {
-        if (AbstractTab::get_active_tab().is_nil())
+        if (AbstractTab::get_active_tab().is_nil()) // should be impossible
             break;
 
         active_tab = AbstractTab::get_active_tab().as_AbstractTab();
-        if (nullptr == active_tab)
+        if (nullptr == active_tab) // should be impossible
             break;
 
         // *** terminal resized? *************
@@ -125,6 +125,7 @@ int main(int argc, char ** argv)
         // tab_desc_win is on all tabs and is always enabled so it is the chosen one
         ch = wgetch(tab_desc_win->get_WINDOW());
 
+        // enter shell mode?
         if (ch == '$' || ch == '~' || ch == '`')
         {
             def_prog_mode();

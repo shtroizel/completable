@@ -35,6 +35,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractCompletionDataWindow.h"
 
 
+/**
+ * InputWindow provides the location where the users input is echoed
+ */
 class InputWindow : public AbstractCompletionDataWindow
 {
     using AbstractCompletionDataWindow::AbstractCompletionDataWindow;

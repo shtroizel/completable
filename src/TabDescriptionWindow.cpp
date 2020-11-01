@@ -68,6 +68,10 @@ void TabDescriptionWindow::draw_hook()
 
 void TabDescriptionWindow::post_resize_hook()
 {
+    // TabDescriptionWindow is a window that is on every tab.
+    // As such, it has been recruited to be the window used for the keypad.
+    // All key events regardless of what tab or window is active come through
+    // TabDescriptionWindow's low level ncurses WINDOW.
     keypad(w, true);
 }
 

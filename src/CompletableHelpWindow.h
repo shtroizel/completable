@@ -36,6 +36,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
+/**
+ * The CompletableHelpWindow provides help on window usage within the "completable" tab
+ */
 class CompletableHelpWindow : public AbstractWindow
 {
     using AbstractWindow::AbstractWindow;

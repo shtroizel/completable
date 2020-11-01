@@ -55,6 +55,9 @@ struct word_filter;
 struct word_stack_element;
 
 
+/**
+ * CompletableTabAgent constructs and provides access to CompletableTab
+ */
 class CompletableTabAgent
 {
 public:

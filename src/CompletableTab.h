@@ -39,8 +39,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
+// create Tab variant, "completable" as a handle to CompletableTab
 SPREAD_MATCHABLE(Tab, completable)
 
+/**
+ * CompletableTab manages windows used for the application's core functionality
+ */
 class CompletableTab : public AbstractTab
 {
 public:

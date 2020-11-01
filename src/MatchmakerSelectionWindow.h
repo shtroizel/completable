@@ -38,6 +38,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
+/**
+ * MatchmakerSelectionWindow provides the list of found dictionaries after searching the path provided
+ * to MatchmakerLocationWindow. MatchmakerSelectionWindow also provides selection and application of
+ * dictionaries
+ */
 class MatchmakerSelectionWindow : public AbstractWindow
 {
 public:

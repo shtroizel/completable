@@ -36,8 +36,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
+// create Tab variant, "matchmaker" as a handle to MatchmakerTab
 SPREAD_MATCHABLE(Tab, matchmaker)
 
+/**
+ * MatchmakerTab manages windows used for the dynamic loading of matchmaker dictionaries
+ */
 class MatchmakerTab : public AbstractTab
 {
 public:

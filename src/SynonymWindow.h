@@ -37,6 +37,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class CompletionWindow;
 
+
+/**
+ * SynonymWindow lists synonyms of the currently completed word
+ */
 class SynonymWindow : public AbstractListWindow
 {
 public:

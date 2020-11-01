@@ -36,6 +36,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
+/**
+ * SettingsWindow provides a way to view and edit the application's settings
+ */
 class SettingsWindow : public AbstractWindow
 {
     using AbstractWindow::AbstractWindow;

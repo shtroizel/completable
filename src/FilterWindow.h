@@ -39,6 +39,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 struct word_filter;
 class InputWindow;
 
+
+/**
+ * FilterWindow provides users with a way to filter the dictionary.
+ */
 class FilterWindow : public AbstractCompletionDataWindow
 {
 public:

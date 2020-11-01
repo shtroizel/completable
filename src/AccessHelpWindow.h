@@ -35,6 +35,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractWindow.h"
 
 
+
+/**
+ * The AccessHelpWindow shows how to access help for tabs without InputWindow
+ */
 class AccessHelpWindow : public AbstractWindow
 {
     using AbstractWindow::AbstractWindow;

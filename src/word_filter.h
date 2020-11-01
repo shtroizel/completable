@@ -41,9 +41,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using filter_func = std::function<bool (int)>;
 
 PROPERTYx1_MATCHABLE(
-    filter_func,
-    func,
+    // property
+    filter_func, func,
+
+    // matchable name
     word_attribute,
+
+    // variants
     name,
     male_spc_name,
     female_spc_name,

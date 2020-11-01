@@ -45,6 +45,9 @@ class AccessHelpWindow;
 class SettingsHelpWindow;
 class SettingsWindow;
 
+/**
+ * SettingsTabAgent constructs and provides access to SettingsTab
+ */
 class SettingsTabAgent
 {
 public:

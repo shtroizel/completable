@@ -36,6 +36,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
+/**
+ * The SettingsHelpWindow provides help on window usage within the "settings" tab
+ */
 class SettingsHelpWindow : public AbstractWindow
 {
     using AbstractWindow::AbstractWindow;

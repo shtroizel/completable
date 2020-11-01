@@ -46,6 +46,9 @@ class MatchmakerHelpWindow;
 class MatchmakerLocationWindow;
 class MatchmakerSelectionWindow;
 
+/**
+ * MatchmakerTabAgent constructs and provides access to MatchmakerTab
+ */
 class MatchmakerTabAgent
 {
 public:

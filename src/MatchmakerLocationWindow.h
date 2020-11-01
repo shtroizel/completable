@@ -40,6 +40,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class MatchmakerSelectionWindow;
 
+/**
+ * MatchmakerLocationWindow provides an area for users to type a file system path where dictionaries
+ * should be searched.
+ */
 class MatchmakerLocationWindow : public AbstractWindow
 {
 public:

@@ -31,5 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-
+/**
+ * completable_shell() implements a simple, non-ncurses command-line driver for the matchmaker library
+ */
 void completable_shell();

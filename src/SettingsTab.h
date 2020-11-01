@@ -36,8 +36,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
+// create Tab variant, "settings" as a handle to SettingsTab
 SPREAD_MATCHABLE(Tab, settings)
 
+/**
+ * SettingsTab manages windows used for editing the application's settings
+ */
 class SettingsTab : public AbstractTab
 {
 public:

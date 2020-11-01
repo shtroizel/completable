@@ -36,6 +36,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
+/**
+ * The CompletionWindow class provides the window for showing all words starting with the given input
+ */
 class CompletionWindow : public AbstractListWindow
 {
     using AbstractListWindow::AbstractListWindow;

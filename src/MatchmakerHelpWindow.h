@@ -36,6 +36,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
+/**
+ * The MatchmakerHelpWindow provides help on window usage within the "matchmaker" tab
+ */
 class MatchmakerHelpWindow : public AbstractWindow
 {
     using AbstractWindow::AbstractWindow;
