@@ -43,7 +43,6 @@ class FilterWindow : public AbstractCompletionDataWindow
 {
 public:
     FilterWindow(CompletionStack &, WordStack &, InputWindow &, word_filter &);
-    ~FilterWindow() final;
 
 private:
     // resolved dependencies

@@ -55,11 +55,6 @@ LengthCompletionWindow::LengthCompletionWindow(
 }
 
 
-LengthCompletionWindow::~LengthCompletionWindow()
-{
-}
-
-
 std::string LengthCompletionWindow::title()
 {
     static std::string const t{"Length Completion"};

@@ -49,7 +49,6 @@ public:
         word_filter &,
         CompletionWindow const &
     );
-    ~LengthCompletionWindow() final;
 
 private:
     // resolved AbstractWindow dependencies

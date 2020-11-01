@@ -54,11 +54,6 @@ FilterWindow::FilterWindow(CompletionStack & cs, WordStack & ws, InputWindow & i
 }
 
 
-FilterWindow::~FilterWindow()
-{
-}
-
-
 std::string FilterWindow::title()
 {
     static std::string const t{"Filter"};
