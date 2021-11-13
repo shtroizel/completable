@@ -52,6 +52,8 @@ namespace matchmaker
     int from_longest(int length_index);
     void lengths(int const * * len_array, int * count);
     bool length_location(int length, int * length_index, int * count);
+    int ordinal_summation(int index);
+    void from_ordinal_summation(int summation, int const * * words, int * count);
     bool parts_of_speech(int index, char const * const * * pos, int8_t const * * flagged, int * count);
     bool is_name(int index);
     bool is_male_name(int index);

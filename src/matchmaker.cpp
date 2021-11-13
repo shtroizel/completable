@@ -59,6 +59,8 @@ namespace matchmaker
     static int (*mm_from_longest)(int){nullptr};
     static void (*mm_lengths)(int const * *, int *){nullptr};
     static bool (*mm_length_location)(int, int *, int *){nullptr};
+    static int (*mm_ordinal_summation)(int){nullptr};
+    static void (*mm_from_ordinal_summation)(int, int const * *, int *){nullptr};
     static bool (*mm_parts_of_speech)(int, char const * const * *, int8_t const * *, int *){nullptr};
     static bool (*mm_is_name)(int){nullptr};
     static bool (*mm_is_male_name)(int){nullptr};
@@ -112,6 +114,8 @@ namespace matchmaker
         init_func(from_longest);
         init_func(lengths);
         init_func(length_location);
+        init_func(ordinal_summation);
+        init_func(from_ordinal_summation);
         init_func(parts_of_speech);
         init_func(is_name);
         init_func(is_male_name);
@@ -153,6 +157,8 @@ namespace matchmaker
         mm_from_longest = nullptr;
         mm_lengths = nullptr;
         mm_length_location = nullptr;
+        mm_ordinal_summation = nullptr;
+        mm_from_ordinal_summation = nullptr;
         mm_parts_of_speech = nullptr;
         mm_is_name = nullptr;
         mm_is_male_name = nullptr;
@@ -238,6 +244,26 @@ namespace matchmaker
         }
 
         return (*mm_length_location)(length, length_index, count);
+    }
+
+
+    int ordinal_summation(int index)
+    {
+        if (nullptr == mm_ordinal_summation)
+            return 0;
+
+        return (*mm_ordinal_summation)(index);
+    }
+
+
+    void from_ordinal_summation(int summation, int const * * words, int * count)
+    {
+        if (nullptr == mm_from_ordinal_summation)
+        {
+            *words = nullptr;
+            *count = 0;
+        }
+        (*mm_from_ordinal_summation)(summation, words, count);
     }
 
 

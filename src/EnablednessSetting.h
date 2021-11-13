@@ -38,7 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 MATCHABLE(Enabledness, Enabled, Disabled);
 
 PROPERTYx1_MATCHABLE(
-    // properties
+    // property
     Enabledness::Type, enabledness,
 
     // matchable name
@@ -46,10 +46,14 @@ PROPERTYx1_MATCHABLE(
 
     // variants
     Borders,
+    CompletionList,
     Length_spc_Completion,
+    Ordinal_spc_Summation,
     Antonyms
 );
 
 SET_PROPERTY(EnablednessSetting, Borders, enabledness, Enabledness::Enabled::grab());
+SET_PROPERTY(EnablednessSetting, CompletionList, enabledness, Enabledness::Enabled::grab());
 SET_PROPERTY(EnablednessSetting, Length_spc_Completion, enabledness, Enabledness::Disabled::grab());
+SET_PROPERTY(EnablednessSetting, Ordinal_spc_Summation, enabledness, Enabledness::Disabled::grab());
 SET_PROPERTY(EnablednessSetting, Antonyms, enabledness, Enabledness::Disabled::grab());

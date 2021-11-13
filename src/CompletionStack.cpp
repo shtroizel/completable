@@ -54,6 +54,7 @@ void CompletionStack::push(int ch)
     if (completion_count >= CAPACITY)
         return;
 
+    bool shortcut = false;
     {
         // keep reference to previous top for prefix initialization
         completion const & prev_top = top();
@@ -61,11 +62,11 @@ void CompletionStack::push(int ch)
         // grow
         ++completion_count;
 
-        // check if nothing to do
+        // check if been here before (shortcut)
         std::string prev_prefix_with_ch = prev_top.prefix;
         prev_prefix_with_ch += (char) ch;
         if (top().prefix == prev_prefix_with_ch)
-            return;
+            shortcut = true;
 
         clear_top();
         top().prefix = prev_top.prefix;
@@ -94,6 +95,9 @@ void CompletionStack::push(int ch)
         }
     }
 
+    if (shortcut)
+        return;
+
     // calculate length completion
     top().length_completion.reserve(top().standard_completion.size());
     std::make_heap(top().length_completion.begin(), top().length_completion.end());
@@ -103,7 +107,6 @@ void CompletionStack::push(int ch)
         std::push_heap(top().length_completion.begin(), top().length_completion.end());
     }
     std::sort_heap(top().length_completion.begin(), top().length_completion.end());
-
     top().display_start = 0;
     top().len_display_start = 0;
 }
@@ -123,6 +126,7 @@ void CompletionStack::clear_top()
     top().display_start = 0;
     top().len_display_start = 0;
     top().length_completion.clear();
+    top().ord_sum_display_start = 0;
     top().syn_display_start = 0;
     top().ant_display_start = 0;
 

@@ -30,57 +30,68 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "CompletionWindow.h"
+#include "OrdinalSummationWindow.h"
 
 #include <ncurses.h>
 
+#include "AbstractTab.h"
 #include "CompletionStack.h"
-#include "InputWindow.h"
 #include "EnablednessSetting.h"
+#include "InputWindow.h"
+#include "CompletionWindow.h"
+#include "matchmaker.h"
 
 
 
-std::string CompletionWindow::title()
+OrdinalSummationWindow::OrdinalSummationWindow(
+    CompletionStack & cs,
+    WordStack & ws,
+    InputWindow & iw,
+    word_filter & f,
+    CompletionWindow & cw
+)
+    : AbstractListWindow(cs, ws, iw, f)
+    , completion_win(cw)
 {
-    std::string t{"Completion ("};
-    t += std::to_string(cs.top().standard_completion.size());
+    completion_win.add_dirty_dependency(this);
+}
+
+
+std::string OrdinalSummationWindow::title()
+{
+    std::string t{"Ordinal Summation: "};
+
+    auto const & completion = cs.top().standard_completion;
+    if (completion.size() > 0)
+        t += std::to_string(matchmaker::ordinal_summation(completion[cs.top().display_start]));
+    else
+        t += "0";
+
+    t += "  (";
+    auto os = get_words();
+    t += std::to_string(os.size());
     t += ")";
+
     return t;
 }
 
 
-void CompletionWindow::resize_hook()
+void OrdinalSummationWindow::resize_hook()
 {
-    y = 3;
+	y = completion_win.get_y() + completion_win.get_height();
     x = 0;
-
-    if (EnablednessSetting::CompletionList::grab().as_enabledness() == Enabledness::Enabled::grab())
-    {
-        int combined_height = root_y - 5 - y;
-
-        if (EnablednessSetting::Length_spc_Completion::grab().as_enabledness() == Enabledness::Enabled::grab()
-            || EnablednessSetting::Ordinal_spc_Summation::grab().as_enabledness() == Enabledness::Enabled::grab())
-            height = combined_height / 1.618;
-        else
-            height = combined_height;
-    }
-    else
-    {
-        height = 3;
-    }
-
-    width = root_x / 2;
+    height = root_y - y - 5;
+    width = completion_win.get_width();
 }
 
 
-int & CompletionWindow::display_start()
+int & OrdinalSummationWindow::display_start()
 {
-    return cs.top().display_start;
+    return cs.top().ord_sum_display_start;
 }
 
 
-void CompletionWindow::unfiltered_words(int, int const * * words, int * count) const
+void OrdinalSummationWindow::unfiltered_words(int index, int const * * words, int * count) const
 {
-    *words = cs.top().standard_completion.data();
-    *count = (int) cs.top().standard_completion.size();
+    matchmaker::from_ordinal_summation(matchmaker::ordinal_summation(index), words, count);
 }

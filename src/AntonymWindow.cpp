@@ -38,7 +38,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CompletionStack.h"
 #include "InputWindow.h"
 #include "CompletionWindow.h"
-#include "LengthCompletionWindow.h"
 #include "SynonymWindow.h"
 #include "matchmaker.h"
 

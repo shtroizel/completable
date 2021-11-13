@@ -65,6 +65,9 @@ public:
         // first index displayed for length_completion
         int len_display_start{0};
 
+        // first ordinal summation sibling displayed
+        int ord_sum_display_start{0};
+
         // first synonym displayed
         int syn_display_start{0};
 
