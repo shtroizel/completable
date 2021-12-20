@@ -54,19 +54,12 @@ void CompletionStack::push(int ch)
     if (completion_count >= CAPACITY)
         return;
 
-    bool shortcut = false;
     {
         // keep reference to previous top for prefix initialization
         completion const & prev_top = top();
 
         // grow
         ++completion_count;
-
-        // check if been here before (shortcut)
-        std::string prev_prefix_with_ch = prev_top.prefix;
-        prev_prefix_with_ch += (char) ch;
-        if (top().prefix == prev_prefix_with_ch)
-            shortcut = true;
 
         clear_top();
         top().prefix = prev_top.prefix;
@@ -94,9 +87,6 @@ void CompletionStack::push(int ch)
             return;
         }
     }
-
-    if (shortcut)
-        return;
 
     // calculate length completion
     top().length_completion.reserve(top().standard_completion.size());
