@@ -35,7 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ncurses.h>
 
 #include "AbstractTab.h"
-#include "EnablednessSetting.h"
+#include "Settings.h"
 #include "Layer.h"
 
 

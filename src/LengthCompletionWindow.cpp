@@ -36,7 +36,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "CompletionStack.h"
 #include "CompletionWindow.h"
-#include "EnablednessSetting.h"
 #include "InputWindow.h"
 #include "matchmaker.h"
 #include "word_filter.h"

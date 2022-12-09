@@ -103,11 +103,11 @@ void FilterWindow::draw_hook()
 
     static std::string const filter_type{"filter type: "};
 
-    mvwprintw(w, top_margin - 2, indent - filter_type.length(), filter_type.c_str());
+    mvwprintw(w, top_margin - 2, indent - filter_type.length(), "%s", filter_type.c_str());
 
     if (hover == -1)
         wattron(w, A_BOLD);
-    mvwprintw(w, top_margin - 2, indent, wf.direction.as_string().c_str());
+    mvwprintw(w, top_margin - 2, indent, "%s", wf.direction.as_string().c_str());
     if (hover == -1)
         wattroff(w, A_BOLD);
 
@@ -182,7 +182,7 @@ void FilterWindow::on_RETURN()
     }
     else
     {
-        std::cerr << "FilterWindow::toggle_hovered() :  hover [" << hover
+        std::cerr << "FilterWindow::on_RETURN() :  hover [" << hover
                   << "] is outside valid range [-1.." << word_attribute::variants().size() << "]"
                   << std::endl;
     }

@@ -61,7 +61,34 @@ namespace matchmaker
     bool is_place(int index);
     bool is_compound(int index);
     bool is_acronym(int index);
+    bool is_phrase(int index);
+    bool is_used_in_book(int book_index, int index);
     void synonyms(int index, int const * * syn_array, int * count);
     void antonyms(int index, int const * * ant_array, int * count);
+    void embedded(int index, int const * * embedded_words, int * count);
+    void locations(
+        int index,
+        int const * * book_indexes,
+        int const * * chapter_indexes,
+        int const * * paragraph_indexes,
+        int const * * word_indexes,
+        int * count
+    );
     void complete(char const * prefix, int * start, int * length);
+    int book_count();
+    void book_title(int book_index, int const * * title, int * count);
+    void book_author(int book_index, int const * * author, int * count);
+    int chapter_count(int book_index);
+    void chapter_title(int book_index, int chapter_index, int const * * title, int * count);
+    void chapter_subtitle(int book_index, int chapter_index, int const * * subtitle, int * count);
+    int paragraph_count(int book_index, int chapter_index);
+    int word_count(int book_index, int chapter_index, int paragraph_index);
+    int word(
+        int book_index,
+        int chapter_index,
+        int paragraph_index,
+        int word_index,
+        int * parent_phrase,
+        int * parent_phrase_word_index
+    );
 }

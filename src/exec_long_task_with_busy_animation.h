@@ -34,9 +34,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <functional>
 
+#include <matchable/matchable.h>
+
+#include "Settings.h"
+
 
 
 class AbstractWindow;
+
 
 // 459
 void exec_long_task_with_busy_animation(std::function<void()>, AbstractWindow &);
