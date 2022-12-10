@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-project(completable VERSION 1.3.0)
+project(completable VERSION 1.4.0)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -29,7 +29,7 @@ if(matchmaker_DL STREQUAL "ON")
 else()
     get_filename_component(rpath_dir "${matchmaker_DIR}/.." REALPATH)
     set(CMAKE_INSTALL_RPATH "${rpath_dir}")
-    find_package(matchmaker 3.0.0 REQUIRED)
+    find_package(matchmaker 3.1.0 REQUIRED)
 endif()
 
 find_package(Curses REQUIRED)
