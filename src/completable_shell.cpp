@@ -32,16 +32,17 @@ void completable_shell()
         if (help)
             std::cout << "{ just enter a word for lookup                                                }\n"
                       << "{ prefix the word with '!' for completion                                     }\n"
-                      << "{ use  :it <index> <count>        to iterate <count> words from <index>       }\n"
+                      << "{ use  :it <index> <count>        to iterate <count> terms from <index>       }\n"
                       << "{ use  :pos <word>                for parts of speech of <word>               }\n"
                       << "{ use  :s <word>                  for synonyms of <word>                      }\n"
                       << "{ use  :a <word>                  for antonyms of <word>                      }\n"
                       << "{ use  :itl <index> <count>       like ':it' but uses length indexes          }\n"
                       << "{ use  :len                       to list length index offsets                }\n"
-                      << "{ use  :e <index>                 to list embedded words                      }\n"
+                      << "{ use  :e <index>                 to list embedded terms                      }\n"
                       << "{ use  :books                     to list books                               }\n"
                       << "{ use  :book <index>              to read a book                              }\n"
                       << "{ use  :loc <index>               to locate all occurrences of a word         }\n"
+                      << "{ use  :p <b> <ch> <p> <w>        show a word's parent and index within parent}\n"
                       << "{ use  :curses                    return to curses mode                       }\n"
                       << "{ use  :q                         to quit                                     }\n"
                       << "{ use  :help                      to toggle help                              }\n"
@@ -59,18 +60,18 @@ void completable_shell()
             std::getline(std::cin, line);
             continue;
         }
-        std::vector<std::string> words;
+        std::vector<std::string> terms;
         std::stringstream ss(line);
         std::string token;
         while (std::getline(ss, token, ' '))
-            words.push_back(token);
+            terms.push_back(token);
 
-        if (words.size() == 0 || words[0].length() == 0)
+        if (terms.size() == 0 || terms[0].length() == 0)
         {
             std::cout << std::endl;
             continue;
         }
-        if (words[0][0] == '!')
+        if (terms[0][0] == '!')
         {
             int completion_start{0};
             int completion_length{0};
@@ -83,13 +84,13 @@ void completable_shell()
                 std::cout << "    --> " << matchmaker::at(i, nullptr) << "\n";
             std::cout << "\ncompletion done in " << duration.count() << " microseconds" << std::endl;
         }
-        else if (words[0] == ":it")
+        else if (terms[0] == ":it")
         {
-            if (words.size() < 3)
+            if (terms.size() < 3)
                 continue;
 
-            int start{0}; try { start = std::stoi(words[1]); } catch (...) { continue; }
-            int count{0}; try { count = std::stoi(words[2]); } catch (...) { continue; }
+            int start{0}; try { start = std::stoi(terms[1]); } catch (...) { continue; }
+            int count{0}; try { count = std::stoi(terms[2]); } catch (...) { continue; }
 
             for (int i = start; i < matchmaker::count() && i < start + count; ++i)
             {
@@ -103,9 +104,9 @@ void completable_shell()
             }
             std::cout << std::flush;
         }
-        else if (words[0] == ":pos")
+        else if (terms[0] == ":pos")
         {
-            if (words.size() < 2)
+            if (terms.size() < 2)
                 continue;
 
             std::cout << "       [";
@@ -136,9 +137,9 @@ void completable_shell()
             std::cout << "\n       -------> parts_of_speech() time: "
                         << duration.count() << " microseconds" << std::endl;
         }
-        else if (words[0] == ":s")
+        else if (terms[0] == ":s")
         {
-            if (words.size() < 2)
+            if (terms.size() < 2)
                 continue;
 
             std::cout << "       [";
@@ -167,9 +168,9 @@ void completable_shell()
             std::cout << "\n       -------> lookup + synonym retrieval time: "
                         << duration.count() << " microseconds" << std::endl;
         }
-        else if (words[0] == ":a")
+        else if (terms[0] == ":a")
         {
-            if (words.size() < 2)
+            if (terms.size() < 2)
                 continue;
 
             std::cout << "       [";
@@ -198,13 +199,43 @@ void completable_shell()
             std::cout << "\n       -------> lookup + antonym retrieval time: "
                         << duration.count() << " microseconds" << std::endl;
         }
-        else if (words[0] == ":itl")
+        else if (terms[0] == ":def")
         {
-            if (words.size() < 3)
+            if (terms.size() < 2)
                 continue;
 
-            int start{0}; try { start = std::stoi(words[1]); } catch (...) { continue; }
-            int count{0}; try { count = std::stoi(words[2]); } catch (...) { continue; }
+            std::cout << "       [";
+            auto start = std::chrono::high_resolution_clock::now();
+            index = matchmaker::lookup(line.substr(5).c_str(), &found);
+            if (index == matchmaker::count())
+            {
+                std::cout << matchmaker::count() << "], (would be new last word)" << std::endl;
+                continue;
+            }
+            int const * def{nullptr};
+            int def_count{0};
+            // matchmaker::definition(index, &def, &def_count);
+            mm_definition(index, &def, &def_count);
+            auto stop = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+            std::cout << index << "] :  '" << matchmaker::at(index, nullptr) << "' ";
+            if (!found)
+                std::cout << "(index if existed) ";
+            std::cout << " def: ";
+            for (int j = 0; j < def_count; ++j)
+                std::cout << " " << matchmaker::at(def[j], nullptr);
+            if (def_count == 0)
+                std::cout << " NONE AVAILABLE";
+            std::cout << "\n       -------> lookup + definiton retrieval time: "
+                        << duration.count() << " microseconds" << std::endl;
+        }
+        else if (terms[0] == ":itl")
+        {
+            if (terms.size() < 3)
+                continue;
+
+            int start{0}; try { start = std::stoi(terms[1]); } catch (...) { continue; }
+            int count{0}; try { count = std::stoi(terms[2]); } catch (...) { continue; }
 
             for (int i = start; i < (int) matchmaker::count() && i < start + count; ++i)
             {
@@ -215,7 +246,7 @@ void completable_shell()
                             << word << " has " << word_len << " characters" << std::endl;
             }
         }
-        else if (words[0] == ":len")
+        else if (terms[0] == ":len")
         {
             std::cout << "The following length indexes can be used with ':itl'" << std::endl;
 
@@ -232,35 +263,35 @@ void completable_shell()
 
                 if (matchmaker::length_location(l, &index, &count))
                     std::cout << "    " << std::setw(MAX_INDEX_DIGITS) << l
-                                << " letter words begin at index [" << std::setw(MAX_INDEX_DIGITS)
+                                << " letter terms begin at index [" << std::setw(MAX_INDEX_DIGITS)
                                 << index << "] with a count of: " << std::to_string(count) << std::endl;
                 else
                     std::cout << "index [" << l << "] out of bounds! expected range: [0.."
                                 << matchmaker::count() << "]" << std::endl;
             }
         }
-        else if (words[0] == ":e")
+        else if (terms[0] == ":e")
         {
-            if (words.size() < 2)
+            if (terms.size() < 2)
                 continue;
 
             int index{0}; try { index = std::stoi(line.substr(3)); } catch (...) { continue; }
 
-            int const * embedded_words;
+            int const * embedded_terms;
             int count{0};
-            matchmaker::embedded(index, &embedded_words, &count);
+            matchmaker::embedded(index, &embedded_terms, &count);
             char const * compound_word = matchmaker::at(index, nullptr);
 
             std::cout << "       [" << std::setw(MAX_INDEX_DIGITS) << index << "], length["
                         << std::setw(MAX_INDEX_DIGITS) << matchmaker::as_longest(index) << "] :  '"
-                        << compound_word << "'\n   *** has the following embedded words: ***\n";
+                        << compound_word << "'\n   *** has the following embedded terms: ***\n";
             for (int i = 0; i < count; ++i)
-                std::cout << "       --> [" << std::setw(MAX_INDEX_DIGITS) << embedded_words[i] << "], length["
-                            << std::setw(MAX_INDEX_DIGITS) << matchmaker::as_longest(embedded_words[i]) << "] :  '"
-                            << matchmaker::at(embedded_words[i], nullptr) << "'\n";
+                std::cout << "       --> [" << std::setw(MAX_INDEX_DIGITS) << embedded_terms[i] << "], length["
+                            << std::setw(MAX_INDEX_DIGITS) << matchmaker::as_longest(embedded_terms[i]) << "] :  '"
+                            << matchmaker::at(embedded_terms[i], nullptr) << "'\n";
             std::cout << std::flush;
         }
-        else if (words[0] == ":books")
+        else if (terms[0] == ":books")
         {
             std::cout << "The number of books in the library is: " << matchmaker::book_count()
                       << std::endl << std::endl;
@@ -285,14 +316,14 @@ void completable_shell()
                             << std::to_string(matchmaker::chapter_count(i)) << "\n" << std::endl;
             }
         }
-        else if (words[0] == ":book")
+        else if (terms[0] == ":book")
         {
-            if (words.size() < 2)
+            if (terms.size() < 2)
                 continue;
 
             int book_index{0}; try { book_index = std::stoi(line.substr(6)); } catch (...) { continue; }
 
-            std::cout << "Reading book [" << words[1] << "]...\n"
+            std::cout << "Reading book [" << terms[1] << "]...\n"
                       << "\n               title: ";
             int const * title{nullptr};
             int title_count{0};
@@ -332,12 +363,18 @@ void completable_shell()
                 {
                     for (int w = 0; w < matchmaker::word_count(book_index, ch, p); ++w)
                     {
-                        std::cout << matchmaker::at(matchmaker::word(book_index,
-                                                                     ch,
-                                                                     p,
-                                                                     w,
-                                                                     nullptr,
-                                                                     nullptr), nullptr);
+                        int ancestor_count = 0;
+                        int const * ancestors;
+                        int index_within_first_ancestor{-1};
+                        int term = matchmaker::word(book_index,
+                                                    ch,
+                                                    p,
+                                                    w,
+                                                    &ancestors,
+                                                    &ancestor_count,
+                                                    &index_within_first_ancestor);
+
+                        std::cout << " " << matchmaker::at(term, nullptr);
                     }
                     std::cout << std::endl;
                 }
@@ -345,9 +382,40 @@ void completable_shell()
                           << std::endl;
             }
         }
-        else if (words[0] == ":loc")
+        else if (terms[0] == ":p")
         {
-            if (words.size() < 2)
+            if (terms.size() != 5)
+                continue;
+
+            int bk{0}; try { bk = std::stoi(terms[1]); } catch (...) { continue; }
+            int ch{0}; try { ch = std::stoi(terms[2]); } catch (...) { continue; }
+            int par{0}; try { par = std::stoi(terms[3]); } catch (...) { continue; }
+            int wrd{0}; try { wrd = std::stoi(terms[4]); } catch (...) { continue; }
+
+            int ancestor_count{0};
+            int const * ancestors{nullptr};
+            int index_within_first_ancestor{-1};
+            int term = matchmaker::word(bk, ch, par, wrd, &ancestors, &ancestor_count,
+                                        &index_within_first_ancestor);
+
+            std::cout << "\n"
+                      << "\n         given term: " << term
+                      << "\n        term as str: " << matchmaker::at(term, nullptr)
+                      << "\n          ancestors:";
+
+            for (int i = 0; i < ancestor_count; ++i)
+                std::cout << " " << ancestors[i];
+
+            std::cout << "\n    ancestors (str): ";
+
+            for (int i = 0; i < ancestor_count; ++i)
+                std::cout << " " << matchmaker::at(ancestors[i], nullptr);
+
+            std::cout << "\nindex within parent: " << index_within_first_ancestor << std::endl;
+        }
+        else if (terms[0] == ":loc")
+        {
+            if (terms.size() < 2)
                 continue;
 
             int search_word{0}; try { search_word = std::stoi(line.substr(5)); } catch (...) { continue; }
@@ -375,15 +443,15 @@ void completable_shell()
             if (count == 0)
                 std::cout << "  ----> NONE!" << std::endl;
         }
-        else if (words[0] == ":curses")
+        else if (terms[0] == ":curses")
         {
             break;
         }
-        else if (words[0] == ":q")
+        else if (terms[0] == ":q")
         {
             exit(EXIT_SUCCESS);
         }
-        else if (words[0] == ":help")
+        else if (terms[0] == ":help")
         {
             help = !help;
         }

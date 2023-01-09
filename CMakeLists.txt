@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.17)
 
-project(completable VERSION 1.4.0)
+project(completable VERSION 1.5.0)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -29,7 +29,7 @@ if(matchmaker_DL STREQUAL "ON")
 else()
     get_filename_component(rpath_dir "${matchmaker_DIR}/.." REALPATH)
     set(CMAKE_INSTALL_RPATH "${rpath_dir}")
-    find_package(matchmaker 3.1.0 REQUIRED)
+    find_package(matchmaker 4.0.0 REQUIRED)
 endif()
 
 find_package(Curses REQUIRED)
@@ -81,10 +81,4 @@ else()
     target_link_libraries(completable matchmaker)
 endif()
 
-target_include_directories(
-    completable
-    PRIVATE
-    include
-    matchable/include
-)
 install(TARGETS completable DESTINATION bin)

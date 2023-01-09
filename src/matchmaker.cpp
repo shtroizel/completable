@@ -1,34 +1,3 @@
-/*
-Copyright (c) 2020, Eric Hyer
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution.
-
-3. Neither the name of the copyright holder nor the names of its
-   contributors may be used to endorse or promote products derived from
-   this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
-
 #include "matchmaker.h"
 #include "MatchmakerState.h"
 
@@ -72,6 +41,7 @@ namespace matchmaker
     static bool (*shim_is_used_in_book)(int, int){nullptr};
     static void (*shim_synonyms)(int, int const * *, int *){nullptr};
     static void (*shim_antonyms)(int, int const * *, int *){nullptr};
+    static void (*shim_definition)(int, int const * *, int *){nullptr};
     static void (*shim_embedded)(int, int const * *, int *){nullptr};
     static void (*shim_locations)(int,
                                   int const * *,
@@ -88,7 +58,7 @@ namespace matchmaker
     static void (*shim_chapter_subtitle)(int, int, int const * *, int *){nullptr};
     static int (*shim_paragraph_count)(int, int){nullptr};
     static int (*shim_word_count)(int, int, int){nullptr};
-    static int (*shim_word)(int, int, int, int, int *, int *){nullptr};
+    static int (*shim_word)(int, int, int, int, int const * *, int *, int *){nullptr};
 
 
 
@@ -145,6 +115,7 @@ namespace matchmaker
         init_func(is_used_in_book);
         init_func(synonyms);
         init_func(antonyms);
+        init_func(definition);
         init_func(embedded);
         init_func(locations);
         init_func(complete);
@@ -201,6 +172,7 @@ namespace matchmaker
         shim_is_used_in_book = nullptr;
         shim_synonyms = nullptr;
         shim_antonyms = nullptr;
+        shim_definition = nullptr;
         shim_embedded = nullptr;
         shim_locations = nullptr;
         shim_complete = nullptr;
@@ -421,6 +393,19 @@ namespace matchmaker
     }
 
 
+    void definition(int index, int const * * def, int * count)
+    {
+        if (nullptr == shim_definition)
+        {
+            *def = nullptr;
+            *count = 0;
+            return;
+        }
+
+        (*shim_definition)(index, def, count);
+    }
+
+
     void embedded(int index, int const * * embedded_words, int * count)
     {
         if (nullptr == shim_embedded)
@@ -558,13 +543,20 @@ namespace matchmaker
     }
 
 
-    int word(int book_index, int chapter_index, int paragraph_index, int word_index,
-             int * parent_phrase, int * parent_phrase_word_index)
+    int word(
+        int book_index,
+        int chapter_index,
+        int paragraph_index,
+        int word_index,
+        int const * * ancestors,
+        int * ancestor_count,
+        int * index_within_first_ancestor
+    )
     {
         if (nullptr == shim_word)
             return -1;
 
         return (*shim_word)(book_index, chapter_index, paragraph_index, word_index,
-                            parent_phrase, parent_phrase_word_index);
+                            ancestors, ancestor_count, index_within_first_ancestor);
     }
 }
