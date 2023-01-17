@@ -214,8 +214,7 @@ void completable_shell()
             }
             int const * def{nullptr};
             int def_count{0};
-            // matchmaker::definition(index, &def, &def_count);
-            mm_definition(index, &def, &def_count);
+            matchmaker::definition(index, &def, &def_count);
             auto stop = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
             std::cout << index << "] :  '" << matchmaker::at(index, nullptr) << "' ";
@@ -372,7 +371,8 @@ void completable_shell()
                                                     w,
                                                     &ancestors,
                                                     &ancestor_count,
-                                                    &index_within_first_ancestor);
+                                                    &index_within_first_ancestor,
+                                                    nullptr);
 
                         std::cout << " " << matchmaker::at(term, nullptr);
                     }
@@ -395,8 +395,16 @@ void completable_shell()
             int ancestor_count{0};
             int const * ancestors{nullptr};
             int index_within_first_ancestor{-1};
-            int term = matchmaker::word(bk, ch, par, wrd, &ancestors, &ancestor_count,
-                                        &index_within_first_ancestor);
+            int term = matchmaker::word(
+                           bk,
+                           ch,
+                           par,
+                           wrd,
+                           &ancestors,
+                           &ancestor_count,
+                           &index_within_first_ancestor,
+                           nullptr
+                       );
 
             std::cout << "\n"
                       << "\n         given term: " << term

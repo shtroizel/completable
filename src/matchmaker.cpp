@@ -58,7 +58,7 @@ namespace matchmaker
     static void (*shim_chapter_subtitle)(int, int, int const * *, int *){nullptr};
     static int (*shim_paragraph_count)(int, int){nullptr};
     static int (*shim_word_count)(int, int, int){nullptr};
-    static int (*shim_word)(int, int, int, int, int const * *, int *, int *){nullptr};
+    static int (*shim_word)(int, int, int, int, int const * *, int *, int *, bool *){nullptr};
 
 
 
@@ -550,13 +550,14 @@ namespace matchmaker
         int word_index,
         int const * * ancestors,
         int * ancestor_count,
-        int * index_within_first_ancestor
+        int * index_within_first_ancestor,
+        bool * referenced
     )
     {
         if (nullptr == shim_word)
             return -1;
 
         return (*shim_word)(book_index, chapter_index, paragraph_index, word_index,
-                            ancestors, ancestor_count, index_within_first_ancestor);
+                            ancestors, ancestor_count, index_within_first_ancestor, referenced);
     }
 }
