@@ -1,6 +1,3 @@
 [submodule "matchmaker"]
 	path = matchmaker
 	url = https://github.com/shtroizel/matchmaker.git
-[submodule "matchable"]
-	path = matchable
-	url = https://github.com/shtroizel/matchable.git
