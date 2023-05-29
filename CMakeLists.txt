@@ -30,9 +30,14 @@ endif()
 if(matchmaker_DL STREQUAL "ON")
     add_definitions(-DMM_DYNAMIC_LOADING)
 else()
+    get_filename_component(rpath_dir "${matchmaker_DIR}/.." REALPATH)
     get_filename_component(matchmaker_name "${matchmaker_DIR}/.." REALPATH)
     get_filename_component(matchmaker_name "${matchmaker_name}" NAME)
-    set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib/${matchmaker_name}")
+    set(
+        CMAKE_INSTALL_RPATH
+        "$ORIGIN/../lib/${matchmaker_name}"
+        "${rpath_dir}"
+    )
     find_package(matchmaker 4.0.0 REQUIRED)
 endif()
 
