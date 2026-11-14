@@ -30,7 +30,7 @@ std::string AntonymWindow::title()
 {
     std::string t{"Antonyms ("};
 
-    auto ant = get_words();
+    auto const & ant = get_words();
     t += std::to_string(ant.size());
 
     t += ")";

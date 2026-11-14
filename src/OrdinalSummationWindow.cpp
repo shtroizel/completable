@@ -35,7 +35,7 @@ std::string OrdinalSummationWindow::title()
         t += "0";
 
     t += "  (";
-    auto os = get_words();
+    auto const & os = get_words();
     t += std::to_string(os.size());
     t += ")";
 

@@ -27,7 +27,7 @@ AbstractListWindow::AbstractListWindow(
 
 void AbstractListWindow::draw_hook()
 {
-    auto words = get_words();
+    auto const & words = get_words();
 
     // new filter could result in display_start out of bounds so clamp
     if (display_start() >= (int) words.size())
@@ -89,7 +89,7 @@ void AbstractListWindow::on_KEY_DOWN()
     int & ds = display_start();
 
     cache_dirty.set_false();
-    auto words = get_words();
+    auto const & words = get_words();
     if (words.size() == 0)
         return;
 
@@ -128,7 +128,7 @@ void AbstractListWindow::on_PAGE_DOWN()
     int & ds = display_start();
 
     cache_dirty.set_false();
-    auto words = get_words();
+    auto const & words = get_words();
 
     if (words.size() == 0)
         return;
@@ -166,7 +166,7 @@ void AbstractListWindow::on_END()
     int & ds = display_start();
 
     cache_dirty.set_false();
-    auto words = get_words();
+    auto const & words = get_words();
     if (words.size() == 0)
         return;
 
@@ -184,7 +184,7 @@ void AbstractListWindow::on_RETURN()
 {
     int & ds = display_start();
 
-    auto words = get_words();
+    auto const & words = get_words();
 
     if (words.size() == 0)
         return;
