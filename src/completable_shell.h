@@ -7,5 +7,6 @@
  * completable_shell() implements a simple, non-ncurses command-line app using the matchmaker library
  *
  * Given commands, it runs them in order and returns instead of reading stdin.
+ * Returns true when the user asks to quit.
  */
-void completable_shell(std::vector<std::string> const & commands, bool show_timing);
+bool completable_shell(std::vector<std::string> const & commands, bool show_timing);

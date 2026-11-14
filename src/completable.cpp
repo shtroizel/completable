@@ -168,7 +168,8 @@ int main(int argc, char ** argv)
             def_prog_mode();
             endwin();
 
-            completable_shell({}, show_timing);
+            if (completable_shell({}, show_timing))
+                break;
 
             reset_prog_mode();
             resized_draw = true;

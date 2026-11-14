@@ -1,8 +1,10 @@
 #include "completable_shell.h"
 
+#include <algorithm>
 #include <chrono>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -39,7 +41,7 @@ static void print_prompt(bool help)
 
 
 
-void completable_shell(std::vector<std::string> const & commands, bool show_timing)
+bool completable_shell(std::vector<std::string> const & commands, bool show_timing)
 {
     bool const batch{!commands.empty()};
     size_t next_command{0};
@@ -63,7 +65,7 @@ void completable_shell(std::vector<std::string> const & commands, bool show_timi
         if (batch)
         {
             if (next_command == commands.size())
-                return;
+                return false;
             line = commands[next_command++];
             std::cout << "\n\n$ " << line << std::endl;
         }
@@ -73,7 +75,7 @@ void completable_shell(std::vector<std::string> const & commands, bool show_timi
 
             std::getline(std::cin, line);
             if (std::cin.fail() && std::cin.eof() && !isatty(STDIN_FILENO))
-                return;
+                return false;
             if (std::cin.fail() || std::cin.eof() == 1)
             {
                 std::cin.clear();
@@ -119,7 +121,8 @@ void completable_shell(std::vector<std::string> const & commands, bool show_timi
             int start{0}; try { start = std::stoi(terms[1]); } catch (...) { continue; }
             int count{0}; try { count = std::stoi(terms[2]); } catch (...) { continue; }
 
-            for (int i = start; i < matchmaker::count() && i < start + count; ++i)
+            long long const end{(long long) start + count};
+            for (int i = std::max(start, 0); i < matchmaker::count() && i < end; ++i)
             {
                 auto start = std::chrono::high_resolution_clock::now();
                 char const * word = matchmaker::at(i, nullptr);
@@ -262,7 +265,7 @@ void completable_shell(std::vector<std::string> const & commands, bool show_timi
             if (def_count == 0)
                 std::cout << " NONE AVAILABLE";
             if (show_timing)
-                std::cout << "\n       -------> lookup + definiton retrieval time: "
+                std::cout << "\n       -------> lookup + definition retrieval time: "
                           << duration.count() << " microseconds";
             std::cout << std::endl;
         }
@@ -274,7 +277,8 @@ void completable_shell(std::vector<std::string> const & commands, bool show_timi
             int start{0}; try { start = std::stoi(terms[1]); } catch (...) { continue; }
             int count{0}; try { count = std::stoi(terms[2]); } catch (...) { continue; }
 
-            for (int i = start; i < (int) matchmaker::count() && i < start + count; ++i)
+            long long const end{(long long) start + count};
+            for (int i = std::max(start, 0); i < matchmaker::count() && i < end; ++i)
             {
                 int word_len{0};
                 char const * word = matchmaker::at(matchmaker::from_longest(i), &word_len);
@@ -491,11 +495,11 @@ void completable_shell(std::vector<std::string> const & commands, bool show_timi
         }
         else if (terms[0] == ":curses")
         {
-            break;
+            return false;
         }
         else if (terms[0] == ":q")
         {
-            exit(EXIT_SUCCESS);
+            return true;
         }
         else if (terms[0] == ":help")
         {

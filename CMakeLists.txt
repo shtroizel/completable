@@ -108,3 +108,23 @@ set_tests_properties(shell_quit PROPERTIES TIMEOUT 60 FAIL_REGULAR_EXPRESSION "\
 
 add_test(NAME bad_option COMMAND completable --bogus)
 set_tests_properties(bad_option PROPERTIES TIMEOUT 60 WILL_FAIL TRUE)
+
+foreach(it :it :itl)
+    add_test(NAME shell_${it}_overflow COMMAND completable -n -c "${it} 1 2147483647")
+    set_tests_properties(
+        shell_${it}_overflow PROPERTIES
+        TIMEOUT 300 PASS_REGULAR_EXPRESSION "\\[ *1\\]" FAIL_REGULAR_EXPRESSION "runtime error"
+    )
+
+    add_test(NAME shell_${it}_negative COMMAND completable -n -c "${it} -2 3")
+    set_tests_properties(
+        shell_${it}_negative PROPERTIES
+        TIMEOUT 60 PASS_REGULAR_EXPRESSION "\\[ *0\\]" FAIL_REGULAR_EXPRESSION "\\[ *-[0-9]"
+    )
+endforeach()
+
+add_test(NAME shell_def_spelling COMMAND completable -c ":def run")
+set_tests_properties(
+    shell_def_spelling PROPERTIES
+    TIMEOUT 60 PASS_REGULAR_EXPRESSION "definition retrieval"
+)
