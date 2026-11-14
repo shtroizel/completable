@@ -68,7 +68,6 @@ set(
     src/MatchmakerTab.cpp
     src/MatchmakerTabAgent.cpp
     src/OrdinalSummationWindow.cpp
-    src/TabDescriptionWindow.cpp
     src/SettingsHelpWindow.cpp
     src/SettingsTab.cpp
     src/SettingsTabAgent.cpp
