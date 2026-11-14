@@ -72,7 +72,9 @@ CompletableTabAgent::CompletableTabAgent(
     ant_win->set_right_neighbor(Tab::completable::grab(), completion_win.get());
 
     // prevent both Length_spc_Completion and Ordinal_spc_Summation from being enabled simultaneously!
+    // observers run in id order: the "1 exclusive" observers must run before "2 window enabledness"
     EnablednessSetting::Length_spc_Completion::grab().add_enabledness_observer(
+        "1 exclusive with ordinal summation",
         [&]()
         {
             if (EnablednessSetting::Length_spc_Completion::grab().as_enabledness() ==
@@ -84,6 +86,7 @@ CompletableTabAgent::CompletableTabAgent(
         }
     );
     EnablednessSetting::Ordinal_spc_Summation::grab().add_enabledness_observer(
+        "1 exclusive with length completion",
         [&]()
         {
             if (EnablednessSetting::Ordinal_spc_Summation::grab().as_enabledness() ==
@@ -149,6 +152,7 @@ CompletableTabAgent::CompletableTabAgent(
         };
 
     EnablednessSetting::Length_spc_Completion::grab().add_enabledness_observer(
+        "2 window enabledness",
         std::bind(
             on_win_enabledness,
             EnablednessSetting::Length_spc_Completion::grab(),
@@ -157,6 +161,7 @@ CompletableTabAgent::CompletableTabAgent(
     );
 
     EnablednessSetting::Ordinal_spc_Summation::grab().add_enabledness_observer(
+        "2 window enabledness",
         std::bind(
             on_win_enabledness,
             EnablednessSetting::Ordinal_spc_Summation::grab(),
@@ -165,6 +170,7 @@ CompletableTabAgent::CompletableTabAgent(
     );
 
     EnablednessSetting::Antonyms::grab().add_enabledness_observer(
+        "2 window enabledness",
         std::bind(
             on_win_enabledness,
             EnablednessSetting::Antonyms::grab(),
@@ -174,6 +180,7 @@ CompletableTabAgent::CompletableTabAgent(
 
     // respond to matchmaker state changes
     MatchmakerState::Instance::grab().add_state_observer(
+        "reset completable",
         [&]()
         {
             // clear out the word stack

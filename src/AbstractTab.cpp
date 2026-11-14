@@ -1,5 +1,8 @@
 #include "AbstractTab.h"
 
+#include <cstdint>
+#include <string>
+
 #include <ncurses.h>
 
 #include "AbstractWindow.h"
@@ -8,6 +11,12 @@
 #include "VisibilityAspect.h"
 #include "key_codes.h"
 
+
+
+static std::string borders_observer_id(AbstractTab const * tab)
+{
+    return "AbstractTab " + std::to_string(reinterpret_cast<std::uintptr_t>(tab));
+}
 
 
 AbstractTab::AbstractTab()
@@ -23,7 +32,10 @@ AbstractTab::AbstractTab()
     for (auto l : Layer::variants())
         layers->mut_at(l).second = nullptr;
 
-    EnablednessSetting::Borders::grab().add_enabledness_observer([&](){ draw(true); });
+    EnablednessSetting::Borders::grab().add_enabledness_observer(
+        borders_observer_id(this),
+        [&](){ draw(true); }
+    );
 
     Tab::nil.set_AbstractTab(nullptr);
 }
@@ -31,6 +43,7 @@ AbstractTab::AbstractTab()
 
 AbstractTab::~AbstractTab()
 {
+    EnablednessSetting::Borders::grab().del_enabledness_observer(borders_observer_id(this));
     layers.reset();
     active_tab() = nullptr;
     left_neighbor = Tab::nil;
