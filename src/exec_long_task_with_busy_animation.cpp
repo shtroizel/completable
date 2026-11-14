@@ -32,8 +32,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "exec_long_task_with_busy_animation.h"
 
+#include <chrono>
+#include <condition_variable>
 #include <functional>
 #include <iostream>
+#include <mutex>
 #include <thread>
 
 #include <ncurses.h>
@@ -750,8 +753,9 @@ void exec_long_task_with_busy_animation(std::function<void()> task, AbstractWind
         return;
     }
     int busy_index = 0;
+    std::mutex m;
+    std::condition_variable cv;
     bool finished = false;
-    auto start = std::chrono::high_resolution_clock::now();
 
     // clear old window content
     for (int i = 1; i < win.get_height() - 1; ++i)
@@ -761,39 +765,52 @@ void exec_long_task_with_busy_animation(std::function<void()> task, AbstractWind
     std::thread animation_thread{
         [&]()
         {
-            while (!finished)
+            // system_clock: GCC 11 TSan doesn't intercept the steady_clock wait and misreports
+            auto next_frame =
+                [&]() { return std::chrono::system_clock::now() + std::chrono::milliseconds(125); };
+            std::unique_lock<std::mutex> lock{m};
+            while (!cv.wait_until(lock, next_frame(), [&]() { return finished; }))
             {
-                auto stop = std::chrono::high_resolution_clock::now();
-                auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-                if (duration.count() > 124)
-                {
-                    int x_margin = win.get_width() / 2 - (*content)[busy_index][1].length() / 2;
-                    int y_margin = win.get_height() / 2 - (*content)[busy_index].size() / 2;
-                    --y_margin;
+                int x_margin = win.get_width() / 2 - (*content)[busy_index][1].length() / 2;
+                int y_margin = win.get_height() / 2 - (*content)[busy_index].size() / 2;
+                --y_margin;
 
-                    for (int line = 0; line < (int) (*content)[busy_index].size(); ++line)
-                        mvwprintw(
-                            win.get_WINDOW(),
-                            y_margin + line,
-                            x_margin,
-                            "%s", (*content)[busy_index][line].c_str()
-                        );
+                for (int line = 0; line < (int) (*content)[busy_index].size(); ++line)
+                    mvwprintw(
+                        win.get_WINDOW(),
+                        y_margin + line,
+                        x_margin,
+                        "%s", (*content)[busy_index][line].c_str()
+                    );
 
-                    ++busy_index;
-                    if (busy_index >= (int) content->size())
-                        busy_index = 0;
+                ++busy_index;
+                if (busy_index >= (int) content->size())
+                    busy_index = 0;
 
-                    wrefresh(win.get_WINDOW());
-
-                    start = std::chrono::high_resolution_clock::now();
-                }
-
-                std::this_thread::sleep_for(std::chrono::microseconds(17));
+                wrefresh(win.get_WINDOW());
             }
         }
     };
 
-    task();
-    finished = true;
-    animation_thread.join();
+    auto stop_animation =
+        [&]()
+        {
+            {
+                std::lock_guard<std::mutex> lock{m};
+                finished = true;
+            }
+            cv.notify_one();
+            animation_thread.join();
+        };
+
+    try
+    {
+        task();
+    }
+    catch (...)
+    {
+        stop_animation();
+        throw;
+    }
+    stop_animation();
 }

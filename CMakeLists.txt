@@ -153,6 +153,13 @@ if(NOT matchmaker_DL STREQUAL "ON")
             key:RET key:RIGHT key:DEL same:4 key:ESC
     )
     set_tests_properties(curses_delete_from_other_window PROPERTIES TIMEOUT 300 SKIP_RETURN_CODE 77)
+
+    add_test(
+        NAME curses_filter_busy_animation
+        COMMAND ${curses_driver} $<TARGET_FILE:completable> --
+            "wait:Completion \\(" text:q key:F1 key:F1 "wait:Completion \\(" key:ESC
+    )
+    set_tests_properties(curses_filter_busy_animation PROPERTIES TIMEOUT 300 SKIP_RETURN_CODE 77)
 endif()
 
 if(matchmaker_DL STREQUAL "ON" AND completable_test_library)

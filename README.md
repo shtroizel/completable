@@ -44,3 +44,5 @@ The curses tests drive completable through a pseudo terminal and need the Python
 (they're skipped without it). Pick the Python with `-DPython3_EXECUTABLE=<python>`. Builds with
 `matchmaker_DL=ON` run the shell and library tests only with
 `-Dcompletable_test_library=<path to libmatchmaker.so>`.
+With ThreadSanitizer builds, run `setarch $(uname -m) -R ctest`, since TSan fails with full address space
+randomization on newer kernels.

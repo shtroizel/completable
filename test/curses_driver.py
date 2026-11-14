@@ -15,10 +15,12 @@ steps:
     sh:<command>          run a shell command
     show                  print the screen
 
-After the last step the driver waits for completable to exit and fails unless it exits with 0.
+Address space randomization is off for completable. After the last step the driver waits for completable
+to exit and fails unless it exits with 0.
 Exits with 77 (skip) when the pyte module is missing.
 '''
 
+import ctypes
 import fcntl
 import os
 import pty
@@ -45,11 +47,13 @@ KEYS = {
     'RIGHT': b'\x1bOC',
     'LEFT': b'\x1bOD',
     'TAB': b'\t',
+    'F1': b'\x1bOP',
     'ESC': b'\x1b',
     'SHIFT_LEFT': b'\x1b[1;2D',
     'SHIFT_RIGHT': b'\x1b[1;2C',
 }
 ROWS, COLS = 40, 140
+ADDR_NO_RANDOMIZE = 0x0040000  # ThreadSanitizer builds fail with full ASLR on newer kernels
 TIMEOUT = 120
 
 
@@ -60,6 +64,7 @@ class Session:
         self.open = True
         self.pid, self.fd = pty.fork()
         if self.pid == 0:
+            ctypes.CDLL(None).personality(ADDR_NO_RANDOMIZE)
             os.environ.update(TERM='xterm', ESCDELAY='25')
             os.execv(argv[0], argv)
         fcntl.ioctl(self.fd, termios.TIOCSWINSZ, struct.pack('HHHH', ROWS, COLS, 0, 0))
