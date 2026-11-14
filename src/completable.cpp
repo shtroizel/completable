@@ -1,6 +1,7 @@
 #include <memory>
 #include <string>
 #include <iostream>
+#include <vector>
 
 #include <ncurses.h>
 
@@ -17,18 +18,85 @@
 
 
 
+static void print_usage()
+{
+    std::cout << "usage: completable [options] [borders_disabled]\n"
+              << "    -c <command>    run a shell command and exit without curses (repeat to run several)\n"
+              << "    -s              start in shell mode, reading commands from stdin\n"
+              << "    -n              leave timing out of shell output\n"
+#ifdef MM_DYNAMIC_LOADING
+              << "    -l <library>    load a matchmaker library at startup\n"
+#endif
+              << "    -h              print this message" << std::endl;
+}
+
+
+
 int main(int argc, char ** argv)
 {
-    if (argc == 2)
+    std::vector<std::string> commands;
+    bool shell{false};
+    bool show_timing{true};
+    std::string library;
+
+    for (int i = 1; i < argc; ++i)
     {
-        std::string const a1{argv[1]};
-        if (a1 == "borders_disabled")
+        std::string const arg{argv[i]};
+        if (arg == "borders_disabled")
+        {
             EnablednessSetting::Borders::grab().set_enabledness(Enabledness::Disabled::grab());
+        }
+        else if (arg == "-c" && i + 1 < argc)
+        {
+            commands.push_back(argv[++i]);
+        }
+        else if (arg == "-s")
+        {
+            shell = true;
+        }
+        else if (arg == "-n")
+        {
+            show_timing = false;
+        }
+#ifdef MM_DYNAMIC_LOADING
+        else if (arg == "-l" && i + 1 < argc)
+        {
+            library = argv[++i];
+        }
+#endif
+        else if (arg == "-h")
+        {
+            print_usage();
+            return 0;
+        }
+        else
+        {
+            std::cerr << "invalid argument: " << arg << std::endl;
+            print_usage();
+            return 1;
+        }
     }
 
-#ifndef MM_DYNAMIC_LOADING
+#ifdef MM_DYNAMIC_LOADING
+    if (!library.empty())
+    {
+        char const * error = matchmaker::set_library(library.c_str());
+        if (nullptr != error)
+        {
+            std::cerr << "failed to load " << library << ": " << error << std::endl;
+            return 1;
+        }
+    }
+#else
     matchmaker::set_library(nullptr); // disable dynamic loading, use linking instead
 #endif
+
+    if (shell || !commands.empty())
+    {
+        completable_shell(commands, show_timing);
+        matchmaker::unset_library();
+        return 0;
+    }
 
     initscr();
     noecho();
@@ -100,7 +168,7 @@ int main(int argc, char ** argv)
             def_prog_mode();
             endwin();
 
-            completable_shell();
+            completable_shell({}, show_timing);
 
             reset_prog_mode();
             resized_draw = true;

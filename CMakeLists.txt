@@ -91,3 +91,20 @@ else()
 endif()
 
 install(TARGETS completable DESTINATION bin)
+
+enable_testing()
+
+add_test(NAME shell_commands COMMAND completable -n -c ":len" -c "!zzzzzz" -c "zzzzzz")
+set_tests_properties(shell_commands PROPERTIES TIMEOUT 60 PASS_REGULAR_EXPRESSION "\\$ zzzzzz")
+
+add_test(NAME shell_no_timing COMMAND completable -n -c "zzzzzz")
+set_tests_properties(shell_no_timing PROPERTIES TIMEOUT 60 FAIL_REGULAR_EXPRESSION "microseconds")
+
+add_test(NAME shell_stdin_eof COMMAND sh -c "printf 'zzzzzz\\n' | \"$<TARGET_FILE:completable>\" -n -s")
+set_tests_properties(shell_stdin_eof PROPERTIES TIMEOUT 60 PASS_REGULAR_EXPRESSION "\\$ zzzzzz")
+
+add_test(NAME shell_quit COMMAND sh -c "printf ':q\\nzzzzzz\\n' | \"$<TARGET_FILE:completable>\" -n -s")
+set_tests_properties(shell_quit PROPERTIES TIMEOUT 60 FAIL_REGULAR_EXPRESSION "\\$ zzzzzz")
+
+add_test(NAME bad_option COMMAND completable --bogus)
+set_tests_properties(bad_option PROPERTIES TIMEOUT 60 WILL_FAIL TRUE)

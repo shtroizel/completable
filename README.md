@@ -29,3 +29,14 @@ matchmaker/scripts/build_and_install.py
 scripts/build_and_install.py
 install/bin/completable
 ```
+## shell mode without curses
+Press `$` in completable to open its shell, or skip curses with these options (`-h` lists them all):
+```
+install_q/bin/completable -c ':books' -c 'run'       # run commands and exit
+printf ':len\nrun\n' | install_q/bin/completable -s   # read commands from stdin
+install_q/bin/completable -n -c 'run'                # leave timing out, for output that diffs cleanly
+```
+## tests
+```
+cd <build dir> && ctest
+```

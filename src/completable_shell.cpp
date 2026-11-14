@@ -6,12 +6,43 @@
 #include <string>
 #include <vector>
 
+#include <unistd.h>
+
 #include "matchmaker.h"
 
 
 
-void completable_shell()
+static void print_prompt(bool help)
 {
+    std::cout << "\n\n";
+    if (help)
+        std::cout << "{ just enter a word for lookup                                                }\n"
+                  << "{ prefix the word with '!' for completion                                     }\n"
+                  << "{ use  :it <index> <count>        to iterate <count> terms from <index>       }\n"
+                  << "{ use  :pos <word>                for parts of speech of <word>               }\n"
+                  << "{ use  :s <word>                  for synonyms of <word>                      }\n"
+                  << "{ use  :a <word>                  for antonyms of <word>                      }\n"
+                  << "{ use  :itl <index> <count>       like ':it' but uses length indexes          }\n"
+                  << "{ use  :len                       to list length index offsets                }\n"
+                  << "{ use  :e <index>                 to list embedded terms                      }\n"
+                  << "{ use  :books                     to list books                               }\n"
+                  << "{ use  :book <index>              to read a book                              }\n"
+                  << "{ use  :loc <index>               to locate all occurrences of a word         }\n"
+                  << "{ use  :p <b> <ch> <p> <w>        show a word's parent and index within parent}\n"
+                  << "{ use  :curses                    return to curses mode                       }\n"
+                  << "{ use  :q                         to quit                                     }\n"
+                  << "{ use  :help                      to toggle help                              }\n"
+                  << "matchmaker (" << matchmaker::count() << ") $  ";
+    else
+        std::cout << "matchmaker (" << matchmaker::count() << ") { enter :help for help } $  ";
+}
+
+
+
+void completable_shell(std::vector<std::string> const & commands, bool show_timing)
+{
+    bool const batch{!commands.empty()};
+    size_t next_command{0};
     int index{-1};
     bool found{false};
     bool help{false};
@@ -28,38 +59,33 @@ void completable_shell()
 
     while (true)
     {
-        std::cout << "\n\n";
-        if (help)
-            std::cout << "{ just enter a word for lookup                                                }\n"
-                      << "{ prefix the word with '!' for completion                                     }\n"
-                      << "{ use  :it <index> <count>        to iterate <count> terms from <index>       }\n"
-                      << "{ use  :pos <word>                for parts of speech of <word>               }\n"
-                      << "{ use  :s <word>                  for synonyms of <word>                      }\n"
-                      << "{ use  :a <word>                  for antonyms of <word>                      }\n"
-                      << "{ use  :itl <index> <count>       like ':it' but uses length indexes          }\n"
-                      << "{ use  :len                       to list length index offsets                }\n"
-                      << "{ use  :e <index>                 to list embedded terms                      }\n"
-                      << "{ use  :books                     to list books                               }\n"
-                      << "{ use  :book <index>              to read a book                              }\n"
-                      << "{ use  :loc <index>               to locate all occurrences of a word         }\n"
-                      << "{ use  :p <b> <ch> <p> <w>        show a word's parent and index within parent}\n"
-                      << "{ use  :curses                    return to curses mode                       }\n"
-                      << "{ use  :q                         to quit                                     }\n"
-                      << "{ use  :help                      to toggle help                              }\n"
-                      << "matchmaker (" << matchmaker::count() << ") $  ";
-        else
-            std::cout << "matchmaker (" << matchmaker::count() << ") { enter :help for help } $  ";
-
         std::string line;
-        std::getline(std::cin, line);
-        if (std::cin.fail() || std::cin.eof() == 1)
+        if (batch)
         {
-            std::cin.clear();
-            std::cin.ignore();
-            std::cout << "\ncommand failed! terminal resized?" << std::endl;
-            std::getline(std::cin, line);
-            continue;
+            if (next_command == commands.size())
+                return;
+            line = commands[next_command++];
+            std::cout << "\n\n$ " << line << std::endl;
         }
+        else
+        {
+            print_prompt(help);
+
+            std::getline(std::cin, line);
+            if (std::cin.fail() && std::cin.eof() && !isatty(STDIN_FILENO))
+                return;
+            if (std::cin.fail() || std::cin.eof() == 1)
+            {
+                std::cin.clear();
+                std::cin.ignore();
+                std::cout << "\ncommand failed! terminal resized?" << std::endl;
+                std::getline(std::cin, line);
+                continue;
+            }
+            if (!isatty(STDIN_FILENO))
+                std::cout << "$ " << line << std::endl;
+        }
+
         std::vector<std::string> terms;
         std::stringstream ss(line);
         std::string token;
@@ -82,7 +108,8 @@ void completable_shell()
             std::cout << "completion (" << completion_length << ") :\n";
             for (int i = completion_start; i < completion_start + completion_length; ++i)
                 std::cout << "    --> " << matchmaker::at(i, nullptr) << "\n";
-            std::cout << "\ncompletion done in " << duration.count() << " microseconds" << std::endl;
+            if (show_timing)
+                std::cout << "\ncompletion done in " << duration.count() << " microseconds" << std::endl;
         }
         else if (terms[0] == ":it")
         {
@@ -100,7 +127,10 @@ void completable_shell()
                 auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
                 std::cout << "       [" << std::setw(MAX_INDEX_DIGITS) << i << "], length["
                             << std::setw(MAX_INDEX_DIGITS) << matchmaker::as_longest(i) << "] :  '"
-                            << word << "' accessed in " << duration.count() << " microseconds\n";
+                            << word << "'";
+                if (show_timing)
+                    std::cout << " accessed in " << duration.count() << " microseconds";
+                std::cout << "\n";
             }
             std::cout << std::flush;
         }
@@ -134,8 +164,10 @@ void completable_shell()
             if (pos_count == 0)
                 std::cout << "NONE AVAILABLE";
 
-            std::cout << "\n       -------> parts_of_speech() time: "
-                        << duration.count() << " microseconds" << std::endl;
+            if (show_timing)
+                std::cout << "\n       -------> parts_of_speech() time: "
+                          << duration.count() << " microseconds";
+            std::cout << std::endl;
         }
         else if (terms[0] == ":s")
         {
@@ -165,8 +197,10 @@ void completable_shell()
                 std::cout << matchmaker::at(syn_array[syn_array_count - 1], nullptr);
             else
                 std::cout << " NONE AVAILABLE";
-            std::cout << "\n       -------> lookup + synonym retrieval time: "
-                        << duration.count() << " microseconds" << std::endl;
+            if (show_timing)
+                std::cout << "\n       -------> lookup + synonym retrieval time: "
+                          << duration.count() << " microseconds";
+            std::cout << std::endl;
         }
         else if (terms[0] == ":a")
         {
@@ -196,8 +230,10 @@ void completable_shell()
                 std::cout << matchmaker::at(ant_array[ant_array_count - 1], nullptr);
             else
                 std::cout << " NONE AVAILABLE";
-            std::cout << "\n       -------> lookup + antonym retrieval time: "
-                        << duration.count() << " microseconds" << std::endl;
+            if (show_timing)
+                std::cout << "\n       -------> lookup + antonym retrieval time: "
+                          << duration.count() << " microseconds";
+            std::cout << std::endl;
         }
         else if (terms[0] == ":def")
         {
@@ -225,8 +261,10 @@ void completable_shell()
                 std::cout << " " << matchmaker::at(def[j], nullptr);
             if (def_count == 0)
                 std::cout << " NONE AVAILABLE";
-            std::cout << "\n       -------> lookup + definiton retrieval time: "
-                        << duration.count() << " microseconds" << std::endl;
+            if (show_timing)
+                std::cout << "\n       -------> lookup + definiton retrieval time: "
+                          << duration.count() << " microseconds";
+            std::cout << std::endl;
         }
         else if (terms[0] == ":itl")
         {
@@ -481,7 +519,9 @@ void completable_shell()
             {
                 std::cout << matchmaker::count() << "], (would be new last word)";
             }
-            std::cout << "       lookup time: " << duration.count() << " microseconds" << std::endl;
+            if (show_timing)
+                std::cout << "       lookup time: " << duration.count() << " microseconds";
+            std::cout << std::endl;
         }
     }
 }
