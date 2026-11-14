@@ -1,6 +1,6 @@
 #include "CompletionStack.h"
 
-#include <queue>
+#include <algorithm>
 
 #include "MatchmakerState.h"
 #include "matchmaker.h"
@@ -58,13 +58,9 @@ void CompletionStack::push(int ch)
 
     // calculate length completion
     top().length_completion.reserve(top().standard_completion.size());
-    std::make_heap(top().length_completion.begin(), top().length_completion.end());
     for (auto const & i : top().standard_completion)
-    {
         top().length_completion.push_back(matchmaker::as_longest(i));
-        std::push_heap(top().length_completion.begin(), top().length_completion.end());
-    }
-    std::sort_heap(top().length_completion.begin(), top().length_completion.end());
+    std::sort(top().length_completion.begin(), top().length_completion.end());
     top().display_start = 0;
     top().len_display_start = 0;
 }
@@ -98,13 +94,9 @@ void CompletionStack::clear_top()
                 top().standard_completion.push_back(i);
 
         top().length_completion.reserve(top().standard_completion.size());
-        std::make_heap(top().length_completion.begin(), top().length_completion.end());
         for (auto const & i : top().standard_completion)
-        {
             top().length_completion.push_back(matchmaker::as_longest(i));
-            std::push_heap(top().length_completion.begin(), top().length_completion.end());
-        }
-        std::sort_heap(top().length_completion.begin(), top().length_completion.end());
+        std::sort(top().length_completion.begin(), top().length_completion.end());
     }
 }
 
