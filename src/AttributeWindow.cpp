@@ -97,7 +97,8 @@ void AttributeWindow::draw_hook()
         char const * const * pos{nullptr};
         int8_t const * flagged{nullptr};
         int pos_count{0};
-        matchmaker::parts_of_speech(selection, &pos, &flagged, &pos_count);
+        if (!matchmaker::parts_of_speech(selection, &pos, &flagged, &pos_count))
+            pos_count = 0;
 
         std::string const pos_label{"Parts of Speech:"};
         mvwprintw(w, line, 1, "%s", pos_label.c_str());

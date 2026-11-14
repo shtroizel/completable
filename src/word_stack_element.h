@@ -2,11 +2,11 @@
 
 
 
-class AbstractWindow;
+class AbstractListWindow;
 
 struct word_stack_element
 {
     std::string word;
-    AbstractWindow * active_win;
+    AbstractListWindow * active_win;
     int display_start;
 };

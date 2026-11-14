@@ -94,37 +94,94 @@ install(TARGETS completable DESTINATION bin)
 
 enable_testing()
 
-add_test(NAME shell_commands COMMAND completable -n -c ":len" -c "!zzzzzz" -c "zzzzzz")
-set_tests_properties(shell_commands PROPERTIES TIMEOUT 60 PASS_REGULAR_EXPRESSION "\\$ zzzzzz")
+if(matchmaker_DL STREQUAL "ON" AND completable_test_library)
+    set(library_args -l ${completable_test_library})
+endif()
+string(REPLACE ";" " " library_args_sh "${library_args}")
 
-add_test(NAME shell_no_timing COMMAND completable -n -c "zzzzzz")
-set_tests_properties(shell_no_timing PROPERTIES TIMEOUT 60 FAIL_REGULAR_EXPRESSION "microseconds")
+if(NOT matchmaker_DL STREQUAL "ON" OR completable_test_library)
+    add_test(NAME shell_commands COMMAND completable ${library_args} -n -c ":len" -c "!zzzzzz" -c "zzzzzz")
+    set_tests_properties(shell_commands PROPERTIES TIMEOUT 60 PASS_REGULAR_EXPRESSION "\\$ zzzzzz")
 
-add_test(NAME shell_stdin_eof COMMAND sh -c "printf 'zzzzzz\\n' | \"$<TARGET_FILE:completable>\" -n -s")
-set_tests_properties(shell_stdin_eof PROPERTIES TIMEOUT 60 PASS_REGULAR_EXPRESSION "\\$ zzzzzz")
+    add_test(NAME shell_no_timing COMMAND completable ${library_args} -n -c "zzzzzz")
+    set_tests_properties(shell_no_timing PROPERTIES TIMEOUT 60 FAIL_REGULAR_EXPRESSION "microseconds")
 
-add_test(NAME shell_quit COMMAND sh -c "printf ':q\\nzzzzzz\\n' | \"$<TARGET_FILE:completable>\" -n -s")
-set_tests_properties(shell_quit PROPERTIES TIMEOUT 60 FAIL_REGULAR_EXPRESSION "\\$ zzzzzz")
-
-add_test(NAME bad_option COMMAND completable --bogus)
-set_tests_properties(bad_option PROPERTIES TIMEOUT 60 WILL_FAIL TRUE)
-
-foreach(it :it :itl)
-    add_test(NAME shell_${it}_overflow COMMAND completable -n -c "${it} 1 2147483647")
-    set_tests_properties(
-        shell_${it}_overflow PROPERTIES
-        TIMEOUT 300 PASS_REGULAR_EXPRESSION "\\[ *1\\]" FAIL_REGULAR_EXPRESSION "runtime error"
+    add_test(
+        NAME shell_stdin_eof
+        COMMAND sh -c "printf 'zzzzzz\\n' | \"$<TARGET_FILE:completable>\" ${library_args_sh} -n -s"
     )
+    set_tests_properties(shell_stdin_eof PROPERTIES TIMEOUT 60 PASS_REGULAR_EXPRESSION "\\$ zzzzzz")
 
-    add_test(NAME shell_${it}_negative COMMAND completable -n -c "${it} -2 3")
-    set_tests_properties(
-        shell_${it}_negative PROPERTIES
-        TIMEOUT 60 PASS_REGULAR_EXPRESSION "\\[ *0\\]" FAIL_REGULAR_EXPRESSION "\\[ *-[0-9]"
+    add_test(
+        NAME shell_quit
+        COMMAND sh -c "printf ':q\\nzzzzzz\\n' | \"$<TARGET_FILE:completable>\" ${library_args_sh} -n -s"
     )
-endforeach()
+    set_tests_properties(shell_quit PROPERTIES TIMEOUT 60 FAIL_REGULAR_EXPRESSION "\\$ zzzzzz")
 
-add_test(NAME shell_def_spelling COMMAND completable -c ":def run")
-set_tests_properties(
-    shell_def_spelling PROPERTIES
-    TIMEOUT 60 PASS_REGULAR_EXPRESSION "definition retrieval"
-)
+    add_test(NAME bad_option COMMAND completable --bogus)
+    set_tests_properties(bad_option PROPERTIES TIMEOUT 60 WILL_FAIL TRUE)
+
+    foreach(it :it :itl)
+        add_test(NAME shell_${it}_overflow COMMAND completable ${library_args} -n -c "${it} 1 2147483647")
+        set_tests_properties(
+            shell_${it}_overflow PROPERTIES
+            TIMEOUT 300 PASS_REGULAR_EXPRESSION "\\[ *1\\]" FAIL_REGULAR_EXPRESSION "runtime error"
+        )
+
+        add_test(NAME shell_${it}_negative COMMAND completable ${library_args} -n -c "${it} -2 3")
+        set_tests_properties(
+            shell_${it}_negative PROPERTIES
+            TIMEOUT 60 PASS_REGULAR_EXPRESSION "\\[ *0\\]" FAIL_REGULAR_EXPRESSION "\\[ *-[0-9]"
+        )
+    endforeach()
+
+    add_test(NAME shell_def_spelling COMMAND completable ${library_args} -c ":def run")
+    set_tests_properties(
+        shell_def_spelling PROPERTIES
+        TIMEOUT 60 PASS_REGULAR_EXPRESSION "definition retrieval"
+    )
+endif()
+
+find_package(Python3 COMPONENTS Interpreter)
+set(curses_driver ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/curses_driver.py)
+
+if(NOT matchmaker_DL STREQUAL "ON")
+    add_test(
+        NAME curses_delete_from_other_window
+        COMMAND ${curses_driver} $<TARGET_FILE:completable> --
+            "wait:Completion \\(" text:q key:DOWN key:DOWN key:DOWN remember:4
+            key:RET key:RIGHT key:DEL same:4 key:ESC
+    )
+    set_tests_properties(curses_delete_from_other_window PROPERTIES TIMEOUT 300 SKIP_RETURN_CODE 77)
+endif()
+
+if(matchmaker_DL STREQUAL "ON" AND completable_test_library)
+    get_filename_component(test_library_dir "${completable_test_library}" DIRECTORY)
+    set(libs ${CMAKE_CURRENT_BINARY_DIR}/test_library)
+    add_test(
+        NAME curses_book_after_failed_load
+        COMMAND ${curses_driver} $<TARGET_FILE:completable> --
+            "sh:rm -rf ${libs} && mkdir ${libs} && ln -s ${test_library_dir}/*.so ${libs}/"
+            "wait:search location" text:${libs} key:TAB wait:libmatchmaker.so key:RET "wait:Completion \\("
+            "sh:ln -sf /dev/null ${libs}/libmatchmaker.so"
+            key:SHIFT_LEFT key:SHIFT_LEFT "wait:search location" key:RET
+            text:$ "wait:enter :help" "text::book 0" key:RET "wait:Reading book" text::q key:RET
+    )
+    set_tests_properties(curses_book_after_failed_load PROPERTIES TIMEOUT 300 SKIP_RETURN_CODE 77)
+endif()
+
+if(matchmaker_DL STREQUAL "ON")
+    add_library(partial_library SHARED test/partial_library.c)
+    set_target_properties(
+        partial_library PROPERTIES
+        OUTPUT_NAME matchmaker LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/partial_library
+    )
+    add_test(
+        NAME curses_partial_library_unloads
+        COMMAND ${curses_driver} $<TARGET_FILE:completable> --
+            "wait:search location" text:${CMAKE_CURRENT_BINARY_DIR}/partial_library key:TAB
+            wait:libmatchmaker.so key:RET
+            text:$ "wait:enter :help" "expect:*:matchmaker \\(0\\)" text::q key:RET
+    )
+    set_tests_properties(curses_partial_library_unloads PROPERTIES TIMEOUT 300 SKIP_RETURN_CODE 77)
+endif()

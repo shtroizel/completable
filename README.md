@@ -40,3 +40,7 @@ install_q/bin/completable -n -c 'run'                # leave timing out, for out
 ```
 cd <build dir> && ctest
 ```
+The curses tests drive completable through a pseudo terminal and need the Python `pyte` module
+(they're skipped without it). Pick the Python with `-DPython3_EXECUTABLE=<python>`. Builds with
+`matchmaker_DL=ON` run the shell and library tests only with
+`-Dcompletable_test_library=<path to libmatchmaker.so>`.

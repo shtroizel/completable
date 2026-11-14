@@ -218,7 +218,8 @@ void AbstractListWindow::on_DELETE()
     if (!belongs_to_active_tab())
         return;
 
-    auto & [s, w, ds] = ws.top();
+    auto [s, w, ds] = ws.top();
+    ws.pop();
 
     while (cs.count() > 1)
         cs.pop();
@@ -226,12 +227,10 @@ void AbstractListWindow::on_DELETE()
     for (auto ch : s)
         cs.push(ch);
 
-    ws.pop();
-
     auto active_tab = AbstractTab::get_active_tab().as_AbstractTab();
     active_tab->set_active_window(w);
     input_win.mark_dirty();
-    display_start() = ds;
+    w->display_start() = ds;
 }
 
 
@@ -296,7 +295,7 @@ void AbstractListWindow::on_BACKSPACE()
 
 void AbstractListWindow::on_printable_ascii(int key)
 {
-    bool old_count = cs.count();
+    int old_count = cs.count();
     cs.push(key);
     if (cs.count() != old_count)
         input_win.mark_dirty();

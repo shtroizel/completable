@@ -2,6 +2,7 @@
 #include "MatchmakerState.h"
 
 #include <iostream>
+#include <string>
 
 #ifdef MM_DYNAMIC_LOADING
     #include <dlfcn.h>
@@ -131,9 +132,17 @@ namespace matchmaker
 
 #ifdef MM_DYNAMIC_LOADING
         if (ok)
+        {
             MatchmakerState::Instance::grab().set_state(LibraryState::Loaded::grab());
+        }
         else
+        {
+            static std::string error;
+            error = ret;
+            unset_library();
+            ret = error.data();
             MatchmakerState::Instance::grab().set_state(LibraryState::Unloaded::grab());
+        }
 #else
         MatchmakerState::Instance::grab().set_state(LibraryState::Linked::grab());
 #endif
@@ -177,6 +186,8 @@ namespace matchmaker
         shim_locations = nullptr;
         shim_complete = nullptr;
         shim_book_count = nullptr;
+        shim_book_title = nullptr;
+        shim_book_author = nullptr;
         shim_chapter_count = nullptr;
         shim_chapter_title = nullptr;
         shim_chapter_subtitle = nullptr;
@@ -276,6 +287,7 @@ namespace matchmaker
         {
             *words = nullptr;
             *count = 0;
+            return;
         }
         (*shim_from_ordinal_summation)(summation, words, count);
     }
