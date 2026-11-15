@@ -103,7 +103,11 @@ if(NOT matchmaker_DL STREQUAL "ON" OR completable_test_library)
     set_tests_properties(shell_commands PROPERTIES TIMEOUT 60 PASS_REGULAR_EXPRESSION "\\$ zzzzzz")
 
     add_test(NAME shell_no_timing COMMAND completable ${library_args} -n -c "zzzzzz")
-    set_tests_properties(shell_no_timing PROPERTIES TIMEOUT 60 FAIL_REGULAR_EXPRESSION "microseconds")
+    set_tests_properties(shell_no_timing PROPERTIES TIMEOUT 60 FAIL_REGULAR_EXPRESSION "seconds")
+
+    add_test(NAME shell_timing_ns COMMAND completable ${library_args} -c "!zzzzzz" -c ":it 0 1" -c "zzzzzz")
+    set_tests_properties(shell_timing_ns PROPERTIES TIMEOUT 60 PASS_REGULAR_EXPRESSION "nanoseconds"
+        FAIL_REGULAR_EXPRESSION "microseconds")
 
     add_test(
         NAME shell_stdin_eof

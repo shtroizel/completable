@@ -103,15 +103,15 @@ bool completable_shell(std::vector<std::string> const & commands, bool show_timi
         {
             int completion_start{0};
             int completion_length{0};
-            auto start = std::chrono::high_resolution_clock::now();
+            auto start = std::chrono::steady_clock::now();
             matchmaker::complete(line.substr(1).c_str(), &completion_start, &completion_length);
-            auto stop = std::chrono::high_resolution_clock::now();
-            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+            auto stop = std::chrono::steady_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
             std::cout << "completion (" << completion_length << ") :\n";
             for (int i = completion_start; i < completion_start + completion_length; ++i)
                 std::cout << "    --> " << matchmaker::at(i, nullptr) << "\n";
             if (show_timing)
-                std::cout << "\ncompletion done in " << duration.count() << " microseconds" << std::endl;
+                std::cout << "\ncompletion done in " << duration.count() << " nanoseconds" << std::endl;
         }
         else if (terms[0] == ":it")
         {
@@ -124,15 +124,15 @@ bool completable_shell(std::vector<std::string> const & commands, bool show_timi
             long long const end{(long long) start + count};
             for (int i = std::max(start, 0); i < matchmaker::count() && i < end; ++i)
             {
-                auto start = std::chrono::high_resolution_clock::now();
+                auto start = std::chrono::steady_clock::now();
                 char const * word = matchmaker::at(i, nullptr);
-                auto stop = std::chrono::high_resolution_clock::now();
-                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+                auto stop = std::chrono::steady_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
                 std::cout << "       [" << std::setw(MAX_INDEX_DIGITS) << i << "], length["
                             << std::setw(MAX_INDEX_DIGITS) << matchmaker::as_longest(i) << "] :  '"
                             << word << "'";
                 if (show_timing)
-                    std::cout << " accessed in " << duration.count() << " microseconds";
+                    std::cout << " accessed in " << duration.count() << " nanoseconds";
                 std::cout << "\n";
             }
             std::cout << std::flush;
@@ -149,13 +149,13 @@ bool completable_shell(std::vector<std::string> const & commands, bool show_timi
                 std::cout << matchmaker::count() << "], (would be new last word)" << std::endl;
                 continue;
             }
-            auto start = std::chrono::high_resolution_clock::now();
+            auto start = std::chrono::steady_clock::now();
             char const * const * pos{nullptr};
             int8_t const * flagged{nullptr};
             int pos_count{0};
             matchmaker::parts_of_speech(index, &pos, &flagged, &pos_count);
-            auto stop = std::chrono::high_resolution_clock::now();
-            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+            auto stop = std::chrono::steady_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
             std::cout << index << "] :  '" << matchmaker::at(index, nullptr) << "' ";
             if (!found)
                 std::cout << "(index if existed) ";
@@ -169,7 +169,7 @@ bool completable_shell(std::vector<std::string> const & commands, bool show_timi
 
             if (show_timing)
                 std::cout << "\n       -------> parts_of_speech() time: "
-                          << duration.count() << " microseconds";
+                          << duration.count() << " nanoseconds";
             std::cout << std::endl;
         }
         else if (terms[0] == ":s")
@@ -178,7 +178,7 @@ bool completable_shell(std::vector<std::string> const & commands, bool show_timi
                 continue;
 
             std::cout << "       [";
-            auto start = std::chrono::high_resolution_clock::now();
+            auto start = std::chrono::steady_clock::now();
             index = matchmaker::lookup(line.substr(3).c_str(), &found);
             if (index == matchmaker::count())
             {
@@ -188,8 +188,8 @@ bool completable_shell(std::vector<std::string> const & commands, bool show_timi
             int const * syn_array{nullptr};
             int syn_array_count{0};
             matchmaker::synonyms(index, &syn_array, &syn_array_count);
-            auto stop = std::chrono::high_resolution_clock::now();
-            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+            auto stop = std::chrono::steady_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
             std::cout << index << "] :  '" << matchmaker::at(index, nullptr) << "' ";
             if (!found)
                 std::cout << "(index if existed) ";
@@ -202,7 +202,7 @@ bool completable_shell(std::vector<std::string> const & commands, bool show_timi
                 std::cout << " NONE AVAILABLE";
             if (show_timing)
                 std::cout << "\n       -------> lookup + synonym retrieval time: "
-                          << duration.count() << " microseconds";
+                          << duration.count() << " nanoseconds";
             std::cout << std::endl;
         }
         else if (terms[0] == ":a")
@@ -211,7 +211,7 @@ bool completable_shell(std::vector<std::string> const & commands, bool show_timi
                 continue;
 
             std::cout << "       [";
-            auto start = std::chrono::high_resolution_clock::now();
+            auto start = std::chrono::steady_clock::now();
             index = matchmaker::lookup(line.substr(3).c_str(), &found);
             if (index == matchmaker::count())
             {
@@ -221,8 +221,8 @@ bool completable_shell(std::vector<std::string> const & commands, bool show_timi
             int const * ant_array{nullptr};
             int ant_array_count{0};
             matchmaker::antonyms(index, &ant_array, &ant_array_count);
-            auto stop = std::chrono::high_resolution_clock::now();
-            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+            auto stop = std::chrono::steady_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
             std::cout << index << "] :  '" << matchmaker::at(index, nullptr) << "' ";
             if (!found)
                 std::cout << "(index if existed) ";
@@ -235,7 +235,7 @@ bool completable_shell(std::vector<std::string> const & commands, bool show_timi
                 std::cout << " NONE AVAILABLE";
             if (show_timing)
                 std::cout << "\n       -------> lookup + antonym retrieval time: "
-                          << duration.count() << " microseconds";
+                          << duration.count() << " nanoseconds";
             std::cout << std::endl;
         }
         else if (terms[0] == ":def")
@@ -244,7 +244,7 @@ bool completable_shell(std::vector<std::string> const & commands, bool show_timi
                 continue;
 
             std::cout << "       [";
-            auto start = std::chrono::high_resolution_clock::now();
+            auto start = std::chrono::steady_clock::now();
             index = matchmaker::lookup(line.substr(5).c_str(), &found);
             if (index == matchmaker::count())
             {
@@ -254,8 +254,8 @@ bool completable_shell(std::vector<std::string> const & commands, bool show_timi
             int const * def{nullptr};
             int def_count{0};
             matchmaker::definition(index, &def, &def_count);
-            auto stop = std::chrono::high_resolution_clock::now();
-            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+            auto stop = std::chrono::steady_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
             std::cout << index << "] :  '" << matchmaker::at(index, nullptr) << "' ";
             if (!found)
                 std::cout << "(index if existed) ";
@@ -266,7 +266,7 @@ bool completable_shell(std::vector<std::string> const & commands, bool show_timi
                 std::cout << " NONE AVAILABLE";
             if (show_timing)
                 std::cout << "\n       -------> lookup + definition retrieval time: "
-                          << duration.count() << " microseconds";
+                          << duration.count() << " nanoseconds";
             std::cout << std::endl;
         }
         else if (terms[0] == ":itl")
@@ -508,10 +508,10 @@ bool completable_shell(std::vector<std::string> const & commands, bool show_timi
         else
         {
             std::cout << "       [";
-            auto start = std::chrono::high_resolution_clock::now();
+            auto start = std::chrono::steady_clock::now();
             index = matchmaker::lookup(line.c_str(), &found);
-            auto stop = std::chrono::high_resolution_clock::now();
-            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+            auto stop = std::chrono::steady_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
             if (index < matchmaker::count())
             {
                 std::cout << index << "], length[" << matchmaker::as_longest(index) << "] :  '"
@@ -524,7 +524,7 @@ bool completable_shell(std::vector<std::string> const & commands, bool show_timi
                 std::cout << matchmaker::count() << "], (would be new last word)";
             }
             if (show_timing)
-                std::cout << "       lookup time: " << duration.count() << " microseconds";
+                std::cout << "       lookup time: " << duration.count() << " nanoseconds";
             std::cout << std::endl;
         }
     }
