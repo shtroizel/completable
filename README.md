@@ -34,6 +34,7 @@ Press `$` in completable to open its shell, or skip curses with these options (`
 ```
 install_q/bin/completable -c ':books' -c 'run'       # run commands and exit
 printf ':len\nrun\n' | install_q/bin/completable -s   # read commands from stdin
+install_q/bin/completable -s                         # start in the shell; :curses and $ switch
 install_q/bin/completable -n -c 'run'                # leave timing out, for output that diffs cleanly
 ```
 ## tests

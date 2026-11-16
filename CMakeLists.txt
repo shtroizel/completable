@@ -163,6 +163,15 @@ if(NOT matchmaker_DL STREQUAL "ON")
             "wait:Completion \\(" text:q key:F1 key:F1 "wait:Completion \\(" key:ESC
     )
     set_tests_properties(curses_filter_busy_animation PROPERTIES TIMEOUT 300 SKIP_RETURN_CODE 77)
+
+    add_test(
+        NAME curses_shell_round_trip
+        COMMAND ${curses_driver} $<TARGET_FILE:completable> -s --
+            "wait:enter :help" text::curses key:RET "wait:Completion \\("
+            text:$ "wait:enter :help" text::curses key:RET "wait:Completion \\("
+            text:$ "wait:enter :help" text::q key:RET
+    )
+    set_tests_properties(curses_shell_round_trip PROPERTIES TIMEOUT 300 SKIP_RETURN_CODE 77)
 endif()
 
 if(matchmaker_DL STREQUAL "ON" AND completable_test_library)

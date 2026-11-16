@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <ncurses.h>
+#include <unistd.h>
 
 #include "CompletableTabAgent.h"
 #include "Settings.h"
@@ -23,6 +24,7 @@ static void print_usage()
     std::cout << "usage: completable [options] [borders_disabled]\n"
               << "    -c <command>    run a shell command and exit without curses (repeat to run several)\n"
               << "    -s              start in shell mode, reading commands from stdin\n"
+              << "                    (on a terminal, :curses and $ switch back and forth)\n"
               << "    -n              leave timing out of shell output\n"
 #ifdef MM_DYNAMIC_LOADING
               << "    -l <library>    load a matchmaker library at startup\n"
@@ -91,9 +93,16 @@ int main(int argc, char ** argv)
     matchmaker::set_library(nullptr); // disable dynamic loading, use linking instead
 #endif
 
-    if (shell || !commands.empty())
+    // commands and piped stdin run without curses; a terminal shell can switch to curses and back
+    if (!commands.empty() || (shell && !isatty(STDIN_FILENO)))
     {
         completable_shell(commands, show_timing);
+        matchmaker::unset_library();
+        return 0;
+    }
+
+    if (shell && completable_shell({}, show_timing))
+    {
         matchmaker::unset_library();
         return 0;
     }
