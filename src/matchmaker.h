@@ -10,7 +10,13 @@
 
 namespace matchmaker
 {
+    // load_library() then publish_library_state(), which runs the MatchmakerState observers
     char * set_library(char const * so_filename);
+
+    // loads without running observers, so it can run while another thread draws
+    char * load_library(char const * so_filename);
+    void publish_library_state();
+
     void unset_library();
 
     // matchmaker interface

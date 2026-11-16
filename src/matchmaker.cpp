@@ -66,7 +66,7 @@ namespace matchmaker
 
 
 
-    char * set_library(char const * so_filename)
+    char * load_library(char const * so_filename)
     {
         unset_library();
 
@@ -78,7 +78,6 @@ namespace matchmaker
         if (nullptr == handle)
         {
             error = dlerror();
-            MatchmakerState::Instance::grab().set_state(LibraryState::Unloaded::grab());
             return error.data();
         }
 
@@ -98,11 +97,8 @@ namespace matchmaker
         {
             error = missing;
             unset_library();
-            MatchmakerState::Instance::grab().set_state(LibraryState::Unloaded::grab());
             return error.data();
         }
-
-        MatchmakerState::Instance::grab().set_state(LibraryState::Loaded::grab());
 #else
         (void) so_filename;
 
@@ -110,11 +106,30 @@ namespace matchmaker
         #define LINK_SHIM(name, ret, params) shim_##name = &::mm_##name;
         MM_FUNCTIONS(LINK_SHIM)
         #undef LINK_SHIM
-
-        MatchmakerState::Instance::grab().set_state(LibraryState::Linked::grab());
 #endif
 
         return nullptr;
+    }
+
+
+    void publish_library_state()
+    {
+#ifdef MM_DYNAMIC_LOADING
+        if (nullptr != handle)
+            MatchmakerState::Instance::grab().set_state(LibraryState::Loaded::grab());
+        else
+            MatchmakerState::Instance::grab().set_state(LibraryState::Unloaded::grab());
+#else
+        MatchmakerState::Instance::grab().set_state(LibraryState::Linked::grab());
+#endif
+    }
+
+
+    char * set_library(char const * so_filename)
+    {
+        char * ret = load_library(so_filename);
+        publish_library_state();
+        return ret;
     }
 
 

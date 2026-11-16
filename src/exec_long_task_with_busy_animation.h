@@ -44,4 +44,6 @@ class AbstractWindow;
 
 
 // 459
+// the animation draws from another thread while task runs, so task must not call curses (ncurses
+// is not thread-safe), directly or through observers
 void exec_long_task_with_busy_animation(std::function<void()>, AbstractWindow &);

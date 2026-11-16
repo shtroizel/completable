@@ -87,10 +87,12 @@ void MatchmakerSelectionWindow::load_currently_selected()
 {
     if (content.size() > 0)
     {
+        // observers draw, so they run after the animation stops
         exec_long_task_with_busy_animation(
-            [&]() { matchmaker::set_library(content.at(selected).c_str()); },
+            [&]() { matchmaker::load_library(content.at(selected).c_str()); },
             *this
         );
+        matchmaker::publish_library_state();
         mark_dirty();
     }
 }
