@@ -16,138 +16,105 @@
 
 
 
+// every matchmaker function completable calls: name, return type, parameter types
+#define MM_FUNCTIONS(X)                                                                          \
+    X(count, int, ())                                                                            \
+    X(at, char const *, (int, int *))                                                            \
+    X(lookup, int, (char const *, bool *))                                                       \
+    X(as_longest, int, (int))                                                                    \
+    X(from_longest, int, (int))                                                                  \
+    X(lengths, void, (int const * *, int *))                                                     \
+    X(length_location, bool, (int, int *, int *))                                                \
+    X(ordinal_summation, int, (int))                                                             \
+    X(from_ordinal_summation, void, (int, int const * *, int *))                                 \
+    X(parts_of_speech, bool, (int, char const * const * *, int8_t const * *, int *))             \
+    X(is_name, bool, (int))                                                                      \
+    X(is_male_name, bool, (int))                                                                 \
+    X(is_female_name, bool, (int))                                                               \
+    X(is_place, bool, (int))                                                                     \
+    X(is_compound, bool, (int))                                                                  \
+    X(is_acronym, bool, (int))                                                                   \
+    X(is_phrase, bool, (int))                                                                    \
+    X(is_used_in_book, bool, (int, int))                                                         \
+    X(synonyms, void, (int, int const * *, int *))                                               \
+    X(antonyms, void, (int, int const * *, int *))                                               \
+    X(definition, void, (int, int const * *, int *))                                             \
+    X(embedded, void, (int, int const * *, int *))                                               \
+    X(locations, void, (int, int const * *, int const * *, int const * *, int const * *, int *)) \
+    X(complete, void, (char const *, int *, int *))                                              \
+    X(book_count, int, ())                                                                       \
+    X(book_title, void, (int, int const * *, int *))                                             \
+    X(book_author, void, (int, int const * *, int *))                                            \
+    X(chapter_count, int, (int))                                                                 \
+    X(chapter_title, void, (int, int, int const * *, int *))                                     \
+    X(chapter_subtitle, void, (int, int, int const * *, int *))                                  \
+    X(paragraph_count, int, (int, int))                                                          \
+    X(word_count, int, (int, int, int))                                                          \
+    X(word, int, (int, int, int, int, int const * *, int *, int *, bool *))
+
+
+
 namespace matchmaker
 {
 #ifdef MM_DYNAMIC_LOADING
     static void * handle{nullptr};
 #endif
 
-    static int (*shim_count)(){nullptr};
-    static char const * (*shim_at)(int, int *){nullptr};
-    static int (*shim_lookup)(char const *, bool *){nullptr};
-    static int (*shim_as_longest)(int){nullptr};
-    static int (*shim_from_longest)(int){nullptr};
-    static void (*shim_lengths)(int const * *, int *){nullptr};
-    static bool (*shim_length_location)(int, int *, int *){nullptr};
-    static int (*shim_ordinal_summation)(int){nullptr};
-    static void (*shim_from_ordinal_summation)(int, int const * *, int *){nullptr};
-    static bool (*shim_parts_of_speech)(int, char const * const * *, int8_t const * *, int *){nullptr};
-    static bool (*shim_is_name)(int){nullptr};
-    static bool (*shim_is_male_name)(int){nullptr};
-    static bool (*shim_is_female_name)(int){nullptr};
-    static bool (*shim_is_place)(int){nullptr};
-    static bool (*shim_is_compound)(int){nullptr};
-    static bool (*shim_is_acronym)(int){nullptr};
-    static bool (*shim_is_phrase)(int){nullptr};
-    static bool (*shim_is_used_in_book)(int, int){nullptr};
-    static void (*shim_synonyms)(int, int const * *, int *){nullptr};
-    static void (*shim_antonyms)(int, int const * *, int *){nullptr};
-    static void (*shim_definition)(int, int const * *, int *){nullptr};
-    static void (*shim_embedded)(int, int const * *, int *){nullptr};
-    static void (*shim_locations)(int,
-                                  int const * *,
-                                  int const * *,
-                                  int const * *,
-                                  int const * *,
-                                  int *){nullptr};
-    static void (*shim_complete)(char const *, int *, int *){nullptr};
-    static int (*shim_book_count)(){nullptr};
-    static void (*shim_book_title)(int, int const * *, int *){nullptr};
-    static void (*shim_book_author)(int, int const * *, int *){nullptr};
-    static int (*shim_chapter_count)(int){nullptr};
-    static void (*shim_chapter_title)(int, int, int const * *, int *){nullptr};
-    static void (*shim_chapter_subtitle)(int, int, int const * *, int *){nullptr};
-    static int (*shim_paragraph_count)(int, int){nullptr};
-    static int (*shim_word_count)(int, int, int){nullptr};
-    static int (*shim_word)(int, int, int, int, int const * *, int *, int *, bool *){nullptr};
+    #define DECLARE_SHIM(name, ret, params) static ret (*shim_##name) params{nullptr};
+    MM_FUNCTIONS(DECLARE_SHIM)
+    #undef DECLARE_SHIM
 
 
 
     char * set_library(char const * so_filename)
     {
         unset_library();
-        char * ret = nullptr;
 
 #ifdef MM_DYNAMIC_LOADING
+        // copied before anything else can call into libdl and replace dlerror()'s text
+        static std::string error;
+
         handle = dlmopen(LM_ID_NEWLM, so_filename, RTLD_NOW);
         if (nullptr == handle)
         {
+            error = dlerror();
             MatchmakerState::Instance::grab().set_state(LibraryState::Unloaded::grab());
-            ret = dlerror();
-            return ret;
+            return error.data();
         }
 
         dlerror();
 
-        bool ok = true;
+        char const * missing{nullptr};
+        #define LOAD_SHIM(name, ret, params)                                                               \
+            if (nullptr == missing)                                                                        \
+            {                                                                                              \
+                *(void **) (&shim_##name) = dlsym(handle, "mm_" #name);                                    \
+                missing = dlerror();                                                                       \
+            }
+        MM_FUNCTIONS(LOAD_SHIM)
+        #undef LOAD_SHIM
 
-        #define init_func(_f)                                                                              \
-        if (ok)                                                                                            \
-        {                                                                                                  \
-            *(void **) (&shim_##_f) = dlsym(handle, "mm_" #_f);                                            \
-            if ((ret = dlerror()) != nullptr)                                                              \
-                ok = false;                                                                                \
-        }
-#else
-        // use normal linking
-        (void) so_filename; // quiet unused variable warning
-
-        // just redirect to global namespace version of function provided by matchmaker library's header
-        #define init_func(_f) shim_##_f = &::mm_##_f;
-#endif
-
-        init_func(count);
-        init_func(at);
-        init_func(lookup);
-        init_func(as_longest);
-        init_func(from_longest);
-        init_func(lengths);
-        init_func(length_location);
-        init_func(ordinal_summation);
-        init_func(from_ordinal_summation);
-        init_func(parts_of_speech);
-        init_func(is_name);
-        init_func(is_male_name);
-        init_func(is_female_name);
-        init_func(is_place);
-        init_func(is_compound);
-        init_func(is_acronym);
-        init_func(is_phrase);
-        init_func(is_used_in_book);
-        init_func(synonyms);
-        init_func(antonyms);
-        init_func(definition);
-        init_func(embedded);
-        init_func(locations);
-        init_func(complete);
-        init_func(book_count);
-        init_func(book_title);
-        init_func(book_author);
-        init_func(chapter_count);
-        init_func(chapter_title);
-        init_func(chapter_subtitle);
-        init_func(paragraph_count);
-        init_func(word_count);
-        init_func(word);
-
-#ifdef MM_DYNAMIC_LOADING
-        if (ok)
+        if (nullptr != missing)
         {
-            MatchmakerState::Instance::grab().set_state(LibraryState::Loaded::grab());
-        }
-        else
-        {
-            static std::string error;
-            error = ret;
+            error = missing;
             unset_library();
-            ret = error.data();
             MatchmakerState::Instance::grab().set_state(LibraryState::Unloaded::grab());
+            return error.data();
         }
+
+        MatchmakerState::Instance::grab().set_state(LibraryState::Loaded::grab());
 #else
+        (void) so_filename;
+
+        // the linked library's own functions; their types must match MM_FUNCTIONS
+        #define LINK_SHIM(name, ret, params) shim_##name = &::mm_##name;
+        MM_FUNCTIONS(LINK_SHIM)
+        #undef LINK_SHIM
+
         MatchmakerState::Instance::grab().set_state(LibraryState::Linked::grab());
 #endif
 
-        return ret;
+        return nullptr;
     }
 
 
@@ -161,39 +128,9 @@ namespace matchmaker
         }
 #endif
 
-        shim_count = nullptr;
-        shim_at = nullptr;
-        shim_lookup = nullptr;
-        shim_as_longest = nullptr;
-        shim_from_longest = nullptr;
-        shim_lengths = nullptr;
-        shim_length_location = nullptr;
-        shim_ordinal_summation = nullptr;
-        shim_from_ordinal_summation = nullptr;
-        shim_parts_of_speech = nullptr;
-        shim_is_name = nullptr;
-        shim_is_male_name = nullptr;
-        shim_is_female_name = nullptr;
-        shim_is_place = nullptr;
-        shim_is_compound = nullptr;
-        shim_is_acronym = nullptr;
-        shim_is_phrase = nullptr;
-        shim_is_used_in_book = nullptr;
-        shim_synonyms = nullptr;
-        shim_antonyms = nullptr;
-        shim_definition = nullptr;
-        shim_embedded = nullptr;
-        shim_locations = nullptr;
-        shim_complete = nullptr;
-        shim_book_count = nullptr;
-        shim_book_title = nullptr;
-        shim_book_author = nullptr;
-        shim_chapter_count = nullptr;
-        shim_chapter_title = nullptr;
-        shim_chapter_subtitle = nullptr;
-        shim_paragraph_count = nullptr;
-        shim_word_count = nullptr;
-        shim_word = nullptr;
+        #define CLEAR_SHIM(name, ret, params) shim_##name = nullptr;
+        MM_FUNCTIONS(CLEAR_SHIM)
+        #undef CLEAR_SHIM
     }
 
 
