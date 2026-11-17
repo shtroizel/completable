@@ -118,7 +118,7 @@ def build_and_install(build_dir, install_dir, matchmaker_dir, use_clang, q, debu
 def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'hcb:i:m:qdl',
-                ['help', 'clang', 'build_dir', 'install_dir', 'matchmaker_dir', 'q', 'debug',
+                ['help', 'clang', 'build_dir=', 'install_dir=', 'matchmaker_dir=', 'q', 'debug',
                  'dynamic_loading'])
     except getopt.GetoptError as err:
         print(err)

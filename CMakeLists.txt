@@ -148,6 +148,14 @@ endif()
 find_package(Python3 COMPONENTS Interpreter)
 set(curses_driver ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/curses_driver.py)
 
+# build_and_install.py takes its long options in --name=value form (-h last, so nothing is built)
+add_test(
+    NAME build_script_long_values
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/build_and_install.py
+        --build_dir=b --install_dir=i --matchmaker_dir=m -h
+)
+set_tests_properties(build_script_long_values PROPERTIES TIMEOUT 60)
+
 if(NOT matchmaker_DL STREQUAL "ON")
     add_test(
         NAME curses_delete_from_other_window
